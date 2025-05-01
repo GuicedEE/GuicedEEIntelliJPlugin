@@ -582,7 +582,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
             if (moduleData.isMicroProfileOpenAPI())
             {
-                requires.append("\trequires io.vertx.openapi;\n");
+                requires.append("\trequires com.guicedee.services.openapi;\n");
             }
 
             if (moduleData.isMicroProfileLogging())
@@ -609,22 +609,28 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         // Create provides statements for service loaders
         StringBuilder provides = new StringBuilder();
 
-        // Generate a class name for the ScanModuleInclusions implementation
-        String artifactIdBase = moduleData.getArtifactId().replace("-", "").replace(".", "");
-        String capitalizedArtifactId = Character.toUpperCase(artifactIdBase.charAt(0)) + artifactIdBase.substring(1);
-        String className = capitalizedArtifactId + "ScanInclude";
-        if (!Character.isJavaIdentifierStart(className.charAt(0)))
-        {
-            className = "App" + className;
-        }
-
-        // Add provides statement for IGuiceScanModuleInclusions
-        String fullClassName = myWizardData.getGroupId() + ".impl." + className;
-        provides.append("\tprovides com.guicedee.guicedinjection.interfaces.IGuiceScanModuleInclusions with " + fullClassName + ";\n");
-
         // Add provides statement for IGuiceModule if database module is created
         if (moduleData.isDatabase()) {
-            String dbClassName = "TestModule"; // Same as in createDatabaseModule
+            // Determine database type and class name
+            String dbType = "Postgres";
+            if (moduleData.isDatabaseMySQL()) {
+                dbType = "MySql";
+            } else if (moduleData.isDatabaseOracle()) {
+                dbType = "Oracle";
+            } else if (moduleData.isDatabaseDB2()) {
+                dbType = "DB2";
+            } else if (moduleData.isDatabaseSqlServer()) {
+                dbType = "SqlServer";
+            } else if (moduleData.isDatabaseCassandra()) {
+                dbType = "Cassandra";
+            } else if (moduleData.isDatabaseMongoDB()) {
+                dbType = "MongoDB";
+            } else if (moduleData.isDatabaseJDBC()) {
+                dbType = "JDBC";
+            }
+
+            // Use DB type in class name - same as in createDatabaseModule
+            String dbClassName = dbType + "DBModule";
             String dbFullClassName = myWizardData.getGroupId() + ".db." + dbClassName;
             provides.append("\tprovides com.guicedee.guicedinjection.interfaces.IGuiceModule with " + dbFullClassName + ";\n");
         }
@@ -742,6 +748,33 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
      */
     private void createRestService(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
+        // Check if both database and REST are selected in the same module
+        if (moduleData.isDatabase() && moduleData.isWebReactiveRest()) {
+            // Check if OpenAPI is also selected
+            if (moduleData.isMicroProfileOpenAPI()) {
+                // Create REST resource and service with entity and OpenAPI
+                createRestResourceWithEntityAndOpenAPI(srcDir, moduleData);
+                createRestResourceServiceWithEntity(srcDir, moduleData);
+            } else {
+                // Create REST resource and service with entity
+                createRestResourceWithEntity(srcDir, moduleData);
+                createRestResourceServiceWithEntity(srcDir, moduleData);
+            }
+        } else {
+            // Create standard REST service without entity
+            createStandardRestService(srcDir, moduleData);
+        }
+    }
+
+    /**
+     * Creates a standard REST service without entity integration.
+     *
+     * @param srcDir The source directory
+     * @param moduleData The module data
+     * @throws IOException If an I/O error occurs
+     */
+    private void createStandardRestService(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
+    {
         // Create resources package
         String packagePath = myWizardData.getGroupId().replace('.', '/') + "/resources";
         File packageDir = new File(srcDir, packagePath);
@@ -781,7 +814,305 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         FileUtil.writeToFile(new File(packageDir, className + ".java"), restService);
         FileUtil.writeToFile(new File(servicesPackageDir, serviceImplName + ".java"), restServiceImpl);
 
-        System.out.println("[DEBUG_LOG] REST service and implementation created successfully");
+        System.out.println("[DEBUG_LOG] Standard REST service and implementation created successfully");
+    }
+
+    /**
+     * Creates a REST resource class with entity integration.
+     *
+     * @param srcDir The source directory
+     * @param moduleData The module data
+     * @throws IOException If an I/O error occurs
+     */
+    private void createRestResourceWithEntity(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
+    {
+        // Create resources package
+        String packagePath = myWizardData.getGroupId().replace('.', '/') + "/resources";
+        File packageDir = new File(srcDir, packagePath);
+        FileUtil.createDirectory(packageDir);
+
+        // Create the REST resource class with entity integration
+        String restResourceTemplate = 
+            "package " + myWizardData.getGroupId() + ".resources;\n\n" +
+            "import " + myWizardData.getGroupId() + ".db.entity.YourEntity;\n" +
+            "import " + myWizardData.getGroupId() + ".resources.services.RestResourceService;\n" +
+            "import io.swagger.v3.oas.annotations.Operation;\n" +
+            "import io.swagger.v3.oas.annotations.Parameter;\n" +
+            "import io.swagger.v3.oas.annotations.media.Content;\n" +
+            "import io.swagger.v3.oas.annotations.media.Schema;\n" +
+            "import io.swagger.v3.oas.annotations.responses.ApiResponse;\n" +
+            "import io.swagger.v3.oas.annotations.responses.ApiResponses;\n" +
+            "import io.swagger.v3.oas.annotations.tags.Tag;\n" +
+            "import io.vertx.core.Future;\n" +
+            "import jakarta.inject.Inject;\n" +
+            "import jakarta.ws.rs.*;\n" +
+            "import jakarta.ws.rs.core.MediaType;\n" +
+            "import lombok.extern.slf4j.Slf4j;\n\n" +
+            "/**\n" +
+            " * REST endpoint for managing YourEntity resources.\n" +
+            " * Provides CRUD operations for entity management using asynchronous processing.\n" +
+            " */\n" +
+            "@Path(\"/resources\")\n" +
+            "@Produces(MediaType.APPLICATION_JSON)\n" +
+            "@Consumes(MediaType.APPLICATION_JSON)\n" +
+            "@Tag(name = \"Resource Management\", description = \"Operations for managing YourEntity resources\")\n" +
+            "@Slf4j\n" +
+            "public class RestResource {\n\n" +
+            "    @Inject\n" +
+            "    private RestResourceService service;\n\n" +
+            "    /**\n" +
+            "     * Retrieves a sample integer value.\n" +
+            "     *\n" +
+            "     * @return Future containing a sample integer value\n" +
+            "     */\n" +
+            "    @GET\n" +
+            "    @Operation(\n" +
+            "            summary = \"Get sample data\",\n" +
+            "            description = \"Retrieves a sample integer value for testing purposes\"\n" +
+            "    )\n" +
+            "    @ApiResponses({\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"200\",\n" +
+            "                    description = \"Successfully retrieved sample data\",\n" +
+            "                    content = @Content(schema = @Schema(implementation = Integer.class))\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"500\",\n" +
+            "                    description = \"Internal server error\"\n" +
+            "            )\n" +
+            "    })\n" +
+            "    public Future<Integer> get() {\n" +
+            "        return service.getSampleData();\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Retrieves an entity by its ID.\n" +
+            "     *\n" +
+            "     * @param id The unique identifier of the entity\n" +
+            "     * @return Future containing the requested entity\n" +
+            "     */\n" +
+            "    @GET\n" +
+            "    @Path(\"/{id}\")\n" +
+            "    @Operation(\n" +
+            "            summary = \"Get entity by ID\",\n" +
+            "            description = \"Retrieves a specific entity based on its unique identifier\"\n" +
+            "    )\n" +
+            "    @ApiResponses({\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"200\",\n" +
+            "                    description = \"Entity found\",\n" +
+            "                    content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"404\",\n" +
+            "                    description = \"Entity not found\"\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"500\",\n" +
+            "                    description = \"Internal server error\"\n" +
+            "            )\n" +
+            "    })\n" +
+            "    public Future<YourEntity> getById(\n" +
+            "            @Parameter(description = \"ID of the entity to retrieve\", required = true)\n" +
+            "            @PathParam(\"id\") String id) {\n" +
+            "        return service.getDataById(id);\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Creates a new entity.\n" +
+            "     *\n" +
+            "     * @param entity The entity to create\n" +
+            "     * @return Future containing the created entity\n" +
+            "     */\n" +
+            "    @POST\n" +
+            "    @Operation(\n" +
+            "            summary = \"Create new entity\",\n" +
+            "            description = \"Creates a new entity with the provided data\"\n" +
+            "    )\n" +
+            "    @ApiResponses({\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"200\",\n" +
+            "                    description = \"Entity created successfully\",\n" +
+            "                    content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"400\",\n" +
+            "                    description = \"Invalid entity data provided\"\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"500\",\n" +
+            "                    description = \"Internal server error\"\n" +
+            "            )\n" +
+            "    })\n" +
+            "    public Future<YourEntity> create(\n" +
+            "            @Parameter(description = \"Entity to create\", required = true)\n" +
+            "            YourEntity entity) {\n" +
+            "        return service.createData(entity);\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Updates an existing entity.\n" +
+            "     *\n" +
+            "     * @param id The ID of the entity to update\n" +
+            "     * @param entity The updated entity data\n" +
+            "     * @return Future containing the updated entity\n" +
+            "     */\n" +
+            "    @PUT\n" +
+            "    @Path(\"/{id}\")\n" +
+            "    @Operation(\n" +
+            "            summary = \"Update existing entity\",\n" +
+            "            description = \"Updates an existing entity with the provided data\"\n" +
+            "    )\n" +
+            "    @ApiResponses({\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"200\",\n" +
+            "                    description = \"Entity updated successfully\",\n" +
+            "                    content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"400\",\n" +
+            "                    description = \"Invalid entity data provided\"\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"404\",\n" +
+            "                    description = \"Entity not found\"\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"500\",\n" +
+            "                    description = \"Internal server error\"\n" +
+            "            )\n" +
+            "    })\n" +
+            "    public Future<YourEntity> update(\n" +
+            "            @Parameter(description = \"ID of the entity to update\", required = true)\n" +
+            "            @PathParam(\"id\") String id,\n" +
+            "            @Parameter(description = \"Updated entity data\", required = true)\n" +
+            "            YourEntity entity) {\n" +
+            "        return service.updateData(id, entity);\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Deletes an entity by its ID.\n" +
+            "     *\n" +
+            "     * @param id The ID of the entity to delete\n" +
+            "     * @return Future indicating completion of delete operation\n" +
+            "     */\n" +
+            "    @DELETE\n" +
+            "    @Path(\"/{id}\")\n" +
+            "    @Operation(\n" +
+            "            summary = \"Delete entity\",\n" +
+            "            description = \"Deletes an entity based on its unique identifier\"\n" +
+            "    )\n" +
+            "    @ApiResponses({\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"204\",\n" +
+            "                    description = \"Entity successfully deleted\"\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"404\",\n" +
+            "                    description = \"Entity not found\"\n" +
+            "            ),\n" +
+            "            @ApiResponse(\n" +
+            "                    responseCode = \"500\",\n" +
+            "                    description = \"Internal server error\"\n" +
+            "            )\n" +
+            "    })\n" +
+            "    public Future<Void> delete(\n" +
+            "            @Parameter(description = \"ID of the entity to delete\", required = true)\n" +
+            "            @PathParam(\"id\") String id) {\n" +
+            "        log.info(\"Deleting resource with ID: {}\", id);\n" +
+            "        return service.deleteData(id);\n" +
+            "    }\n" +
+            "}";
+
+        // Write the file
+        FileUtil.writeToFile(new File(packageDir, "RestResource.java"), restResourceTemplate);
+
+        System.out.println("[DEBUG_LOG] REST resource with entity integration created successfully");
+    }
+
+    /**
+     * Creates a REST resource class with entity integration and OpenAPI support.
+     *
+     * @param srcDir The source directory
+     * @param moduleData The module data
+     * @throws IOException If an I/O error occurs
+     */
+    private void createRestResourceWithEntityAndOpenAPI(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
+    {
+        // The REST resource template is the same for both with and without OpenAPI
+        // The difference is in the module-info.java and pom.xml files
+        createRestResourceWithEntity(srcDir, moduleData);
+    }
+
+    /**
+     * Creates a REST resource service class with entity integration.
+     *
+     * @param srcDir The source directory
+     * @param moduleData The module data
+     * @throws IOException If an I/O error occurs
+     */
+    private void createRestResourceServiceWithEntity(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
+    {
+        // Create services package for the service implementation
+        String servicesPackagePath = myWizardData.getGroupId().replace('.', '/') + "/resources/services";
+        File servicesPackageDir = new File(srcDir, servicesPackagePath);
+        FileUtil.createDirectory(servicesPackageDir);
+
+        // Create the REST resource service class with entity integration
+        String restResourceServiceTemplate = 
+            "package " + myWizardData.getGroupId() + ".resources.services;\n\n" +
+            "import " + myWizardData.getGroupId() + ".db.entity.YourEntity;\n" +
+            "import com.google.inject.Inject;\n" +
+            "import io.smallrye.mutiny.Uni;\n" +
+            "import io.vertx.core.Future;\n" +
+            "import lombok.extern.slf4j.Slf4j;\n" +
+            "import org.hibernate.reactive.mutiny.Mutiny;\n" +
+            "import io.vertx.core.Vertx;\n\n" +
+            "@Slf4j\n" +
+            "public class RestResourceService {\n\n" +
+            "    @Inject\n" +
+            "    private Mutiny.Session session;\n\n" +
+            "    @Inject\n" +
+            "    private Vertx vertx;\n\n" +
+            "    public Future<Integer> getSampleData() {\n" +
+            "        return Future.fromCompletionStage(\n" +
+            "                session.createNativeQuery(\"SELECT 1\", Integer.class)\n" +
+            "                        .getSingleResult()\n" +
+            "                        .log()\n" +
+            "                        .subscribeAsCompletionStage()\n" +
+            "        );\n" +
+            "    }\n\n" +
+            "    public Future<YourEntity> getDataById(String id) {\n" +
+            "        return Future.fromCompletionStage(\n" +
+            "                session.find(YourEntity.class, id)\n" +
+            "                        .subscribeAsCompletionStage()\n" +
+            "        );\n" +
+            "    }\n\n" +
+            "    public Future<YourEntity> createData(YourEntity data) {\n" +
+            "        return Future.fromCompletionStage(\n" +
+            "                session.persist(data)\n" +
+            "                        .chain(() -> session.flush())\n" +
+            "                        .replaceWith(data)\n" +
+            "                        .subscribeAsCompletionStage()\n" +
+            "        );\n" +
+            "    }\n\n" +
+            "    public Future<YourEntity> updateData(String id, YourEntity data) {\n" +
+            "        return Future.fromCompletionStage(\n" +
+            "                session.merge(data)\n" +
+            "                        .subscribeAsCompletionStage()\n" +
+            "        );\n" +
+            "    }\n\n" +
+            "    public Future<Void> deleteData(String id) {\n" +
+            "        return Future.fromCompletionStage(\n" +
+            "                session.find(YourEntity.class, id)\n" +
+            "                        .chain(entity -> entity != null\n" +
+            "                                ? session.remove(entity)\n" +
+            "                                : Uni.createFrom().nullItem())\n" +
+            "                        .subscribeAsCompletionStage()\n" +
+            "        );\n" +
+            "    }\n" +
+            "}";
+
+        // Write the file
+        FileUtil.writeToFile(new File(servicesPackageDir, "RestResourceService.java"), restResourceServiceTemplate);
+
+        System.out.println("[DEBUG_LOG] REST resource service with entity integration created successfully");
     }
 
     /**
@@ -866,6 +1197,11 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         File packageDir = new File(srcDir, packagePath + "/db");
         FileUtil.createDirectory(packageDir);
 
+        // Create entity package and class
+        File entityPackageDir = new File(packageDir, "entity");
+        FileUtil.createDirectory(entityPackageDir);
+        createEntityClass(entityPackageDir);
+
         // Determine persistence unit name based on database type
         String persistenceUnit = "postgres";
         String dbType = "Postgres";
@@ -919,7 +1255,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
         // Create persistence.xml file in META-INF directory
         File resourcesDir = new File(srcDir.getParentFile(), "resources");
-        createPersistenceXml(resourcesDir, persistenceUnit);
+        createPersistenceXml(resourcesDir, persistenceUnit, myWizardData.getGroupId() + ".db.entity.YourEntity");
 
         // Create service loader file in META-INF/services for IGuiceModule
         File metaInfServicesDir = new File(resourcesDir, "META-INF/services");
@@ -940,6 +1276,22 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         } else {
             FileUtil.writeToFile(serviceFile, fullClassName);
         }
+    }
+
+    /**
+     * Creates a simple entity class in the entity package.
+     *
+     * @param entityPackageDir The entity package directory
+     * @throws IOException If an I/O error occurs
+     */
+    private void createEntityClass(File entityPackageDir) throws IOException
+    {
+        String entityClass = "package " + myWizardData.getGroupId() + ".db.entity;\n\n" +
+                "public class YourEntity\n" +
+                "{\n" +
+                "}\n";
+
+        FileUtil.writeToFile(new File(entityPackageDir, "YourEntity.java"), entityClass);
     }
 
     // Keep the old method for backward compatibility
@@ -1407,7 +1759,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>guiced-rest-services</artifactId>\n");
+                dependencies.append("            <artifactId>guiced-rest</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 
@@ -1573,8 +1925,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isMicroProfileOpenAPI())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>io.vertx</groupId>\n");
-                dependencies.append("            <artifactId>vertx-openapi</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+                dependencies.append("            <artifactId>openapi</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 
@@ -1902,9 +2254,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
      *
      * @param resourcesDir The resources directory
      * @param persistenceUnit The persistence unit name
+     * @param entityClass The fully qualified name of the entity class to register
      * @throws IOException If an I/O error occurs
      */
-    private void createPersistenceXml(File resourcesDir, String persistenceUnit) throws IOException
+    private void createPersistenceXml(File resourcesDir, String persistenceUnit, String entityClass) throws IOException
     {
         // Create META-INF directory if it doesn't exist
         File metaInfDir = new File(resourcesDir, "META-INF");
@@ -1912,10 +2265,23 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
         // Generate persistence.xml content
         String persistenceXml = getPersistenceXmlTemplate()
-                .replace("${PERSISTENCE_UNIT}", persistenceUnit);
+                .replace("${PERSISTENCE_UNIT}", persistenceUnit)
+                .replace("${ENTITY_CLASS}", entityClass);
 
         // Write persistence.xml file
         FileUtil.writeToFile(new File(metaInfDir, "persistence.xml"), persistenceXml);
+    }
+
+    /**
+     * Creates a persistence.xml file in the META-INF directory without entity classes.
+     *
+     * @param resourcesDir The resources directory
+     * @param persistenceUnit The persistence unit name
+     * @throws IOException If an I/O error occurs
+     */
+    private void createPersistenceXml(File resourcesDir, String persistenceUnit) throws IOException
+    {
+        createPersistenceXml(resourcesDir, persistenceUnit, "");
     }
 
     /**
@@ -1933,6 +2299,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "\n" +
                 "    <persistence-unit name=\"${PERSISTENCE_UNIT}\">\n" +
                 "        <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>\n" +
+                "        <class>${ENTITY_CLASS}</class>\n" +
                 "        <exclude-unlisted-classes>true</exclude-unlisted-classes>\n" +
                 "        <properties>\n" +
                 "            <!-- SQL logging properties using system properties -->\n" +
