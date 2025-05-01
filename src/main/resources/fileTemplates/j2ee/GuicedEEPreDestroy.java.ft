@@ -1,0 +1,22 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IGuicePreDestroy;
+import jakarta.inject.Singleton;
+import java.util.List;
+import io.vertx.core.Future;
+
+/**
+ * A pre-destroy hook that runs before the application shuts down.
+ */
+public class ${NAME} implements IGuicePreDestroy {
+
+    @Override
+    public List<Future<Boolean>> onDestroy() {
+        return List.of(Future.succeededFuture(true));
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

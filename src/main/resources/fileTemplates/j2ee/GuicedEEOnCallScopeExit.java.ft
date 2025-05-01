@@ -1,0 +1,23 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedservlets.servlets.services.IOnCallScopeExit;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+/**
+ * A hook that runs when a call scope is exited.
+ */
+@Singleton
+public class ${NAME} implements IOnCallScopeExit {
+
+    @Override
+    public void onScopeExit(HttpServletRequest request, HttpServletResponse response) {
+        // Add your logic here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

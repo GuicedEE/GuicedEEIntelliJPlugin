@@ -1,0 +1,19 @@
+package ${PACKAGE_NAME}.impl;
+
+import com.guicedee.guicedinjection.interfaces.IGuiceScanModuleInclusions;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Registers modules for scanning in the GuicedEE framework.
+ */
+public class ${NAME} implements IGuiceScanModuleInclusions<${NAME}> {
+
+    @Override
+    public Set<String> includeModules() {
+        Set<String> out = new HashSet<>();
+        // Module name from module-info.java
+        out.add("${MODULE_NAME}");
+        return out;
+    }
+}

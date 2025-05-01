@@ -1,0 +1,22 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedservlets.websockets.services.IWebSocketPreConfiguration;
+import jakarta.inject.Singleton;
+import io.undertow.websockets.WebSocketDeploymentInfo;
+
+/**
+ * A WebSocket pre-configuration hook that configures WebSockets before they are deployed.
+ */
+@Singleton
+public class ${NAME} implements IWebSocketPreConfiguration {
+
+    @Override
+    public void configure(WebSocketDeploymentInfo deploymentInfo) {
+        // Add your WebSocket configuration logic here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

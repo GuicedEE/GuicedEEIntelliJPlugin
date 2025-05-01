@@ -1,0 +1,32 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IPathContentsScanner;
+import jakarta.inject.Singleton;
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * A path contents scanner that scans path contents.
+ */
+@Singleton
+public class ${NAME} implements IPathContentsScanner {
+
+    @Override
+    public Set<String> searchFor() {
+        Set<String> paths = new HashSet<>();
+        // Add paths to scan
+        paths.add("META-INF/services");
+        return paths;
+    }
+
+    @Override
+    public void onMatch(String path, Set<File> files) {
+        // Handle the match here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

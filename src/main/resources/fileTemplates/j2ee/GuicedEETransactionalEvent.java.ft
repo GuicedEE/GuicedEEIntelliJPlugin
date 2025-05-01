@@ -1,0 +1,16 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.vertxpersistence.TransactionalCallable;
+import jakarta.inject.Singleton;
+
+/**
+ * A transactional event that can be executed within a transaction.
+ */
+public class ${NAME} extends TransactionalCallable<Void> {
+    
+    @Override
+    public Void call() throws Exception {
+        // Implement your transactional logic here
+        return null;
+    }
+}

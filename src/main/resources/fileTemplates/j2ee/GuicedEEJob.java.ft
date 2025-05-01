@@ -1,0 +1,18 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IJobService;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+
+/**
+ * A job service implementation.
+ */
+@Singleton
+public class ${NAME} {
+    @Inject
+    private IJobService jobService;
+
+    public void executeJob() {
+        // Add your job execution logic here
+    }
+}

@@ -1,0 +1,23 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedservlets.websockets.services.GuicedWebSocketOnPublish;
+import jakarta.inject.Singleton;
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSockets;
+
+/**
+ * A WebSocket on publish hook that runs when a message is published to a WebSocket.
+ */
+@Singleton
+public class ${NAME} implements GuicedWebSocketOnPublish {
+
+    @Override
+    public void onPublish(WebSocketChannel channel, String message) {
+        // Add your WebSocket publish logic here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

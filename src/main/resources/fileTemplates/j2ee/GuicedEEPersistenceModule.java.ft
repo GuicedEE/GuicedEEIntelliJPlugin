@@ -1,0 +1,46 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.vertxpersistence.CleanVertxConnectionBaseInfo;
+import com.guicedee.vertxpersistence.ConnectionBaseInfoBuilder;
+import com.guicedee.vertxpersistence.ConnectionBaseInfo;
+import com.guicedee.vertxpersistence.DatabaseModule;
+import com.guicedee.vertxpersistence.annotations.EntityManager;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.jpa.boot.internal.ParsedPersistenceXmlDescriptor;
+import com.guicedee.vertxpersistence.VertxConnectionBaseInfo;
+
+import javax.sql.DataSource;
+import java.util.Properties;
+
+/**
+ * A persistence module for database connectivity.
+ */
+@EntityManager(defaultEm = true)
+public class ${NAME} extends DatabaseModule<${NAME}> {
+    public static String persistenceUnitName = "${PERSISTENCE_UNIT}";
+
+    @Override
+    protected @NotNull String getPersistenceUnitName() {
+        //The persistence unit name. Adjustable for alternating between launch conditions
+        return persistenceUnitName;
+    }
+
+    @Override
+    protected ConnectionBaseInfo getConnectionBaseInfo(ParsedPersistenceXmlDescriptor unit, Properties filteredProperties)
+    {
+        ConnectionBaseInfoBuilder connectionBuilder = new ConnectionBaseInfoBuilder();
+        return connectionBuilder.populateConnectionBaseInfo(unit,filteredProperties,new CleanVertxConnectionBaseInfo());
+    }
+
+    @Override
+    protected String getJndiMapping() {
+        //optional JNDI mapping
+        //return "jdbc/jndi_name"; // Uncomment and modify if JNDI mapping is needed
+        return null;
+    }
+
+    @Override
+    public Integer sortOrder() {
+        return 150;
+    }
+}

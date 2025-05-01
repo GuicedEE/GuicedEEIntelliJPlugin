@@ -1,0 +1,23 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.vertx.spi.VerticleStartup;
+import io.vertx.core.Vertx;
+import jakarta.inject.Singleton;
+
+/**
+ * A Vertx startup hook that runs when Vertx is initialized.
+ */
+@Singleton
+public class ${NAME} implements VerticleStartup {
+
+    @Override
+    public void start(Promise<Void> startPromise, Vertx vertx, AbstractVerticle verticle,String assignedPackage)
+    {
+        startPromise.complete();
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 10; // Lower numbers run first
+    }
+}

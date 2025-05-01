@@ -1,0 +1,91 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+  <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+  <id>com.guicedee.intellij.GEEIntelliJPlugin</id>
+
+  <!-- Public plugin name should be written in Title Case.
+       Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+  <name>GuicedEE Framework</name>
+
+  <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+  <vendor url="https://guicedee.com">GuicedEE</vendor>
+
+  <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+       Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+  <description><![CDATA[
+    <p>IntelliJ IDEA plugin for the GuicedEE framework.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Create new GuicedEE projects with proper Maven dependencies</li>
+      <li>Generate module-info.java files with required dependencies</li>
+      <li>Create service loader implementations</li>
+      <li>Create various GuicedEE component templates:
+        <ul>
+          <li>Transactional Events</li>
+          <li>Guice Modules</li>
+          <li>Startup/Shutdown Hooks</li>
+          <li>REST Services</li>
+          <li>Persistence Modules</li>
+          <li>WebSocket Channels</li>
+          <li>RabbitMQ Consumers</li>
+        </ul>
+      </li>
+      <li>Create application templates for different use cases</li>
+      <li>Identify Guiced EE Applications in the services window</li>
+    </ul>
+  ]]></description>
+
+  <!-- Product and plugin compatibility requirements.
+       Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.java</depends>
+  <depends>org.jetbrains.idea.maven</depends>
+  <depends>org.jetbrains.plugins.gradle</depends>
+
+  <!-- Extension points defined by the plugin.
+       Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Project Template Builder -->
+    <moduleBuilder builderClass="com.guicedee.intellij.wizard.GuicedEEProjectTemplateBuilder"
+                  id="guicedee.project"
+                  order="first"/>
+
+    <!-- File Templates -->
+    <fileTemplateGroup implementation="com.guicedee.intellij.template.GuicedEEFileTemplateProvider"/>
+
+    <!-- Run Configuration -->
+    <configurationType implementation="com.guicedee.intellij.run.GuicedEEApplicationConfigurationType"/>
+    <runConfigurationProducer implementation="com.guicedee.intellij.run.GuicedEERunConfigurationProducer"/>
+    <runLineMarkerContributor language="JAVA" implementationClass="com.guicedee.intellij.run.GuicedEERunLineMarkerContributor"/>
+
+    <!-- Intentions -->
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.PackageInfoAnnotationIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddRabbitConnectionOptionsIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddQueueExchangeIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddVerticleIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddQueuePublisherFieldIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+  </extensions>
+
+  <actions>
+    <!-- New File Action Group -->
+    <group id="GuicedEE.NewFileGroup" class="com.guicedee.intellij.actions.GuicedEENewFileActionGroup" 
+           popup="true" text="GuicedEE" description="Create new GuicedEE files">
+      <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewFile"/>
+    </group>
+  </actions>
+</idea-plugin>

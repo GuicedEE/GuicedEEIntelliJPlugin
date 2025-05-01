@@ -1,0 +1,5 @@
+/**
+ * Package documentation.
+ */
+@com.guicedee.rabbit.RabbitConnectionOptions
+package com.example;

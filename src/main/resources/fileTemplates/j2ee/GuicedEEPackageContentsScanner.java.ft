@@ -1,0 +1,31 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IPackageContentsScanner;
+import jakarta.inject.Singleton;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * A package contents scanner that scans package contents.
+ */
+@Singleton
+public class ${NAME} implements IPackageContentsScanner {
+
+    @Override
+    public Set<String> searchFor() {
+        Set<String> packages = new HashSet<>();
+        // Add packages to scan
+        packages.add("com.example");
+        return packages;
+    }
+
+    @Override
+    public void onMatch(String packageName, Set<String> classes) {
+        // Handle the match here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

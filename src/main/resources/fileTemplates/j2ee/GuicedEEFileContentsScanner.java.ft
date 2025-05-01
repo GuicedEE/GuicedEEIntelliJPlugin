@@ -1,0 +1,32 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IFileContentsScanner;
+import jakarta.inject.Singleton;
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * A file contents scanner that scans file contents.
+ */
+@Singleton
+public class ${NAME} implements IFileContentsScanner {
+
+    @Override
+    public Set<String> searchFor() {
+        Set<String> strings = new HashSet<>();
+        // Add strings to search for in files
+        strings.add("example");
+        return strings;
+    }
+
+    @Override
+    public void onMatch(File file, String contents) {
+        // Handle the match here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

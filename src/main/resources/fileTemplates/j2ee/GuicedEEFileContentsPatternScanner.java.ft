@@ -1,0 +1,33 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IFileContentsPatternScanner;
+import jakarta.inject.Singleton;
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+/**
+ * A file contents pattern scanner that scans file contents using regex patterns.
+ */
+@Singleton
+public class ${NAME} implements IFileContentsPatternScanner {
+
+    @Override
+    public Set<Pattern> searchFor() {
+        Set<Pattern> patterns = new HashSet<>();
+        // Add regex patterns to search for in files
+        patterns.add(Pattern.compile("example.*"));
+        return patterns;
+    }
+
+    @Override
+    public void onMatch(File file, String contents, Pattern pattern) {
+        // Handle the match here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

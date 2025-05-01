@@ -1,0 +1,21 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IGuiceConfigurator;
+import jakarta.inject.Singleton;
+
+/**
+ * A configurator that configures the GuicedEE framework.
+ */
+@Singleton
+public class ${NAME} implements IGuiceConfigurator {
+
+    @Override
+    public void configure() {
+        // Add your configuration logic here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

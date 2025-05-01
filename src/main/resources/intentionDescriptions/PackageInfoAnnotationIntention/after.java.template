@@ -1,0 +1,7 @@
+/**
+ * Package documentation.
+ */
+@com.guicedee.rabbit.RabbitConnectionOptions
+@com.guicedee.rabbit.QueueExchange
+@com.guicedee.vertx.spi.Verticle
+package com.example;

@@ -1,0 +1,27 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.IGuicePreStartup;
+import jakarta.inject.Singleton;
+import java.util.List;
+import io.vertx.core.Future;
+import com.guicedee.vertx.spi.IGuicePreStartup;
+/**
+ * A pre-startup hook that runs before the application starts.
+ */
+public class ${NAME} implements IGuicePreStartup {
+
+    @Override
+    public List<Future<Boolean>> onStartup()
+    {
+        return List.of(VertXPreStartup.getVertx().executeBlocking(() -> {
+            ScanResult scanResult = IGuiceContext.instance().getScanResult();
+            //Handle logic that goes before injection starts here
+            return true;
+        }));
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

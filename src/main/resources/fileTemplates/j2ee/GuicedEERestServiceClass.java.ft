@@ -1,0 +1,51 @@
+package ${PACKAGE_NAME};
+
+import ${PACKAGE_NAME}.services.${NAME}Service;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+/**
+ * A REST service endpoint.
+ */
+@Path("/${PATH}")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class ${NAME} {
+    @Inject
+    private ${NAME}Service service;
+
+    @GET
+    public Response get() {
+        // Implement your GET endpoint logic here
+        return Response.ok("Hello from ${NAME}").build();
+    }
+
+    @GET
+    @Path("/{id}")
+    public Response getById(@PathParam("id") String id) {
+        // Implement your GET by ID endpoint logic here
+        return Response.ok("Getting resource with ID: " + id).build();
+    }
+
+    @POST
+    public Response create(Object data) {
+        // Implement your POST endpoint logic here
+        return Response.status(Response.Status.CREATED).entity("Created").build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response update(@PathParam("id") String id, Object data) {
+        // Implement your PUT endpoint logic here
+        return Response.ok("Updated resource with ID: " + id).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response delete(@PathParam("id") String id) {
+        // Implement your DELETE endpoint logic here
+        return Response.ok("Deleted resource with ID: " + id).build();
+    }
+}

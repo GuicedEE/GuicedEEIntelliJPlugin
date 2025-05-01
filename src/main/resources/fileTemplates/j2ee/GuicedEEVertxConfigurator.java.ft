@@ -1,0 +1,28 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.vertx.spi.VertxConfigurator;
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
+import jakarta.inject.Singleton;
+
+/**
+ * A Vertx configurator that configures Vertx options before initialization.
+ */
+@Singleton
+public class ${NAME} implements VertxConfigurator {
+
+    @Override
+    public VertxBuilder builder(VertxBuilder builder)
+    {
+        /*builder.withMetrics()
+                .withTracer()
+                .withTransport()
+                .withClusterManager()*/
+        return builder;
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

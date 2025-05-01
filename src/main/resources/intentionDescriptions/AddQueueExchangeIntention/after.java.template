@@ -1,0 +1,5 @@
+/**
+ * Package documentation.
+ */
+@com.guicedee.rabbit.QueueExchange
+package com.example;

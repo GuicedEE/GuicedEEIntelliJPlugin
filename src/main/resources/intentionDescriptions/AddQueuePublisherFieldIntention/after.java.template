@@ -1,0 +1,15 @@
+package com.example;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import com.guicedee.rabbit.QueuePublisher;
+
+public class ExampleService {
+    @Inject
+    @Named("exampleQueue")
+    private QueuePublisher exampleQueuePublisher;
+    
+    public void processMessage(String message) {
+        // Process message
+    }
+}

@@ -1,0 +1,21 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedinjection.interfaces.Log4JConfigurator;
+import jakarta.inject.Singleton;
+
+/**
+ * A Log4J configurator that configures Log4J before the application starts.
+ */
+@Singleton
+public class ${NAME} implements Log4JConfigurator {
+
+    @Override
+    public void configure() {
+        // Add your Log4J configuration logic here
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
+}

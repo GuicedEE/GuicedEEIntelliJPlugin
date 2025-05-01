@@ -1,0 +1,5 @@
+/**
+ * Package documentation.
+ */
+@com.guicedee.vertx.spi.Verticle
+package com.example;

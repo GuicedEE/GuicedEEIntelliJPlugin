@@ -1,0 +1,25 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.guicedservlets.websockets.options.WebSocketMessageReceiver;
+import com.guicedee.guicedservlets.websockets.services.IWebSocketMessageReceiver;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Slf4j
+public class ${NAME} implements IWebSocketMessageReceiver
+{
+    @Override
+    public void receiveMessage(com.guicedee.guicedservlets.websockets.options.WebSocketMessageReceiver<?> message) throws SecurityException {
+
+    }
+
+    @Override
+    public Set<String> messageNames()
+    {
+        Set<String> messageNames = new HashSet<>();
+        messageNames.add("ActionType");
+        return messageNames;
+    }
+}

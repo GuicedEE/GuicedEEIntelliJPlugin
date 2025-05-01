@@ -1,0 +1,21 @@
+package ${PACKAGE_NAME};
+
+import com.google.inject.AbstractModule;
+import com.guicedee.guicedinjection.interfaces.IGuiceModule;
+
+/**
+ * A Guice module for configuring dependency injection.
+ */
+public class ${NAME} extends AbstractModule implements IGuiceModule<${NAME}> {
+    
+    @Override
+    protected void configure() {
+        // Configure your explicit bindings here. Most bindings can be JIT
+        // Example: bind(Service.class).to(ServiceImpl.class);
+    }
+    
+    @Override
+    public Integer sortOrder() {
+        return 100; // Lower numbers load first
+    }
+}

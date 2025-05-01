@@ -1,0 +1,9 @@
+package com.example;
+
+public class ExampleService {
+    // Class without QueuePublisher field
+    
+    public void processMessage(String message) {
+        // Process message
+    }
+}

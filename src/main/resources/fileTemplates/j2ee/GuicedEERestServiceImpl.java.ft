@@ -1,0 +1,60 @@
+package ${PACKAGE_NAME}.services;
+
+/**
+ * Implementation of the REST service for ${REST_SERVICE_NAME}.
+ */
+public class ${SERVICE_NAME} {
+
+    /**
+     * Example method that could be called from your REST endpoint.
+     * 
+     * @return A sample response
+     */
+    public String getSampleData() {
+        return "Sample data from RestService";
+    }
+
+    /**
+     * Example method to get data by ID.
+     * 
+     * @param id The ID to look up
+     * @return Data for the specified ID
+     */
+    public String getDataById(String id) {
+        return "Data for ID: " + id;
+    }
+
+    /**
+     * Example method to create new data.
+     * 
+     * @param data The data to create
+     * @return Result of the creation operation
+     */
+    public String createData(Object data) {
+        // Implementation would typically save the data to a database
+        return "Created new data";
+    }
+
+    /**
+     * Example method to update existing data.
+     * 
+     * @param id The ID of the data to update
+     * @param data The new data
+     * @return Result of the update operation
+     */
+    public String updateData(String id, Object data) {
+        // Implementation would typically update the data in a database
+        return "Updated data with ID: " + id;
+    }
+
+    /**
+     * Example method to delete data.
+     * 
+     * @param id The ID of the data to delete
+     * @return Result of the delete operation
+     */
+    public String deleteData(String id) {
+        // Implementation would typically delete the data from a database
+        return "Deleted data with ID: " + id;
+    }
+}
