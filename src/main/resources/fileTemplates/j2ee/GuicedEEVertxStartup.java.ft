@@ -2,7 +2,7 @@ package ${PACKAGE_NAME};
 
 import com.guicedee.vertx.spi.VerticleStartup;
 import io.vertx.core.Vertx;
-import jakarta.inject.Singleton;
+import import com.google.inject.Singleton;;
 
 /**
  * A Vertx startup hook that runs when Vertx is initialized.

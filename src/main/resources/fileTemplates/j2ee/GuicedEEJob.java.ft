@@ -2,7 +2,7 @@ package ${PACKAGE_NAME};
 
 import com.guicedee.guicedinjection.interfaces.IJobService;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import import com.google.inject.Singleton;;
 
 /**
  * A job service implementation.

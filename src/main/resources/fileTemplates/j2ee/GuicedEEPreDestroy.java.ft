@@ -1,7 +1,7 @@
 package ${PACKAGE_NAME};
 
 import com.guicedee.guicedinjection.interfaces.IGuicePreDestroy;
-import jakarta.inject.Singleton;
+import import com.google.inject.Singleton;;
 import java.util.List;
 import io.vertx.core.Future;
 

@@ -99,6 +99,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JCheckBox myModuleMicroProfileLoggingCheckBox;
     private JCheckBox myModuleMicroProfileZipkinCheckBox;
 
+    // Tests sub-options
+    private JCheckBox myModuleTestsCheckBox;
+    private JPanel myModuleTestsOptionsPanel;
+    private JCheckBox myModuleTestsTestContainersCheckBox;
+
     public GuicedEEProjectWizardStep(WizardContext wizardContext, GuicedEEProjectWizardData wizardData) {
         System.out.println("[DEBUG_LOG] GuicedEEProjectWizardStep constructor called");
         myWizardContext = wizardContext;
@@ -559,6 +564,16 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMicroProfileOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleMicroProfileOptionsPanel.setVisible(false);
 
+        // Initialize Tests as a main feature group
+        myModuleTestsCheckBox = new JCheckBox("Tests");
+
+        // Initialize Tests sub-options
+        myModuleTestsOptionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        myModuleTestsTestContainersCheckBox = new JCheckBox("Test Containers");
+        myModuleTestsOptionsPanel.add(myModuleTestsTestContainersCheckBox);
+        myModuleTestsOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 0));
+        myModuleTestsOptionsPanel.setVisible(false);
+
         // Add action listeners to update the module data when fields change
         myModuleNameField.addActionListener(e -> updateSelectedModule());
         myModuleArtifactIdField.addActionListener(e -> updateSelectedModule());
@@ -688,6 +703,15 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMicroProfileLoggingCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileZipkinCheckBox.addActionListener(e -> updateSelectedModule());
 
+        // Add action listener for Tests
+        myModuleTestsCheckBox.addActionListener(e -> {
+            myModuleTestsOptionsPanel.setVisible(myModuleTestsCheckBox.isSelected());
+            updateSelectedModule();
+        });
+
+        // Add action listener for Test Containers
+        myModuleTestsTestContainersCheckBox.addActionListener(e -> updateSelectedModule());
+
         // Create the panel
         JBLabel featuresLabel = new JBLabel("Module Features:");
         featuresLabel.setFont(featuresLabel.getFont().deriveFont(Font.BOLD));
@@ -706,7 +730,9 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
                 .addComponent(myModuleCachingCheckBox)
                 .addComponent(myModuleCachingOptionsPanel)
                 .addComponent(myModuleMicroProfileCheckBox)
-                .addComponent(myModuleMicroProfileOptionsPanel);
+                .addComponent(myModuleMicroProfileOptionsPanel)
+                .addComponent(myModuleTestsCheckBox)
+                .addComponent(myModuleTestsOptionsPanel);
 
         return builder.getPanel();
     }
@@ -796,6 +822,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleMicroProfileZipkinCheckBox.setSelected(selectedModule.isMicroProfileZipkin());
             myModuleMicroProfileOptionsPanel.setVisible(selectedModule.isMicroProfile());
 
+            // Set Tests sub-options
+            myModuleTestsCheckBox.setSelected(selectedModule.isTests());
+            myModuleTestsTestContainersCheckBox.setSelected(selectedModule.isTestsTestContainers());
+            myModuleTestsOptionsPanel.setVisible(selectedModule.isTests());
+
             myModuleFeaturesPanel.setEnabled(true);
 
             // Module name is always available and refers to the Java module name syntax
@@ -853,6 +884,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleMicroProfileZipkinCheckBox.setSelected(false);
             myModuleMicroProfileOptionsPanel.setVisible(false);
 
+            // Clear Tests sub-options
+            myModuleTestsCheckBox.setSelected(false);
+            myModuleTestsTestContainersCheckBox.setSelected(false);
+            myModuleTestsOptionsPanel.setVisible(false);
+
             myModuleFeaturesPanel.setEnabled(false);
         }
     }
@@ -905,6 +941,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             selectedModule.setMicroProfileOpenAPI(myModuleMicroProfileOpenAPICheckBox.isSelected());
             selectedModule.setMicroProfileLogging(myModuleMicroProfileLoggingCheckBox.isSelected());
             selectedModule.setMicroProfileZipkin(myModuleMicroProfileZipkinCheckBox.isSelected());
+
+            // Update Tests sub-options
+            selectedModule.setTests(myModuleTestsCheckBox.isSelected());
+            selectedModule.setTestsTestContainers(myModuleTestsTestContainersCheckBox.isSelected());
 
             // Update the list to reflect the name change
             int selectedIndex = myModulesList.getSelectedIndex();

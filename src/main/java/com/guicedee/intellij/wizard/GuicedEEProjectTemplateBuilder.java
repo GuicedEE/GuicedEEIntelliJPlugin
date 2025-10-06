@@ -239,15 +239,24 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         File resourcesDir = new File(baseDir, "src/main/resources");
         File metaInfDir = new File(resourcesDir, "META-INF/services");
 
+        // Create test directories
+        File testSrcDir = new File(baseDir, "src/test/java");
+        File testResourcesDir = new File(baseDir, "src/test/resources");
+
         FileUtil.createDirectory(srcDir);
         FileUtil.createDirectory(resourcesDir);
         FileUtil.createDirectory(metaInfDir);
+        FileUtil.createDirectory(testSrcDir);
+        FileUtil.createDirectory(testResourcesDir);
 
         // Create pom.xml
         createPomXml(baseDir);
 
         // Create module-info.java
         createModuleInfo(srcDir);
+
+        // Create test module-info.java
+        createTestModuleInfo(testSrcDir);
 
         // Create main application class if needed
         if (myWizardData.isWebApplication())
@@ -300,15 +309,31 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             File moduleResourcesDir = new File(moduleDir, "src/main/resources");
             File moduleMetaInfDir = new File(moduleResourcesDir, "META-INF/services");
 
+            // Create test directories
+            File moduleTestSrcDir = new File(moduleDir, "src/test/java");
+            File moduleTestResourcesDir = new File(moduleDir, "src/test/resources");
+
             FileUtil.createDirectory(moduleSrcDir);
             FileUtil.createDirectory(moduleResourcesDir);
             FileUtil.createDirectory(moduleMetaInfDir);
+            FileUtil.createDirectory(moduleTestSrcDir);
+            FileUtil.createDirectory(moduleTestResourcesDir);
 
             // Create module POM
             createModulePom(moduleDir, moduleData);
 
             // Create module-info.java for module
             createModuleInfo(moduleSrcDir, moduleData);
+
+            // Generate a module name based on the artifact ID
+            String moduleName = moduleData.getArtifactId().replace('-', '.');
+            if (!Character.isJavaIdentifierStart(moduleName.charAt(0)))
+            {
+                moduleName = "m." + moduleName;
+            }
+
+            // Create test module-info.java
+            createTestModuleInfo(moduleTestSrcDir, moduleName, moduleData);
 
             // Create main application class if needed
             if (moduleData.isWebApplication())
@@ -429,6 +454,44 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>guiced-rabbit</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
+        }
+
+        // Always add JUnit Jupiter API dependency for tests
+        dependencies.append("        <dependency>\n");
+        dependencies.append("            <groupId>org.junit.jupiter</groupId>\n");
+        dependencies.append("            <artifactId>junit-jupiter-api</artifactId>\n");
+        dependencies.append("            <scope>test</scope>\n");
+        dependencies.append("        </dependency>\n");
+
+        // Add Test Containers dependency if selected
+        if (tempModule.isTestsTestContainers())
+        {
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <artifactId>testcontainers</artifactId>\n");
+            dependencies.append("        </dependency>\n");
+        }
+
+        // Add JUnit Vintage Engine dependency if database is selected
+        if (tempModule.isDatabase())
+        {
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>org.junit.vintage</groupId>\n");
+            dependencies.append("            <artifactId>junit-vintage-engine</artifactId>\n");
+            dependencies.append("            <scope>test</scope>\n");
+            dependencies.append("        </dependency>\n");
+
+            // Add Vertx Mutiny and Mutiny dependencies
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
+            dependencies.append("        </dependency>\n");
+
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>io.smallrye.reactive</groupId>\n");
+            dependencies.append("            <artifactId>mutiny</artifactId>\n");
+            dependencies.append("            <version>2.8.0</version>\n");
+            dependencies.append("        </dependency>\n");
         }
 
         variables.put("DEPENDENCIES", dependencies.toString());
@@ -669,6 +732,57 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         createModuleInfo(srcDir, defaultModule);
     }
 
+    private void createTestModuleInfo(File testSrcDir, String moduleName, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
+    {
+        StringBuilder requires = new StringBuilder();
+
+        // Add TestContainers requirement if selected
+        if (moduleData.isTestsTestContainers())
+        {
+            requires.append("\trequires org.testcontainers;\n");
+        }
+
+        // Add database requirement if database is selected
+        if (moduleData.isDatabase())
+        {
+            requires.append("\trequires com.guicedee.vertxpersistence;\n");
+        }
+
+        // Generate a module name based on the artifact ID with .test suffix
+        String testModuleName = moduleName + ".test";
+
+        String testModuleInfo = getTestModuleInfoTemplate()
+                .replace("${MODULE_NAME}", testModuleName)
+                .replace("${TESTED_MODULE_NAME}", moduleName)
+                .replace("${REQUIRES}", requires.toString());
+
+        FileUtil.writeToFile(new File(testSrcDir, "module-info.java"), testModuleInfo);
+    }
+
+    private void createTestModuleInfo(File testSrcDir) throws IOException
+    {
+        GuicedEEProjectWizardData.ModuleData defaultModule = new GuicedEEProjectWizardData.ModuleData(
+                "Default Module", myWizardData.getArtifactId());
+
+        // Map old feature groups to new ones
+        defaultModule.setWebReactive(myWizardData.isWebApplication());
+        defaultModule.setDatabase(myWizardData.isDatabaseApplication());
+        defaultModule.setMessagingRabbitMQ(myWizardData.isRabbitMQSupport());
+        if (myWizardData.isRabbitMQSupport())
+        {
+            defaultModule.setMessaging(true);
+        }
+
+        // Generate a module name based on the artifact ID
+        String moduleName = myWizardData.getArtifactId().replace('-', '.');
+        if (!Character.isJavaIdentifierStart(moduleName.charAt(0)))
+        {
+            moduleName = "m." + moduleName;
+        }
+
+        createTestModuleInfo(testSrcDir, moduleName, defaultModule);
+    }
+
     private void createBasicApplication(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         String packagePath = myWizardData.getGroupId().replace('.', '/');
@@ -844,7 +958,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "import io.swagger.v3.oas.annotations.responses.ApiResponses;\n" +
             "import io.swagger.v3.oas.annotations.tags.Tag;\n" +
             "import io.vertx.core.Future;\n" +
-            "import jakarta.inject.Inject;\n" +
+            "import com.google.inject.Inject;\n" +
             "import jakarta.ws.rs.*;\n" +
             "import jakarta.ws.rs.core.MediaType;\n" +
             "import lombok.extern.slf4j.Slf4j;\n\n" +
@@ -1060,6 +1174,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "import " + myWizardData.getGroupId() + ".db.entity.YourEntity;\n" +
             "import com.google.inject.Inject;\n" +
             "import io.smallrye.mutiny.Uni;\n" +
+            "import com.google.inject.Provider;\n" +
             "import io.vertx.core.Future;\n" +
             "import lombok.extern.slf4j.Slf4j;\n" +
             "import org.hibernate.reactive.mutiny.Mutiny;\n" +
@@ -1067,12 +1182,12 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "@Slf4j\n" +
             "public class RestResourceService {\n\n" +
             "    @Inject\n" +
-            "    private Mutiny.Session session;\n\n" +
+            "    private Provider<Mutiny.Session> session;\n\n" +
             "    @Inject\n" +
             "    private Vertx vertx;\n\n" +
             "    public Future<Integer> getSampleData() {\n" +
             "        return Future.fromCompletionStage(\n" +
-            "                session.createNativeQuery(\"SELECT 1\", Integer.class)\n" +
+            "                session.get().createNativeQuery(\"SELECT 1\", Integer.class)\n" +
             "                        .getSingleResult()\n" +
             "                        .log()\n" +
             "                        .subscribeAsCompletionStage()\n" +
@@ -1080,13 +1195,13 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "    }\n\n" +
             "    public Future<YourEntity> getDataById(String id) {\n" +
             "        return Future.fromCompletionStage(\n" +
-            "                session.find(YourEntity.class, id)\n" +
+            "                session.get().find(YourEntity.class, id)\n" +
             "                        .subscribeAsCompletionStage()\n" +
             "        );\n" +
             "    }\n\n" +
             "    public Future<YourEntity> createData(YourEntity data) {\n" +
             "        return Future.fromCompletionStage(\n" +
-            "                session.persist(data)\n" +
+            "                session.get().persist(data)\n" +
             "                        .chain(() -> session.flush())\n" +
             "                        .replaceWith(data)\n" +
             "                        .subscribeAsCompletionStage()\n" +
@@ -1094,13 +1209,13 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "    }\n\n" +
             "    public Future<YourEntity> updateData(String id, YourEntity data) {\n" +
             "        return Future.fromCompletionStage(\n" +
-            "                session.merge(data)\n" +
+            "                session.get().merge(data)\n" +
             "                        .subscribeAsCompletionStage()\n" +
             "        );\n" +
             "    }\n\n" +
             "    public Future<Void> deleteData(String id) {\n" +
             "        return Future.fromCompletionStage(\n" +
-            "                session.find(YourEntity.class, id)\n" +
+            "                session.get().find(YourEntity.class, id)\n" +
             "                        .chain(entity -> entity != null\n" +
             "                                ? session.remove(entity)\n" +
             "                                : Uni.createFrom().nullItem())\n" +
@@ -1482,6 +1597,16 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    exports ${PACKAGE_NAME};\n" +
                 "    \n" +
                 "    ${PROVIDES}\n" +
+                "}";
+    }
+
+    private String getTestModuleInfoTemplate()
+    {
+        return "module ${MODULE_NAME} {\n" +
+                "    requires transitive ${TESTED_MODULE_NAME};\n" +
+                "    requires com.guicedee.client;\n" +
+                "    requires org.junit.jupiter.api;\n" +
+                "    ${REQUIRES}\n" +
                 "}";
     }
 
@@ -1945,6 +2070,44 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>vertx-zipkin</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
+        }
+
+        // Always add JUnit Jupiter API dependency for tests
+        dependencies.append("        <dependency>\n");
+        dependencies.append("            <groupId>org.junit.jupiter</groupId>\n");
+        dependencies.append("            <artifactId>junit-jupiter-api</artifactId>\n");
+        dependencies.append("            <scope>test</scope>\n");
+        dependencies.append("        </dependency>\n");
+
+        // Add Test Containers dependency if selected
+        if (moduleData.isTestsTestContainers())
+        {
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <artifactId>testcontainers</artifactId>\n");
+            dependencies.append("        </dependency>\n");
+        }
+
+        // Add JUnit Vintage Engine dependency if database is selected
+        if (moduleData.isDatabase())
+        {
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>org.junit.vintage</groupId>\n");
+            dependencies.append("            <artifactId>junit-vintage-engine</artifactId>\n");
+            dependencies.append("            <scope>test</scope>\n");
+            dependencies.append("        </dependency>\n");
+
+            // Add Vertx Mutiny and Mutiny dependencies
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
+            dependencies.append("        </dependency>\n");
+
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>io.smallrye.reactive</groupId>\n");
+            dependencies.append("            <artifactId>mutiny</artifactId>\n");
+            dependencies.append("            <version>2.8.0</version>\n");
+            dependencies.append("        </dependency>\n");
         }
 
         variables.put("DEPENDENCIES", dependencies.toString());

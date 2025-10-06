@@ -3,7 +3,7 @@ package ${PACKAGE_NAME};
 import com.guicedee.vertx.spi.VertxConfigurator;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import jakarta.inject.Singleton;
+import import com.google.inject.Singleton;;
 
 /**
  * A Vertx configurator that configures Vertx options before initialization.

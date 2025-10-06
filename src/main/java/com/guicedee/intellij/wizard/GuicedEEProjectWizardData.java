@@ -21,6 +21,10 @@ public class GuicedEEProjectWizardData {
         private boolean messaging;
         private boolean caching;
         private boolean microProfile;
+        private boolean tests;
+
+        // Tests sub-options
+        private boolean testsTestContainers;
 
         // Web Reactive sub-options
         private boolean webReactiveRest;
@@ -94,6 +98,9 @@ public class GuicedEEProjectWizardData {
             this.microProfileOpenAPI = false;
             this.microProfileLogging = false;
             this.microProfileZipkin = false;
+
+            this.tests = false;
+            this.testsTestContainers = false;
         }
 
         public String getName() {
@@ -468,6 +475,25 @@ public class GuicedEEProjectWizardData {
             this.microProfileZipkin = microProfileZipkin;
             if (microProfileZipkin) {
                 this.microProfile = true;
+            }
+        }
+
+        public boolean isTests() {
+            return tests;
+        }
+
+        public void setTests(boolean tests) {
+            this.tests = tests;
+        }
+
+        public boolean isTestsTestContainers() {
+            return testsTestContainers;
+        }
+
+        public void setTestsTestContainers(boolean testsTestContainers) {
+            this.testsTestContainers = testsTestContainers;
+            if (testsTestContainers) {
+                this.tests = true;
             }
         }
     }
