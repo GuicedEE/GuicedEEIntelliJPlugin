@@ -11,8 +11,8 @@ import java.util.Set;
 public class ${NAME} implements IWebSocketMessageReceiver
 {
     @Override
-    public void receiveMessage(com.guicedee.guicedservlets.websockets.options.WebSocketMessageReceiver<?> message) throws SecurityException {
-
+    public io.smallrye.mutiny.Uni<Void> receiveMessage(com.guicedee.guicedservlets.websockets.options.WebSocketMessageReceiver<?> message) throws SecurityException {
+        return io.smallrye.mutiny.Uni.createFrom().voidItem();
     }
 
     @Override
