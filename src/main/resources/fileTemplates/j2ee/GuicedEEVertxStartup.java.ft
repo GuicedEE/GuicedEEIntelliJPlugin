@@ -1,18 +1,17 @@
 package ${PACKAGE_NAME};
 
 import com.guicedee.vertx.spi.VerticleStartup;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import import com.google.inject.Singleton;;
 
 /**
  * A Vertx startup hook that runs when Vertx is initialized.
  */
-@Singleton
-public class ${NAME} implements VerticleStartup {
+public class ${NAME} implements VerticleStartup<${NAME}> {
 
     @Override
-    public void start(Promise<Void> startPromise, Vertx vertx, AbstractVerticle verticle,String assignedPackage)
-    {
+    public void start(Promise<Void> startPromise, Vertx vertx, AbstractVerticle verticle, String assignedPackage) {
         startPromise.complete();
     }
     

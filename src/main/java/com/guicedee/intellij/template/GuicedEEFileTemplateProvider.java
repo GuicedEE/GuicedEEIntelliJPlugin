@@ -3,12 +3,11 @@ package com.guicedee.intellij.template;
 import com.intellij.ide.fileTemplates.FileTemplateDescriptor;
 import com.intellij.ide.fileTemplates.FileTemplateGroupDescriptor;
 import com.intellij.ide.fileTemplates.FileTemplateGroupDescriptorFactory;
-import com.intellij.openapi.util.IconLoader;
+import com.guicedee.intellij.GuicedIcons;
 
 import javax.swing.*;
 
 public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptorFactory {
-    public static final String TRANSACTIONAL_EVENT_TEMPLATE = "GuicedEETransactionalEvent.java";
     public static final String GUICE_MODULE_TEMPLATE = "GuicedEEModule.java";
     public static final String PRE_STARTUP_TEMPLATE = "GuicedEEPreStartup.java";
     public static final String POST_STARTUP_TEMPLATE = "GuicedEEPostStartup.java";
@@ -17,7 +16,12 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String VERTX_STARTUP_TEMPLATE = "GuicedEEVertxStartup.java";
     public static final String VERTX_CONFIGURATOR_TEMPLATE = "GuicedEEVertxConfigurator.java";
     public static final String REST_SERVICE_TEMPLATE = "GuicedEERestService.java";
+    public static final String REST_SERVICE_NO_SERVICE_TEMPLATE = "GuicedEERestServiceNoService.java";
+    public static final String REST_SERVICE_WITH_SESSION_TEMPLATE = "GuicedEERestServiceWithSession.java";
     public static final String REST_SERVICE_IMPL_TEMPLATE = "GuicedEERestServiceImpl.java";
+    public static final String REST_SERVICE_IMPL_WITH_SESSION_TEMPLATE = "GuicedEERestServiceImplWithSession.java";
+    public static final String REST_SERVICE_IMPL_WITH_SESSION_PARAM_TEMPLATE = "GuicedEERestServiceImplWithSessionParam.java";
+    public static final String REST_CLIENT_TEMPLATE = "GuicedEERestClient.java";
     public static final String PERSISTENCE_MODULE_TEMPLATE = "GuicedEEPersistenceModule.java";
     public static final String WEBSOCKET_CHANNEL_TEMPLATE = "GuicedEEWebSocketChannel.java";
     public static final String WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE = "GuicedEEWebSocketMessageReceiver.java";
@@ -33,17 +37,14 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String PATH_CONTENTS_SCANNER_TEMPLATE = "GuicedEEPathContentsScanner.java";
     public static final String ON_CALL_SCOPE_ENTER_TEMPLATE = "GuicedEEOnCallScopeEnter.java";
     public static final String ON_CALL_SCOPE_EXIT_TEMPLATE = "GuicedEEOnCallScopeExit.java";
-    public static final String JOB_TEMPLATE = "GuicedEEJob.java";
 
-    private static final Icon GUICEDEE_ICON = IconLoader.getIcon("/META-INF/logo_front.png", GuicedEEFileTemplateProvider.class);
+    private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
     @Override
     public FileTemplateGroupDescriptor getFileTemplatesDescriptor() {
         FileTemplateGroupDescriptor group = new FileTemplateGroupDescriptor("GuicedEE", GUICEDEE_ICON);
 
         group.addTemplate(new FileTemplateDescriptor(GUICE_MODULE_TEMPLATE, GUICEDEE_ICON));
-        group.addTemplate(new FileTemplateDescriptor(TRANSACTIONAL_EVENT_TEMPLATE, GUICEDEE_ICON));
-        group.addTemplate(new FileTemplateDescriptor(JOB_TEMPLATE, GUICEDEE_ICON));
         group.addTemplate(new FileTemplateDescriptor(RABBITMQ_CONSUMER_TEMPLATE, GUICEDEE_ICON));
 
         // Create Web subgroup (1st feature)
@@ -58,7 +59,12 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         group.addTemplate(restGroup);
 
         restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_TEMPLATE, GUICEDEE_ICON));
+        restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_NO_SERVICE_TEMPLATE, GUICEDEE_ICON));
+        restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_WITH_SESSION_TEMPLATE, GUICEDEE_ICON));
         restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_IMPL_TEMPLATE, GUICEDEE_ICON));
+        restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_IMPL_WITH_SESSION_TEMPLATE, GUICEDEE_ICON));
+        restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_IMPL_WITH_SESSION_PARAM_TEMPLATE, GUICEDEE_ICON));
+        restGroup.addTemplate(new FileTemplateDescriptor(REST_CLIENT_TEMPLATE, GUICEDEE_ICON));
 
         // Create Database subgroup (3rd feature)
         FileTemplateGroupDescriptor databaseGroup = new FileTemplateGroupDescriptor("Database", GUICEDEE_ICON);

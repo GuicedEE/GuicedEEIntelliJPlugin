@@ -1,19 +1,16 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedservlets.websockets.services.GuicedWebSocketOnPublish;
-import import com.google.inject.Singleton;;
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
+import com.guicedee.client.services.websocket.GuicedWebSocketOnPublish;
 
 /**
  * A WebSocket on publish hook that runs when a message is published to a WebSocket.
  */
-@Singleton
-public class ${NAME} implements GuicedWebSocketOnPublish {
+public class ${NAME} implements GuicedWebSocketOnPublish<${NAME}> {
 
     @Override
-    public void onPublish(WebSocketChannel channel, String message) {
+    public boolean publish(String groupName, String message) throws Exception {
         // Add your WebSocket publish logic here
+        return false; // Return true if the publish is already complete
     }
     
     @Override

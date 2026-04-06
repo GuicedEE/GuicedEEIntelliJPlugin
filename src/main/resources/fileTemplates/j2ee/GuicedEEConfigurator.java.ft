@@ -1,17 +1,17 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IGuiceConfigurator;
-import import com.google.inject.Singleton;;
+import com.guicedee.client.services.lifecycle.IGuiceConfigurator;
+import com.guicedee.client.services.IGuiceConfig;
 
 /**
  * A configurator that configures the GuicedEE framework.
  */
-@Singleton
-public class ${NAME} implements IGuiceConfigurator {
+public class ${NAME} implements IGuiceConfigurator<${NAME}> {
 
     @Override
-    public void configure() {
+    public IGuiceConfig<?> configure(IGuiceConfig<?> config) {
         // Add your configuration logic here
+        return config;
     }
     
     @Override

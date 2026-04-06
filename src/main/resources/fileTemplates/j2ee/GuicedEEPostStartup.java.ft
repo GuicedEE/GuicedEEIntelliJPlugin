@@ -1,31 +1,25 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IGuicePostStartup;
-import import com.google.inject.Singleton;;
-import jakarta.inject.Inject;
-import io.vertx.core.Vertx;
+import com.guicedee.client.services.lifecycle.IGuicePostStartup;
+import io.smallrye.mutiny.Uni;
+
+import java.util.List;
 
 /**
  * A post-startup hook that runs after the application has started.
  */
-public class ${NAME} implements IGuicePostStartup
-{
-    @Inject
-    private Vertx vertx;
+public class ${NAME} implements IGuicePostStartup<${NAME}> {
 
     @Override
-    public List<Future<Boolean>> postLoad ()
-    {
-        return List.of(vertx.executeBlocking(() -> {
-                            return true;
-                        }
-                        //,false //Run in parallel
-                )
-        );
+    public List<Uni<Boolean>> postLoad() {
+        return List.of(Uni.createFrom().item(() -> {
+            // Add your post-startup logic here
+            return true;
+        }));
     }
 
     @Override
-    public Integer sortOrder () {
-    return 100; // Lower numbers run first
-}
+    public Integer sortOrder() {
+        return 100; // Lower numbers run first
+    }
 }

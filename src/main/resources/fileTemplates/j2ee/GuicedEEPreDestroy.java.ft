@@ -1,18 +1,15 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IGuicePreDestroy;
-import import com.google.inject.Singleton;;
-import java.util.List;
-import io.vertx.core.Future;
+import com.guicedee.client.services.lifecycle.IGuicePreDestroy;
 
 /**
  * A pre-destroy hook that runs before the application shuts down.
  */
-public class ${NAME} implements IGuicePreDestroy {
+public class ${NAME} implements IGuicePreDestroy<${NAME}> {
 
     @Override
-    public List<Future<Boolean>> onDestroy() {
-        return List.of(Future.succeededFuture(true));
+    public void onDestroy() {
+        // Add your cleanup logic here
     }
     
     @Override

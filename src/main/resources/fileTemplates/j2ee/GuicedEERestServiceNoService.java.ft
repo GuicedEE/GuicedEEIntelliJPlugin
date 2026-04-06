@@ -1,7 +1,5 @@
 package ${PACKAGE_NAME};
 
-import ${PACKAGE_NAME}.services.${NAME}Service;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -13,8 +11,6 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ${NAME} {
-    @Inject
-    private ${NAME}Service service;
 
     @GET
     public Response get() {
@@ -49,3 +45,4 @@ public class ${NAME} {
         return Response.ok("Deleted resource with ID: " + id).build();
     }
 }
+

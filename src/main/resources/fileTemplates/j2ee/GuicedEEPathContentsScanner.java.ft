@@ -1,16 +1,14 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IPathContentsScanner;
-import import com.google.inject.Singleton;;
-import java.io.File;
+import com.guicedee.client.services.config.IPathContentsScanner;
+
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A path contents scanner that scans path contents.
+ * A path contents scanner that registers paths for scanning.
  */
-@Singleton
-public class ${NAME} implements IPathContentsScanner {
+public class ${NAME} implements IPathContentsScanner<${NAME}> {
 
     @Override
     public Set<String> searchFor() {
@@ -20,11 +18,6 @@ public class ${NAME} implements IPathContentsScanner {
         return paths;
     }
 
-    @Override
-    public void onMatch(String path, Set<File> files) {
-        // Handle the match here
-    }
-    
     @Override
     public Integer sortOrder() {
         return 100; // Lower numbers run first

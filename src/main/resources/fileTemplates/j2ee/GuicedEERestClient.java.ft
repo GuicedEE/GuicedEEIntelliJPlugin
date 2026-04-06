@@ -1,0 +1,49 @@
+package ${PACKAGE_NAME};
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.guicedee.rest.client.annotations.Endpoint;
+import com.guicedee.rest.client.annotations.EndpointOptions;
+import com.guicedee.rest.client.RestClient;
+import io.smallrye.mutiny.Uni;
+import jakarta.inject.Named;
+
+/**
+ * A REST client service that makes outbound HTTP calls using @Endpoint declarations.
+ * <p>
+ * Define endpoints with @Endpoint and @Named annotations on RestClient fields.
+ * The framework handles connection pooling, serialization, and authentication.
+ */
+@Singleton
+public class ${NAME} {
+
+    /**
+     * Example GET endpoint — retrieves data from an external API.
+     * <p>
+     * Override the URL at runtime with the REST_CLIENT_GET_EXAMPLE_URL environment variable.
+     */
+    @Endpoint(url = "/api/example", method = "GET",
+              options = @EndpointOptions(readTimeout = 5000))
+    @Named("get-example")
+    private RestClient<Void, String> exampleClient;
+
+    /**
+     * Sends a GET request to the configured endpoint.
+     *
+     * @return A Uni emitting the response
+     */
+    public Uni<String> fetchData() {
+        return exampleClient.send();
+    }
+
+    /**
+     * Sends a GET request with a path parameter.
+     *
+     * @param id The resource ID
+     * @return A Uni emitting the response
+     */
+    public Uni<String> fetchById(String id) {
+        return exampleClient.pathParam("id", id).send();
+    }
+}
+

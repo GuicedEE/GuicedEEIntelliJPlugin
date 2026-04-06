@@ -1,17 +1,14 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedservlets.websockets.services.IWebSocketPreConfiguration;
-import import com.google.inject.Singleton;;
-import io.undertow.websockets.WebSocketDeploymentInfo;
+import com.guicedee.client.services.websocket.IWebSocketPreConfiguration;
 
 /**
  * A WebSocket pre-configuration hook that configures WebSockets before they are deployed.
  */
-@Singleton
-public class ${NAME} implements IWebSocketPreConfiguration {
+public class ${NAME} implements IWebSocketPreConfiguration<${NAME}> {
 
     @Override
-    public void configure(WebSocketDeploymentInfo deploymentInfo) {
+    public void configure() {
         // Add your WebSocket configuration logic here
     }
     

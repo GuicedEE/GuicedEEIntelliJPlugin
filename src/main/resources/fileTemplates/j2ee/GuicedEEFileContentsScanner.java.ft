@@ -1,28 +1,24 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IFileContentsScanner;
-import import com.google.inject.Singleton;;
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import com.guicedee.client.services.config.IFileContentsScanner;
+import io.github.classgraph.ResourceList;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A file contents scanner that scans file contents.
+ * A file contents scanner that scans file contents by exact filename.
  */
-@Singleton
-public class ${NAME} implements IFileContentsScanner {
+public class ${NAME} implements IFileContentsScanner<${NAME}> {
 
     @Override
-    public Set<String> searchFor() {
-        Set<String> strings = new HashSet<>();
-        // Add strings to search for in files
-        strings.add("example");
-        return strings;
-    }
-
-    @Override
-    public void onMatch(File file, String contents) {
-        // Handle the match here
+    public Map<String, ResourceList.ByteArrayConsumer> onMatch() {
+        Map<String, ResourceList.ByteArrayConsumer> matches = new HashMap<>();
+        // Add file name patterns and their handlers
+        matches.put("example.txt", (resource, bytes) -> {
+            // Handle the matched file contents here
+        });
+        return matches;
     }
     
     @Override

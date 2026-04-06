@@ -1,0 +1,84 @@
+package ${PACKAGE_NAME}.services;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import io.smallrye.mutiny.Uni;
+import org.hibernate.reactive.mutiny.Mutiny;
+
+/**
+ * Service for ${REST_SERVICE_NAME}.
+ * <p>
+ * This service manages its own DB session and transaction.
+ * Each method wraps its work in {@code sessionFactory.withTransaction(...)}.
+ */
+@Singleton
+public class ${SERVICE_NAME} {
+    @Inject
+    private Mutiny.SessionFactory sessionFactory;
+
+    /**
+     * Example method that retrieves sample data.
+     *
+     * @return A Uni emitting the result
+     */
+    public Uni<String> getSampleData() {
+        return sessionFactory.withTransaction(session ->
+                // Use session to query the database
+                Uni.createFrom().item("Sample data from ${SERVICE_NAME}")
+        );
+    }
+
+    /**
+     * Example method to get data by ID.
+     *
+     * @param id The ID to look up
+     * @return A Uni emitting the data for the specified ID
+     */
+    public Uni<String> getDataById(String id) {
+        return sessionFactory.withTransaction(session ->
+                // Use session.find(Entity.class, id) to look up by ID
+                Uni.createFrom().item("Data for ID: " + id)
+        );
+    }
+
+    /**
+     * Example method to create new data.
+     *
+     * @param data The data to create
+     * @return A Uni emitting the result of the creation
+     */
+    public Uni<String> createData(Object data) {
+        return sessionFactory.withTransaction(session ->
+                // Use session.persist(entity) to save
+                Uni.createFrom().item("Created new data")
+        );
+    }
+
+    /**
+     * Example method to update existing data.
+     *
+     * @param id   The ID of the data to update
+     * @param data The new data
+     * @return A Uni emitting the result of the update
+     */
+    public Uni<String> updateData(String id, Object data) {
+        return sessionFactory.withTransaction(session ->
+                // Use session.find then session.merge to update
+                Uni.createFrom().item("Updated data with ID: " + id)
+        );
+    }
+
+    /**
+     * Example method to delete data.
+     *
+     * @param id The ID of the data to delete
+     * @return A Uni emitting the result of the deletion
+     */
+    public Uni<String> deleteData(String id) {
+        return sessionFactory.withTransaction(session ->
+                // Use session.find then session.remove to delete
+                Uni.createFrom().item("Deleted data with ID: " + id)
+        );
+    }
+}
+

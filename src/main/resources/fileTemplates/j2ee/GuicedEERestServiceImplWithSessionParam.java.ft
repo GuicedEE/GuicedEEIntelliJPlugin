@@ -1,0 +1,76 @@
+package ${PACKAGE_NAME}.services;
+
+import com.google.inject.Singleton;
+import io.smallrye.mutiny.Uni;
+import org.hibernate.reactive.mutiny.Mutiny;
+
+/**
+ * Service for ${REST_SERVICE_NAME}.
+ * <p>
+ * The DB session is passed in from the REST resource, allowing multiple
+ * service calls to participate in the <b>same transaction</b>.
+ */
+@Singleton
+public class ${SERVICE_NAME} {
+
+    /**
+     * Example method that retrieves sample data.
+     *
+     * @param session The Mutiny session (managed by the REST resource)
+     * @return A Uni emitting the result
+     */
+    public Uni<String> getSampleData(Mutiny.Session session) {
+        // Use session to query the database
+        return Uni.createFrom().item("Sample data from ${SERVICE_NAME}");
+    }
+
+    /**
+     * Example method to get data by ID.
+     *
+     * @param session The Mutiny session (managed by the REST resource)
+     * @param id      The ID to look up
+     * @return A Uni emitting the data for the specified ID
+     */
+    public Uni<String> getDataById(Mutiny.Session session, String id) {
+        // Use session.find(Entity.class, id) to look up by ID
+        return Uni.createFrom().item("Data for ID: " + id);
+    }
+
+    /**
+     * Example method to create new data.
+     *
+     * @param session The Mutiny session (managed by the REST resource)
+     * @param data    The data to create
+     * @return A Uni emitting the result of the creation
+     */
+    public Uni<String> createData(Mutiny.Session session, Object data) {
+        // Use session.persist(entity) to save
+        return Uni.createFrom().item("Created new data");
+    }
+
+    /**
+     * Example method to update existing data.
+     *
+     * @param session The Mutiny session (managed by the REST resource)
+     * @param id      The ID of the data to update
+     * @param data    The new data
+     * @return A Uni emitting the result of the update
+     */
+    public Uni<String> updateData(Mutiny.Session session, String id, Object data) {
+        // Use session.find then session.merge to update
+        return Uni.createFrom().item("Updated data with ID: " + id);
+    }
+
+    /**
+     * Example method to delete data.
+     *
+     * @param session The Mutiny session (managed by the REST resource)
+     * @param id      The ID of the data to delete
+     * @return A Uni emitting the result of the deletion
+     */
+    public Uni<String> deleteData(Mutiny.Session session, String id) {
+        // Use session.find then session.remove to delete
+        return Uni.createFrom().item("Deleted data with ID: " + id);
+    }
+}
+

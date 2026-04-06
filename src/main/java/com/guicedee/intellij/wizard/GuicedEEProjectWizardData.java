@@ -19,7 +19,6 @@ public class GuicedEEProjectWizardData {
         private boolean webReactive;
         private boolean database;
         private boolean messaging;
-        private boolean caching;
         private boolean microProfile;
         private boolean tests;
 
@@ -28,6 +27,7 @@ public class GuicedEEProjectWizardData {
 
         // Web Reactive sub-options
         private boolean webReactiveRest;
+        private boolean webReactiveRestClient;
         private boolean webReactiveWebSockets;
         private boolean webReactiveSwagger;
 
@@ -38,26 +38,17 @@ public class GuicedEEProjectWizardData {
         private boolean databaseOracle;
         private boolean databaseDB2;
         private boolean databaseSqlServer;
-        private boolean databaseCassandra;
-        private boolean databaseMongoDB;
         private boolean databaseJDBC;
 
         // Messaging sub-options
         private boolean messagingRabbitMQ;
-        private boolean messagingKafka;
-        private boolean messagingAMQP;
-        private boolean messagingMQTT;
-
-        // Caching sub-options
-        private boolean cachingHazelcast;
-        private boolean cachingVertxHazelcast;
 
         // MicroProfile sub-options
         private boolean microProfileHealth;
+        private boolean microProfileConfig;
+        private boolean microProfileMetrics;
         private boolean microProfileTelemetry;
         private boolean microProfileOpenAPI;
-        private boolean microProfileLogging;
-        private boolean microProfileZipkin;
 
         public ModuleData(String name, String artifactId) {
             this.name = name;
@@ -67,11 +58,11 @@ public class GuicedEEProjectWizardData {
             this.webReactive = false;
             this.database = false;
             this.messaging = false;
-            this.caching = false;
             this.microProfile = false;
 
             // Initialize all sub-options to false
             this.webReactiveRest = false;
+            this.webReactiveRestClient = false;
             this.webReactiveWebSockets = false;
             this.webReactiveSwagger = false;
 
@@ -81,23 +72,15 @@ public class GuicedEEProjectWizardData {
             this.databaseOracle = false;
             this.databaseDB2 = false;
             this.databaseSqlServer = false;
-            this.databaseCassandra = false;
-            this.databaseMongoDB = false;
             this.databaseJDBC = false;
 
             this.messagingRabbitMQ = false;
-            this.messagingKafka = false;
-            this.messagingAMQP = false;
-            this.messagingMQTT = false;
-
-            this.cachingHazelcast = false;
-            this.cachingVertxHazelcast = false;
 
             this.microProfileHealth = false;
+            this.microProfileConfig = false;
+            this.microProfileMetrics = false;
             this.microProfileTelemetry = false;
             this.microProfileOpenAPI = false;
-            this.microProfileLogging = false;
-            this.microProfileZipkin = false;
 
             this.tests = false;
             this.testsTestContainers = false;
@@ -175,14 +158,6 @@ public class GuicedEEProjectWizardData {
             this.messaging = messaging;
         }
 
-        public boolean isCaching() {
-            return caching;
-        }
-
-        public void setCaching(boolean caching) {
-            this.caching = caching;
-        }
-
         public boolean isMicroProfile() {
             return microProfile;
         }
@@ -199,6 +174,17 @@ public class GuicedEEProjectWizardData {
         public void setWebReactiveRest(boolean webReactiveRest) {
             this.webReactiveRest = webReactiveRest;
             if (webReactiveRest) {
+                this.webReactive = true;
+            }
+        }
+
+        public boolean isWebReactiveRestClient() {
+            return webReactiveRestClient;
+        }
+
+        public void setWebReactiveRestClient(boolean webReactiveRestClient) {
+            this.webReactiveRestClient = webReactiveRestClient;
+            if (webReactiveRestClient) {
                 this.webReactive = true;
             }
         }
@@ -307,34 +293,6 @@ public class GuicedEEProjectWizardData {
             }
         }
 
-        public boolean isDatabaseCassandra() {
-            return databaseCassandra;
-        }
-
-        public void setDatabaseCassandra(boolean databaseCassandra) {
-            this.databaseCassandra = databaseCassandra;
-            if (databaseCassandra) {
-                this.database = true;
-                if (this.databaseJDBC) {
-                    this.databaseJDBC = false;
-                }
-            }
-        }
-
-        public boolean isDatabaseMongoDB() {
-            return databaseMongoDB;
-        }
-
-        public void setDatabaseMongoDB(boolean databaseMongoDB) {
-            this.databaseMongoDB = databaseMongoDB;
-            if (databaseMongoDB) {
-                this.database = true;
-                if (this.databaseJDBC) {
-                    this.databaseJDBC = false;
-                }
-            }
-        }
-
         public boolean isDatabaseJDBC() {
             return databaseJDBC;
         }
@@ -349,8 +307,6 @@ public class GuicedEEProjectWizardData {
                 this.databaseOracle = false;
                 this.databaseDB2 = false;
                 this.databaseSqlServer = false;
-                this.databaseCassandra = false;
-                this.databaseMongoDB = false;
             }
         }
 
@@ -366,62 +322,6 @@ public class GuicedEEProjectWizardData {
             }
         }
 
-        public boolean isMessagingKafka() {
-            return messagingKafka;
-        }
-
-        public void setMessagingKafka(boolean messagingKafka) {
-            this.messagingKafka = messagingKafka;
-            if (messagingKafka) {
-                this.messaging = true;
-            }
-        }
-
-        public boolean isMessagingAMQP() {
-            return messagingAMQP;
-        }
-
-        public void setMessagingAMQP(boolean messagingAMQP) {
-            this.messagingAMQP = messagingAMQP;
-            if (messagingAMQP) {
-                this.messaging = true;
-            }
-        }
-
-        public boolean isMessagingMQTT() {
-            return messagingMQTT;
-        }
-
-        public void setMessagingMQTT(boolean messagingMQTT) {
-            this.messagingMQTT = messagingMQTT;
-            if (messagingMQTT) {
-                this.messaging = true;
-            }
-        }
-
-        // Getters and setters for Caching sub-options
-        public boolean isCachingHazelcast() {
-            return cachingHazelcast;
-        }
-
-        public void setCachingHazelcast(boolean cachingHazelcast) {
-            this.cachingHazelcast = cachingHazelcast;
-            if (cachingHazelcast) {
-                this.caching = true;
-            }
-        }
-
-        public boolean isCachingVertxHazelcast() {
-            return cachingVertxHazelcast;
-        }
-
-        public void setCachingVertxHazelcast(boolean cachingVertxHazelcast) {
-            this.cachingVertxHazelcast = cachingVertxHazelcast;
-            if (cachingVertxHazelcast) {
-                this.caching = true;
-            }
-        }
-
         // Getters and setters for MicroProfile sub-options
         public boolean isMicroProfileHealth() {
             return microProfileHealth;
@@ -430,6 +330,28 @@ public class GuicedEEProjectWizardData {
         public void setMicroProfileHealth(boolean microProfileHealth) {
             this.microProfileHealth = microProfileHealth;
             if (microProfileHealth) {
+                this.microProfile = true;
+            }
+        }
+
+        public boolean isMicroProfileConfig() {
+            return microProfileConfig;
+        }
+
+        public void setMicroProfileConfig(boolean microProfileConfig) {
+            this.microProfileConfig = microProfileConfig;
+            if (microProfileConfig) {
+                this.microProfile = true;
+            }
+        }
+
+        public boolean isMicroProfileMetrics() {
+            return microProfileMetrics;
+        }
+
+        public void setMicroProfileMetrics(boolean microProfileMetrics) {
+            this.microProfileMetrics = microProfileMetrics;
+            if (microProfileMetrics) {
                 this.microProfile = true;
             }
         }
@@ -456,28 +378,6 @@ public class GuicedEEProjectWizardData {
             }
         }
 
-        public boolean isMicroProfileLogging() {
-            return microProfileLogging;
-        }
-
-        public void setMicroProfileLogging(boolean microProfileLogging) {
-            this.microProfileLogging = microProfileLogging;
-            if (microProfileLogging) {
-                this.microProfile = true;
-            }
-        }
-
-        public boolean isMicroProfileZipkin() {
-            return microProfileZipkin;
-        }
-
-        public void setMicroProfileZipkin(boolean microProfileZipkin) {
-            this.microProfileZipkin = microProfileZipkin;
-            if (microProfileZipkin) {
-                this.microProfile = true;
-            }
-        }
-
         public boolean isTests() {
             return tests;
         }
@@ -496,6 +396,40 @@ public class GuicedEEProjectWizardData {
                 this.tests = true;
             }
         }
+
+        // ── Backward-compatible stubs for removed features ──
+        // These exist so callers (WizardStep, TemplateBuilder) compile without errors.
+        // They always return false and setters are no-ops.
+
+        @Deprecated public boolean isCaching() { return false; }
+        @Deprecated public void setCaching(boolean caching) { }
+
+        @Deprecated public boolean isDatabaseCassandra() { return false; }
+        @Deprecated public void setDatabaseCassandra(boolean v) { }
+
+        @Deprecated public boolean isDatabaseMongoDB() { return false; }
+        @Deprecated public void setDatabaseMongoDB(boolean v) { }
+
+        @Deprecated public boolean isMessagingKafka() { return false; }
+        @Deprecated public void setMessagingKafka(boolean v) { }
+
+        @Deprecated public boolean isMessagingAMQP() { return false; }
+        @Deprecated public void setMessagingAMQP(boolean v) { }
+
+        @Deprecated public boolean isMessagingMQTT() { return false; }
+        @Deprecated public void setMessagingMQTT(boolean v) { }
+
+        @Deprecated public boolean isCachingHazelcast() { return false; }
+        @Deprecated public void setCachingHazelcast(boolean v) { }
+
+        @Deprecated public boolean isCachingVertxHazelcast() { return false; }
+        @Deprecated public void setCachingVertxHazelcast(boolean v) { }
+
+        @Deprecated public boolean isMicroProfileLogging() { return false; }
+        @Deprecated public void setMicroProfileLogging(boolean v) { }
+
+        @Deprecated public boolean isMicroProfileZipkin() { return false; }
+        @Deprecated public void setMicroProfileZipkin(boolean v) { }
     }
 
     private String groupId;

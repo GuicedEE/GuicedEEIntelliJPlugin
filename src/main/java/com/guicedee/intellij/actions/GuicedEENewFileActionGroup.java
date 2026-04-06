@@ -12,13 +12,13 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.psi.impl.file.JavaDirectoryServiceImpl;
+import com.guicedee.intellij.GuicedIcons;
 import com.guicedee.intellij.template.GuicedEEFileTemplateProvider;
 import com.guicedee.intellij.wizard.GuicedEEProjectWizardData;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +34,7 @@ import java.util.Properties;
  * This action group only appears for projects that meet the criteria for a GuicedEE Application.
  */
 public class GuicedEENewFileActionGroup extends DefaultActionGroup implements DumbAware {
-    private static final Icon GUICEDEE_ICON = IconLoader.getIcon("/META-INF/logo_front.png", GuicedEENewFileActionGroup.class);
+    private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
     public GuicedEENewFileActionGroup() {
         super("GuicedEE", true);
@@ -46,11 +46,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         // Add core items
         add(new CreateGuicedEEFileAction("Module", "Create a new Module", 
                 GuicedEEFileTemplateProvider.GUICE_MODULE_TEMPLATE));
-        add(new CreateGuicedEEFileAction("Transactional Event", "Create a new Transactional Event", 
-                GuicedEEFileTemplateProvider.TRANSACTIONAL_EVENT_TEMPLATE));
-        add(new CreateGuicedEEFileAction("Job", "Create a new Job", 
-                GuicedEEFileTemplateProvider.JOB_TEMPLATE));
-        add(new CreateGuicedEEFileAction("RabbitMQ Consumer", "Create a new RabbitMQ Consumer", 
+        add(new CreateGuicedEEFileAction("RabbitMQ Consumer", "Create a new RabbitMQ Consumer",
                 GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE));
 
         // Add Web subgroup
@@ -82,8 +78,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
 
         restGroup.add(new CreateGuicedEEFileAction("REST Service", "Create a new REST Service", 
                 GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE));
-        restGroup.add(new CreateGuicedEEFileAction("REST Service Implementation", "Create a new REST Service Implementation", 
-                GuicedEEFileTemplateProvider.REST_SERVICE_IMPL_TEMPLATE));
+        restGroup.add(new CreateGuicedEEFileAction("REST Client", "Create a new REST Client with @Endpoint",
+                GuicedEEFileTemplateProvider.REST_CLIENT_TEMPLATE));
 
         // Add Database subgroup
         DefaultActionGroup databaseGroup = new DefaultActionGroup("Database", true);
@@ -185,8 +181,9 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 String text = file.getText();
                 // Check if the module-info.java file contains references to GuicedEE dependencies
                 if (text.contains("requires") && 
-                    (text.contains("com.guicedee.guicedinjection") || 
-                     text.contains("com.guicedee.guicedservlets"))) {
+                    (text.contains("com.guicedee.client") ||
+                     text.contains("com.guicedee.vertx") ||
+                     text.contains("com.guicedee.inject"))) {
                     return true;
                 }
             }
@@ -199,7 +196,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         // Check for GuiceContext or IGuiceContext
         boolean hasGuiceContext = 
             javaPsiFacade.findClass("com.guicedee.guicedinjection.GuiceContext", scope) != null ||
-            javaPsiFacade.findClass("com.guicedee.guicedinjection.interfaces.IGuiceContext", scope) != null;
+            javaPsiFacade.findClass("com.guicedee.client.IGuiceContext", scope) != null;
 
         // Check for Inject
         boolean hasInject = 
@@ -407,6 +404,12 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         private final String templateName;
         private boolean isProjectStructureAction = false;
 
+        // REST service options — set during buildDialog, consumed in createFile
+        private volatile boolean restCreateService = true;
+        private volatile boolean restIncludeDbSession = false;
+        private volatile boolean restSessionPerTransaction = false;
+        private volatile boolean restDialogCancelled = false;
+
         public CreateGuicedEEFileAction(String text, String description, String templateName) {
             super(text, description, GUICEDEE_ICON);
             this.templateName = templateName;
@@ -425,6 +428,19 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         protected void buildDialog(Project project, PsiDirectory directory, CreateFileFromTemplateDialog.Builder builder) {
             builder.setTitle("Create New " + getActionName())
                    .addKind(getActionName(), GUICEDEE_ICON, templateName);
+
+            // For REST Service, show options dialog before the name dialog
+            if (templateName.equals(GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE)) {
+                RestServiceOptionsDialog optionsDialog = new RestServiceOptionsDialog(project);
+                if (optionsDialog.showAndGet()) {
+                    restCreateService = optionsDialog.isCreateService();
+                    restIncludeDbSession = optionsDialog.isIncludeDbSession();
+                    restSessionPerTransaction = optionsDialog.isSessionPerTransaction();
+                    restDialogCancelled = false;
+                } else {
+                    restDialogCancelled = true;
+                }
+            }
         }
 
         @Override
@@ -447,20 +463,47 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 Properties defaultProperties = fileTemplateManager.getDefaultProperties();
                 defaultProperties.setProperty("PACKAGE_NAME", packageName);
 
-                // For REST service, add the PATH property if not already set
+                // REST service options — use values captured in buildDialog
+                String actualRestTemplateName = templateName;
+
                 if (templateName.equals(GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE)) {
+                    if (restDialogCancelled) {
+                        return null; // User cancelled the options dialog
+                    }
+
                     if (!defaultProperties.containsKey("PATH")) {
                         defaultProperties.setProperty("PATH", name.toLowerCase());
+                    }
+
+                    // Select the correct REST endpoint template based on dialog choices
+                    if (!restCreateService) {
+                        actualRestTemplateName = GuicedEEFileTemplateProvider.REST_SERVICE_NO_SERVICE_TEMPLATE;
+                    } else if (restSessionPerTransaction) {
+                        actualRestTemplateName = GuicedEEFileTemplateProvider.REST_SERVICE_WITH_SESSION_TEMPLATE;
+                    }
+                    // else: use default REST_SERVICE_TEMPLATE (with service, no session on resource)
+                }
+
+                // REST Client defaults
+                if (templateName.equals(GuicedEEFileTemplateProvider.REST_CLIENT_TEMPLATE)) {
+                    if (!defaultProperties.containsKey("ENDPOINT_URL")) {
+                        defaultProperties.setProperty("ENDPOINT_URL", "/api/" + name.toLowerCase().replace("client", ""));
+                    }
+                    if (!defaultProperties.containsKey("ENDPOINT_NAME")) {
+                        // Convert class name to kebab-case endpoint name e.g. UserClient -> user
+                        String endpointName = name.replaceAll("Client$", "")
+                                .replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
+                        defaultProperties.setProperty("ENDPOINT_NAME", endpointName);
                     }
                 }
 
                 // Create the file with the default properties
                 PsiFile file;
                 try {
-                    file = super.createFile(name, templateName, dir);
+                    file = super.createFile(name, actualRestTemplateName, dir);
                     if (file == null) {
                         Messages.showErrorDialog(dir.getProject(),
-                            "Failed to create file from template: " + templateName,
+                            "Failed to create file from template: " + actualRestTemplateName,
                             "Error Creating File");
                         return null;
                     }
@@ -471,8 +514,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                     return null;
                 }
 
-                // If creating a REST service, also create the service implementation
-                if (templateName.equals(GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE)) {
+                // If creating a REST service with an associated service class
+                if (templateName.equals(GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE) && restCreateService) {
                     try {
                         // Create services directory if it doesn't exist
                         PsiDirectory servicesDir;
@@ -482,21 +525,31 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                             servicesDir = dir.findSubdirectory("services");
                         }
 
+                        // Determine which service template to use
+                        String serviceTemplateName;
+                        if (restSessionPerTransaction) {
+                            // Session managed by REST resource, passed to service
+                            serviceTemplateName = GuicedEEFileTemplateProvider.REST_SERVICE_IMPL_WITH_SESSION_PARAM_TEMPLATE;
+                        } else if (restIncludeDbSession) {
+                            // Service manages its own session
+                            serviceTemplateName = GuicedEEFileTemplateProvider.REST_SERVICE_IMPL_WITH_SESSION_TEMPLATE;
+                        } else {
+                            // No DB session
+                            serviceTemplateName = GuicedEEFileTemplateProvider.REST_SERVICE_IMPL_TEMPLATE;
+                        }
+
                         // Create the service implementation file
-                        FileTemplate template = fileTemplateManager.getJ2eeTemplate(GuicedEEFileTemplateProvider.REST_SERVICE_IMPL_TEMPLATE);
+                        FileTemplate template = fileTemplateManager.getJ2eeTemplate(serviceTemplateName);
                         if (template == null) {
                             Messages.showErrorDialog(dir.getProject(),
-                                "REST service implementation template not found: " + GuicedEEFileTemplateProvider.REST_SERVICE_IMPL_TEMPLATE,
+                                "REST service implementation template not found: " + serviceTemplateName,
                                 "Template Not Found");
                             return file;
                         }
 
                         Properties properties = new Properties(defaultProperties);
-                        // Use the same name as the REST service but with "Service" suffix
                         String serviceImplName = name + "Service";
-                        // Add the service name to the properties
                         properties.setProperty("SERVICE_NAME", serviceImplName);
-                        // Add the REST service name to the properties
                         properties.setProperty("REST_SERVICE_NAME", name);
 
                         PsiElement createdFile = FileTemplateUtil.createFromTemplate(template, serviceImplName, properties, servicesDir);
@@ -506,15 +559,22 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                                 "Error Creating REST Service Implementation");
                         }
                     } catch (Exception e) {
-                        // Log error or show notification
-                        Messages.showErrorDialog(dir.getProject(), 
+                        Messages.showErrorDialog(dir.getProject(),
                             "Failed to create REST service implementation: " + e.getMessage(), 
                             "Error Creating REST Service Implementation");
+                    }
+
+                    // If DB session was selected, ensure persistence dependency is present
+                    if (restIncludeDbSession) {
+                        ensureRequiredDependency(dir.getProject(), GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE, dir);
                     }
                 }
 
                 // Create META-INF/services file and update module-info.java for service interfaces
-                createServiceRegistration(dir.getProject(), templateName, packageName, name);
+                createServiceRegistration(dir.getProject(), templateName, packageName, name, dir);
+
+                // Ensure required Maven dependency is present for this template
+                ensureRequiredDependency(dir.getProject(), templateName, dir);
 
                 return file;
             } catch (Exception e) {
@@ -528,24 +588,31 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         /**
          * Creates META-INF/services file and updates module-info.java for service interfaces
          */
-        private void createServiceRegistration(Project project, String templateName, String packageName, String className) {
+        private void createServiceRegistration(Project project, String templateName, String packageName, String className, PsiDirectory dir) {
             // Map of template names to their corresponding interface names
             java.util.Map<String, String> templateToInterface = new java.util.HashMap<>();
-            templateToInterface.put(GuicedEEFileTemplateProvider.PRE_STARTUP_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IGuicePreStartup");
-            templateToInterface.put(GuicedEEFileTemplateProvider.POST_STARTUP_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IGuicePostStartup");
-            templateToInterface.put(GuicedEEFileTemplateProvider.PRE_DESTROY_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IGuicePreDestroy");
-            templateToInterface.put(GuicedEEFileTemplateProvider.SCAN_MODULE_INCLUSIONS_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IGuiceScanModuleInclusions");
-            templateToInterface.put(GuicedEEFileTemplateProvider.CONFIGURATOR_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IGuiceConfigurator");
-            templateToInterface.put(GuicedEEFileTemplateProvider.FILE_CONTENTS_SCANNER_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IFileContentsScanner");
-            templateToInterface.put(GuicedEEFileTemplateProvider.FILE_CONTENTS_PATTERN_SCANNER_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IFileContentsPatternScanner");
-            templateToInterface.put(GuicedEEFileTemplateProvider.PACKAGE_CONTENTS_SCANNER_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IPackageContentsScanner");
-            templateToInterface.put(GuicedEEFileTemplateProvider.PATH_CONTENTS_SCANNER_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IPathContentsScanner");
-            templateToInterface.put(GuicedEEFileTemplateProvider.ON_CALL_SCOPE_ENTER_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IOnCallScopeEnter");
-            templateToInterface.put(GuicedEEFileTemplateProvider.ON_CALL_SCOPE_EXIT_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IOnCallScopeExit");
-            templateToInterface.put(GuicedEEFileTemplateProvider.GUICE_MODULE_TEMPLATE, "com.guicedee.guicedinjection.interfaces.IGuiceModule");
-            templateToInterface.put(GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE, "com.guicedee.guicedservlets.websockets.services.IGuicedWebSocket");
-            templateToInterface.put(GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE, "com.guicedee.guicedservlets.websockets.services.IWebSocketMessageReceiver");
-            templateToInterface.put(GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE, "com.guicedee.guicedservlets.websockets.services.IWebSocketPreConfiguration");
+            templateToInterface.put(GuicedEEFileTemplateProvider.PRE_STARTUP_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuicePreStartup");
+            templateToInterface.put(GuicedEEFileTemplateProvider.POST_STARTUP_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuicePostStartup");
+            templateToInterface.put(GuicedEEFileTemplateProvider.PRE_DESTROY_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuicePreDestroy");
+            templateToInterface.put(GuicedEEFileTemplateProvider.SCAN_MODULE_INCLUSIONS_TEMPLATE, "com.guicedee.client.services.config.IGuiceScanModuleInclusions");
+            templateToInterface.put(GuicedEEFileTemplateProvider.CONFIGURATOR_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceConfigurator");
+            templateToInterface.put(GuicedEEFileTemplateProvider.FILE_CONTENTS_SCANNER_TEMPLATE, "com.guicedee.client.services.config.IFileContentsScanner");
+            templateToInterface.put(GuicedEEFileTemplateProvider.FILE_CONTENTS_PATTERN_SCANNER_TEMPLATE, "com.guicedee.client.services.config.IFileContentsPatternScanner");
+            templateToInterface.put(GuicedEEFileTemplateProvider.PACKAGE_CONTENTS_SCANNER_TEMPLATE, "com.guicedee.client.services.config.IPackageContentsScanner");
+            templateToInterface.put(GuicedEEFileTemplateProvider.PATH_CONTENTS_SCANNER_TEMPLATE, "com.guicedee.client.services.config.IPathContentsScanner");
+            templateToInterface.put(GuicedEEFileTemplateProvider.ON_CALL_SCOPE_ENTER_TEMPLATE, "com.guicedee.client.services.lifecycle.IOnCallScopeEnter");
+            templateToInterface.put(GuicedEEFileTemplateProvider.ON_CALL_SCOPE_EXIT_TEMPLATE, "com.guicedee.client.services.lifecycle.IOnCallScopeExit");
+            templateToInterface.put(GuicedEEFileTemplateProvider.GUICE_MODULE_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceModule");
+            templateToInterface.put(GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE, "com.guicedee.client.services.websocket.IGuicedWebSocket");
+            templateToInterface.put(GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE, "com.guicedee.client.services.websocket.IWebSocketMessageReceiver");
+            templateToInterface.put(GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE, "com.guicedee.client.services.websocket.IWebSocketPreConfiguration");
+            templateToInterface.put(GuicedEEFileTemplateProvider.WEBSOCKET_ON_PUBLISH_TEMPLATE, "com.guicedee.client.services.websocket.GuicedWebSocketOnPublish");
+            templateToInterface.put(GuicedEEFileTemplateProvider.ROUTER_CONFIGURATION_TEMPLATE, "com.guicedee.vertx.web.spi.VertxRouterConfigurator");
+            templateToInterface.put(GuicedEEFileTemplateProvider.LOG4J_CONFIGURATOR_TEMPLATE, "com.guicedee.client.services.Log4JConfigurator");
+            templateToInterface.put(GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceModule");
+            templateToInterface.put(GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE, "com.guicedee.rabbit.QueueConsumer");
+            templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_STARTUP_TEMPLATE, "com.guicedee.vertx.spi.VerticleStartup");
+            templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_CONFIGURATOR_TEMPLATE, "com.guicedee.vertx.spi.VertxConfigurator");
 
             // Check if this template corresponds to a service interface
             String interfaceName = templateToInterface.get(templateName);
@@ -558,10 +625,10 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
 
             try {
                 // Create META-INF/services file
-                createMetaInfServicesFile(project, interfaceName, fullClassName);
+                createMetaInfServicesFile(project, interfaceName, fullClassName, dir);
 
                 // Update module-info.java with provides entry
-                updateModuleInfoFile(project, interfaceName, fullClassName);
+                updateModuleInfoFile(project, interfaceName, fullClassName, dir);
             } catch (Exception e) {
                 Messages.showErrorDialog(project,
                     "Error creating service registration: " + e.getMessage(),
@@ -570,80 +637,111 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         }
 
         /**
-         * Creates META-INF/services file for the given interface
+         * Creates META-INF/services file for the given interface.
+         * Finds the resources directory relative to the source root where the file is being created.
          */
-        private void createMetaInfServicesFile(Project project, String interfaceName, String fullClassName) {
-            try {
-                // Find or create resources directory
-                VirtualFile projectDir = project.getBaseDir();
-                if (projectDir == null) {
-                    return;
-                }
+        private void createMetaInfServicesFile(Project project, String interfaceName, String fullClassName, PsiDirectory dir) {
+            WriteCommandAction.runWriteCommandAction(project, () -> {
+                try {
+                    // Find the resources directory by traversing up from the selected directory
+                    // to find src/main/java, then use src/main/resources as sibling
+                    VirtualFile resourcesDir = findResourcesDirectory(dir);
+                    if (resourcesDir == null) {
+                        return;
+                    }
 
-                // Look for src/main/resources directory
-                VirtualFile srcDir = projectDir.findChild("src");
-                if (srcDir == null) {
-                    srcDir = projectDir.createChildDirectory(this, "src");
-                }
+                    // Create META-INF/services directory if it doesn't exist
+                    VirtualFile metaInfDir = resourcesDir.findChild("META-INF");
+                    if (metaInfDir == null) {
+                        metaInfDir = resourcesDir.createChildDirectory(this, "META-INF");
+                    }
 
-                VirtualFile mainDir = srcDir.findChild("main");
-                if (mainDir == null) {
-                    mainDir = srcDir.createChildDirectory(this, "main");
-                }
+                    VirtualFile servicesDir = metaInfDir.findChild("services");
+                    if (servicesDir == null) {
+                        servicesDir = metaInfDir.createChildDirectory(this, "services");
+                    }
 
-                VirtualFile resourcesDir = mainDir.findChild("resources");
-                if (resourcesDir == null) {
-                    resourcesDir = mainDir.createChildDirectory(this, "resources");
-                }
+                    // Create or update the service file
+                    VirtualFile serviceFile = servicesDir.findChild(interfaceName);
+                    if (serviceFile == null) {
+                        serviceFile = servicesDir.createChildData(this, interfaceName);
+                        serviceFile.setBinaryContent(fullClassName.getBytes());
+                    } else {
+                        // Check if the implementation is already registered
+                        String content = new String(serviceFile.contentsToByteArray());
+                        boolean found = false;
+                        String[] lines = content.split("\\r?\\n");
+                        for (String line : lines) {
+                            if (line.trim().equals(fullClassName)) {
+                                found = true;
+                                break;
+                            }
+                        }
 
-                // Create META-INF/services directory if it doesn't exist
-                VirtualFile metaInfDir = resourcesDir.findChild("META-INF");
-                if (metaInfDir == null) {
-                    metaInfDir = resourcesDir.createChildDirectory(this, "META-INF");
-                }
-
-                VirtualFile servicesDir = metaInfDir.findChild("services");
-                if (servicesDir == null) {
-                    servicesDir = metaInfDir.createChildDirectory(this, "services");
-                }
-
-                // Create or update the service file
-                VirtualFile serviceFile = servicesDir.findChild(interfaceName);
-                if (serviceFile == null) {
-                    serviceFile = servicesDir.createChildData(this, interfaceName);
-                    serviceFile.setBinaryContent(fullClassName.getBytes());
-                } else {
-                    // Check if the implementation is already registered
-                    String content = new String(serviceFile.contentsToByteArray());
-                    // Split by lines and check if any line exactly matches the fullClassName
-                    boolean found = false;
-                    String[] lines = content.split("\\r?\\n");
-                    for (String line : lines) {
-                        if (line.trim().equals(fullClassName)) {
-                            found = true;
-                            break;
+                        if (!found) {
+                            String newContent = content.trim().isEmpty() ? fullClassName : content.trim() + "\n" + fullClassName;
+                            serviceFile.setBinaryContent(newContent.getBytes());
                         }
                     }
-
-                    if (!found) {
-                        // Append the new implementation on a new line
-                        String newContent = content.trim().isEmpty() ? fullClassName : content.trim() + "\n" + fullClassName;
-                        serviceFile.setBinaryContent(newContent.getBytes());
-                    }
+                } catch (IOException e) {
+                    Messages.showErrorDialog(project,
+                        "Error creating META-INF/services file: " + e.getMessage(),
+                        "Error Creating Service Registration");
                 }
-            } catch (IOException e) {
-                Messages.showErrorDialog(project,
-                    "Error creating META-INF/services file: " + e.getMessage(),
-                    "Error Creating Service Registration");
-            }
+            });
         }
 
         /**
-         * Updates module-info.java with provides entry
+         * Finds the src/main/resources directory relative to the source root where the file is being created.
+         * Traverses up from the selected directory to find a "java" directory under "main" under "src",
+         * then returns the sibling "resources" directory (creating it if needed).
          */
-        private void updateModuleInfoFile(Project project, String interfaceName, String fullClassName) {
+        private VirtualFile findResourcesDirectory(PsiDirectory dir) throws IOException {
+            VirtualFile current = dir.getVirtualFile();
+
+            // Walk up to find the "java" directory that is under src/main/
+            while (current != null) {
+                if ("java".equals(current.getName())) {
+                    VirtualFile mainDir = current.getParent();
+                    if (mainDir != null && "main".equals(mainDir.getName())) {
+                        // Found src/main/java — use src/main/resources
+                        VirtualFile resourcesDir = mainDir.findChild("resources");
+                        if (resourcesDir == null) {
+                            resourcesDir = mainDir.createChildDirectory(this, "resources");
+                        }
+                        return resourcesDir;
+                    }
+                }
+                current = current.getParent();
+            }
+
+            // Fallback: use project base dir / src / main / resources
+            VirtualFile projectDir = dir.getProject().getBaseDir();
+            if (projectDir == null) {
+                return null;
+            }
+            VirtualFile srcDir = projectDir.findChild("src");
+            if (srcDir == null) {
+                srcDir = projectDir.createChildDirectory(this, "src");
+            }
+            VirtualFile mainDir = srcDir.findChild("main");
+            if (mainDir == null) {
+                mainDir = srcDir.createChildDirectory(this, "main");
+            }
+            VirtualFile resourcesDir = mainDir.findChild("resources");
+            if (resourcesDir == null) {
+                resourcesDir = mainDir.createChildDirectory(this, "resources");
+            }
+            return resourcesDir;
+        }
+
+        /**
+         * Updates module-info.java with provides entry.
+         * Finds the correct module-info.java in the same source root as where the file was created.
+         */
+        private void updateModuleInfoFile(Project project, String interfaceName, String fullClassName, PsiDirectory dir) {
             try {
-                // Find module-info.java
+                // Find module-info.java files
                 PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
                     project, "module-info.java", GlobalSearchScope.projectScope(project));
 
@@ -651,9 +749,32 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                     return; // No module-info.java found
                 }
 
+                // Find the source root for the directory where the file was created
+                VirtualFile dirFile = dir.getVirtualFile();
+                VirtualFile sourceRoot = findSourceRoot(dirFile);
+
                 for (PsiFile moduleInfoFile : moduleInfoFiles) {
                     if (!(moduleInfoFile instanceof PsiJavaFile)) {
                         continue;
+                    }
+
+                    // Skip test module-info.java files
+                    String path = moduleInfoFile.getVirtualFile().getPath();
+                    if (path.contains("/test/") || path.contains("\\test\\")) {
+                        continue;
+                    }
+
+                    // If we found a source root, only update module-info.java in the same source tree
+                    if (sourceRoot != null) {
+                        VirtualFile moduleInfoRoot = findSourceRoot(moduleInfoFile.getVirtualFile());
+                        if (moduleInfoRoot != null && !sourceRoot.equals(moduleInfoRoot)) {
+                            // Check if they share the same parent (same module in a multi-module project)
+                            VirtualFile dirMainDir = sourceRoot.getParent(); // src/main
+                            VirtualFile moduleMainDir = moduleInfoRoot.getParent();
+                            if (dirMainDir == null || !dirMainDir.equals(moduleMainDir)) {
+                                continue; // Different module
+                            }
+                        }
                     }
 
                     PsiJavaFile javaFile = (PsiJavaFile) moduleInfoFile;
@@ -677,7 +798,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                             String existingImplementations = fileText.substring(providesIndex + providesPrefix.length(), semicolonIndex);
 
                             // Append the new implementation
-                            String newImplementations = existingImplementations + "," + fullClassName;
+                            String newImplementations = existingImplementations.trim() + ",\n\t\t\t" + fullClassName;
 
                             // Replace the existing provides statement with the updated one
                             String newFileText = fileText.substring(0, providesIndex) +
@@ -701,19 +822,242 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
 
                     // Insert the provides statement before the closing brace
                     String newFileText = fileText.substring(0, closingBraceIndex) +
-                        "\t" + providesStatement + ";\n" +
+                        "\tprovides " + interfaceName + " with " + fullClassName + ";\n" +
                         fileText.substring(closingBraceIndex);
 
                     // Update the file
                     WriteCommandAction.runWriteCommandAction(project, () -> {
                         javaFile.getViewProvider().getDocument().setText(newFileText);
                     });
+
+                    return; // Only update the first matching module-info.java
                 }
             } catch (Exception e) {
                 Messages.showErrorDialog(project,
                     "Error updating module-info.java: " + e.getMessage(),
                     "Error Creating Service Registration");
             }
+        }
+
+        /**
+         * Finds the source root (e.g., src/main/java) for a given VirtualFile by walking up.
+         */
+        private VirtualFile findSourceRoot(VirtualFile file) {
+            VirtualFile current = file;
+            while (current != null) {
+                if ("java".equals(current.getName())) {
+                    VirtualFile parent = current.getParent();
+                    if (parent != null && ("main".equals(parent.getName()) || "test".equals(parent.getName()))) {
+                        return current;
+                    }
+                }
+                current = current.getParent();
+            }
+            return null;
+        }
+
+        /**
+         * Ensures required Maven dependencies are present in the pom.xml for the given template.
+         * If a dependency is missing, it is added automatically.
+         * Also adds the corresponding requires statement to module-info.java.
+         */
+        private void ensureRequiredDependency(Project project, String templateName, PsiDirectory dir) {
+            // Map templates to their required dependencies (groupId, artifactId, module-info requires name)
+            java.util.Map<String, String[][]> templateToDependencies = new java.util.HashMap<>();
+
+            // Web / Router: com.guicedee:web -> requires com.guicedee.vertx.web
+            String[][] webDeps = {{"com.guicedee", "web", "com.guicedee.vertx.web"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.ROUTER_CONFIGURATION_TEMPLATE, webDeps);
+
+            // REST: com.guicedee:rest -> requires com.guicedee.rest
+            String[][] restDeps = {{"com.guicedee", "rest", "com.guicedee.rest"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE, restDeps);
+
+            // REST Client: com.guicedee:rest-client -> requires com.guicedee.rest.client
+            String[][] restClientDeps = {{"com.guicedee", "rest-client", "com.guicedee.rest.client"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.REST_CLIENT_TEMPLATE, restClientDeps);
+
+            // Persistence / Database: com.guicedee:persistence -> requires com.guicedee.persistence
+            String[][] persistDeps = {{"com.guicedee", "persistence", "com.guicedee.persistence"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE, persistDeps);
+
+            // RabbitMQ: com.guicedee:rabbitmq -> requires com.guicedee.rabbit
+            String[][] rabbitDeps = {{"com.guicedee", "rabbitmq", "com.guicedee.rabbit"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE, rabbitDeps);
+
+            // WebSockets: com.guicedee:websockets -> requires com.guicedee.vertx.sockets
+            String[][] wsDeps = {{"com.guicedee", "websockets", "com.guicedee.vertx.sockets"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE, wsDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE, wsDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE, wsDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_ON_PUBLISH_TEMPLATE, wsDeps);
+
+            String[][] deps = templateToDependencies.get(templateName);
+            if (deps == null) {
+                return; // No special dependency needed (core inject/vertx already present)
+            }
+
+            // Find the pom.xml for the module where the file was created
+            VirtualFile pomFile = findPomXml(dir);
+            if (pomFile == null) {
+                return;
+            }
+
+            try {
+                String pomContent = new String(pomFile.contentsToByteArray());
+
+                java.util.List<String[]> missingDeps = new java.util.ArrayList<>();
+                for (String[] dep : deps) {
+                    String artifactId = dep[1];
+                    // Check if the dependency already exists in the pom
+                    if (!pomContent.contains("<artifactId>" + artifactId + "</artifactId>")) {
+                        missingDeps.add(dep);
+                    }
+                }
+
+                if (missingDeps.isEmpty()) {
+                    return; // All dependencies present
+                }
+
+                // Build the dependency XML to insert
+                StringBuilder depXml = new StringBuilder();
+                for (String[] dep : missingDeps) {
+                    depXml.append("\n        <dependency>\n");
+                    depXml.append("            <groupId>").append(dep[0]).append("</groupId>\n");
+                    depXml.append("            <artifactId>").append(dep[1]).append("</artifactId>\n");
+                    depXml.append("        </dependency>");
+                }
+
+                // Find the insertion point: before </dependencies>
+                String insertionMarker = "</dependencies>";
+                int insertionIndex = pomContent.lastIndexOf(insertionMarker);
+                if (insertionIndex == -1) {
+                    return; // No dependencies section found
+                }
+
+                String newPomContent = pomContent.substring(0, insertionIndex)
+                        + depXml
+                        + "\n    " + pomContent.substring(insertionIndex);
+
+                // Write the updated pom.xml
+                final String finalContent = newPomContent;
+                WriteCommandAction.runWriteCommandAction(project, () -> {
+                    try {
+                        pomFile.setBinaryContent(finalContent.getBytes());
+                    } catch (IOException e) {
+                        // Silently fail - dependency can be added manually
+                    }
+                });
+
+                // Also add requires statements to module-info.java for each missing dependency
+                for (String[] dep : missingDeps) {
+                    if (dep.length >= 3 && dep[2] != null) {
+                        addRequiresToModuleInfo(project, dep[2], dir);
+                    }
+                }
+            } catch (IOException e) {
+                // Silently fail - dependency can be added manually
+            }
+        }
+
+        /**
+         * Adds a "requires transitive" statement to the module-info.java if not already present.
+         */
+        private void addRequiresToModuleInfo(Project project, String moduleName, PsiDirectory dir) {
+            try {
+                PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
+                    project, "module-info.java", GlobalSearchScope.projectScope(project));
+
+                if (moduleInfoFiles.length == 0) {
+                    return;
+                }
+
+                VirtualFile dirFile = dir.getVirtualFile();
+                VirtualFile sourceRoot = findSourceRoot(dirFile);
+
+                for (PsiFile moduleInfoFile : moduleInfoFiles) {
+                    if (!(moduleInfoFile instanceof PsiJavaFile)) continue;
+
+                    String path = moduleInfoFile.getVirtualFile().getPath();
+                    if (path.contains("/test/") || path.contains("\\test\\")) continue;
+
+                    // Match to same source tree
+                    if (sourceRoot != null) {
+                        VirtualFile moduleInfoRoot = findSourceRoot(moduleInfoFile.getVirtualFile());
+                        if (moduleInfoRoot != null && !sourceRoot.equals(moduleInfoRoot)) {
+                            VirtualFile dirMainDir = sourceRoot.getParent();
+                            VirtualFile moduleMainDir = moduleInfoRoot.getParent();
+                            if (dirMainDir == null || !dirMainDir.equals(moduleMainDir)) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    PsiJavaFile javaFile = (PsiJavaFile) moduleInfoFile;
+                    String fileText = javaFile.getText();
+
+                    // Check if requires already exists
+                    String requiresStatement = "requires " + moduleName;
+                    if (fileText.contains(requiresStatement)) {
+                        return; // Already present
+                    }
+
+                    // Find a good insertion point — after the last "requires" line, or after the module declaration
+                    int lastRequiresIndex = fileText.lastIndexOf("requires ");
+                    int insertIndex;
+                    if (lastRequiresIndex != -1) {
+                        // Find end of that requires statement (next semicolon + newline)
+                        int semiIndex = fileText.indexOf(";", lastRequiresIndex);
+                        if (semiIndex != -1) {
+                            insertIndex = semiIndex + 1;
+                            // Skip past the newline if present
+                            if (insertIndex < fileText.length() && fileText.charAt(insertIndex) == '\n') {
+                                insertIndex++;
+                            } else if (insertIndex + 1 < fileText.length() && fileText.charAt(insertIndex) == '\r' && fileText.charAt(insertIndex + 1) == '\n') {
+                                insertIndex += 2;
+                            }
+                        } else {
+                            insertIndex = -1;
+                        }
+                    } else {
+                        // No requires found, insert after the opening brace
+                        int braceIndex = fileText.indexOf("{");
+                        insertIndex = braceIndex != -1 ? braceIndex + 1 : -1;
+                    }
+
+                    if (insertIndex == -1) return;
+
+                    String newFileText = fileText.substring(0, insertIndex)
+                        + "\trequires transitive " + moduleName + ";\n"
+                        + fileText.substring(insertIndex);
+
+                    WriteCommandAction.runWriteCommandAction(project, () -> {
+                        javaFile.getViewProvider().getDocument().setText(newFileText);
+                    });
+
+                    return; // Only update the first matching module-info.java
+                }
+            } catch (Exception e) {
+                // Silently fail
+            }
+        }
+
+        /**
+         * Finds the pom.xml for the module where the file is being created.
+         * Walks up from the source root to find the nearest pom.xml.
+         */
+        private VirtualFile findPomXml(PsiDirectory dir) {
+            VirtualFile current = dir.getVirtualFile();
+
+            // Walk up to find pom.xml
+            while (current != null) {
+                VirtualFile pom = current.findChild("pom.xml");
+                if (pom != null) {
+                    return pom;
+                }
+                current = current.getParent();
+            }
+            return null;
         }
 
         /**

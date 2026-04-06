@@ -1,20 +1,20 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IGuicePreStartup;
-import import com.google.inject.Singleton;;
-import java.util.List;
+import com.guicedee.client.services.lifecycle.IGuicePreStartup;
+import com.guicedee.client.IGuiceContext;
+import com.guicedee.vertx.spi.VertXPreStartup;
 import io.vertx.core.Future;
-import com.guicedee.vertx.spi.IGuicePreStartup;
+
+import java.util.List;
+
 /**
  * A pre-startup hook that runs before the application starts.
  */
-public class ${NAME} implements IGuicePreStartup {
+public class ${NAME} implements IGuicePreStartup<${NAME}> {
 
     @Override
-    public List<Future<Boolean>> onStartup()
-    {
+    public List<Future<Boolean>> onStartup() {
         return List.of(VertXPreStartup.getVertx().executeBlocking(() -> {
-            ScanResult scanResult = IGuiceContext.instance().getScanResult();
             //Handle logic that goes before injection starts here
             return true;
         }));

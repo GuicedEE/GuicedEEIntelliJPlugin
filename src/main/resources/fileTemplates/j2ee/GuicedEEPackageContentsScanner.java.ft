@@ -1,15 +1,14 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IPackageContentsScanner;
-import import com.google.inject.Singleton;;
+import com.guicedee.client.services.config.IPackageContentsScanner;
+
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A package contents scanner that scans package contents.
+ * A package contents scanner that registers packages for scanning.
  */
-@Singleton
-public class ${NAME} implements IPackageContentsScanner {
+public class ${NAME} implements IPackageContentsScanner<${NAME}> {
 
     @Override
     public Set<String> searchFor() {
@@ -19,11 +18,6 @@ public class ${NAME} implements IPackageContentsScanner {
         return packages;
     }
 
-    @Override
-    public void onMatch(String packageName, Set<String> classes) {
-        // Handle the match here
-    }
-    
     @Override
     public Integer sortOrder() {
         return 100; // Lower numbers run first

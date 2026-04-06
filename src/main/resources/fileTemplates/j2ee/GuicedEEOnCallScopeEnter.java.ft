@@ -1,18 +1,15 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedservlets.servlets.services.IOnCallScopeEnter;
-import import com.google.inject.Singleton;;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.guicedee.client.services.lifecycle.IOnCallScopeEnter;
+import com.google.inject.Scope;
 
 /**
  * A hook that runs when a call scope is entered.
  */
-@Singleton
-public class ${NAME} implements IOnCallScopeEnter {
+public class ${NAME} implements IOnCallScopeEnter<${NAME}> {
 
     @Override
-    public void onScopeEnter(HttpServletRequest request, HttpServletResponse response) {
+    public void onScopeEnter(Scope scope) {
         // Add your logic here
     }
     

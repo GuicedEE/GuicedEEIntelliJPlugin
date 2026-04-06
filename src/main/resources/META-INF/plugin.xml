@@ -5,7 +5,7 @@
 
   <!-- Public plugin name should be written in Title Case.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-  <name>GuicedEE Framework</name>
+  <name>Guiced</name>
 
   <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
   <vendor url="https://guicedee.com">GuicedEE</vendor>
@@ -13,25 +13,80 @@
   <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    <p>IntelliJ IDEA plugin for the GuicedEE framework.</p>
-    <p>Features:</p>
+    <p><b>Guiced 2.0.0-SNAPSHOT</b> is an IntelliJ IDEA plugin based on the JetBrains Guice plugin, providing full Google Guice and GuicedEE framework support for IntelliJ 2026+.</p>
+
+    <h3>GuicedEE Framework Support</h3>
     <ul>
       <li>Create new GuicedEE projects with proper Maven dependencies</li>
-      <li>Generate module-info.java files with required dependencies</li>
+      <li>Generate <code>module-info.java</code> files with required dependencies</li>
       <li>Create service loader implementations</li>
       <li>Create various GuicedEE component templates:
         <ul>
-          <li>Transactional Events</li>
           <li>Guice Modules</li>
-          <li>Startup/Shutdown Hooks</li>
-          <li>REST Services</li>
-          <li>Persistence Modules</li>
-          <li>WebSocket Channels</li>
+          <li>Lifecycle Hooks (Pre-Startup, Post-Startup, Pre-Destroy)</li>
+          <li>REST Services (with optional service class and DB session)</li>
+          <li>Router Configurations</li>
+          <li>Persistence / Database Modules</li>
+          <li>WebSocket Channels, Message Receivers, and Hooks</li>
           <li>RabbitMQ Consumers</li>
+          <li>Vert.x Startup and Configurators</li>
+          <li>Classpath Scanner SPIs</li>
         </ul>
       </li>
-      <li>Create application templates for different use cases</li>
-      <li>Identify Guiced EE Applications in the services window</li>
+      <li>Application templates for different use cases</li>
+      <li>Identify GuicedEE applications in the Services window</li>
+    </ul>
+
+    <h3>GuicedEE guice-core — Enhanced Google Guice</h3>
+    <p><b>Upstream policy:</b> this module tracks Google Guice releases. Changes are limited to modular descriptors, access-level fixes required by the module system, and the <code>com.google.inject.gee</code> SPI package. No behavioural changes are made to core Guice logic.</p>
+    <ul>
+      <li><b>Full JPMS module</b> — ships a real <code>module-info.java</code> (<code>module com.google.guice</code>) with explicit <code>exports</code>, <code>requires</code>, and <code>uses</code> directives</li>
+      <li><b>JDK 25 compatibility</b> — access-level and reflection fixes so Guice runs cleanly on the module path without <code>--add-opens</code> hacks</li>
+      <li><b>Jakarta namespace</b> — uses <code>jakarta.inject</code> and <code>jakarta.annotation</code> (not <code>javax.*</code>)</li>
+      <li><b>SPI-driven extensibility</b> — six <code>ServiceLoader</code>-based SPIs let you register custom annotations for injection points, scopes, bindings, and naming without touching Guice source</li>
+      <li><b>Multibindings built-in</b> — <code>MapBinder</code>, <code>Multibinder</code>, and <code>OptionalBinder</code> are included in the same module (no separate <code>guice-multibindings</code> artifact needed)</li>
+      <li><b>Drop-in replacement</b> — all public Guice APIs remain unchanged; existing <code>@Inject</code>, <code>@Provides</code>, <code>@Singleton</code>, <code>bind()</code> EDSL code works as-is</li>
+    </ul>
+    <p>Install via Maven:</p>
+    <pre>&lt;dependency&gt;
+    &lt;groupId&gt;com.guicedee.modules.services&lt;/groupId&gt;
+    &lt;artifactId&gt;guice&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+
+    <h4>SPI Extension Points (<code>com.google.inject.gee</code>)</h4>
+    <p>Six SPIs loaded via <code>java.util.ServiceLoader</code> — declare <code>uses</code> in the Guice module and <code>provides</code> in your own module to extend Guice's annotation handling at runtime:</p>
+    <table>
+      <tr><th>SPI</th><th>Purpose</th></tr>
+      <tr><td><code>InjectionPointProvider</code></td><td>Register custom annotations that mark injection points (beyond <code>@Inject</code>)</td></tr>
+      <tr><td><code>InjectorAnnotationsProvider</code></td><td>Declare additional annotations that Guice should treat as injector annotations</td></tr>
+      <tr><td><code>BindScopeProvider</code></td><td>Programmatically bind custom scope annotations during module configuration</td></tr>
+      <tr><td><code>ScopeAnnotationProvider</code></td><td>Supply annotation classes to be recognised as scope annotations (like <code>@Singleton</code>)</td></tr>
+      <tr><td><code>BindingAnnotationProvider</code></td><td>Supply annotation classes to be recognised as binding annotations (like <code>@Named</code>)</td></tr>
+      <tr><td><code>NamedAnnotationProvider</code></td><td>Map custom naming annotations to Guice's <code>@Named</code>, enabling alternative naming strategies</td></tr>
+    </table>
+
+    <h4>What Changed from Upstream</h4>
+    <table>
+      <tr><th>Area</th><th>Change</th></tr>
+      <tr><td><b>Module descriptor</b></td><td>Added <code>module-info.java</code> with full <code>exports</code>, <code>requires</code>, <code>uses</code></td></tr>
+      <tr><td><b>Jakarta namespace</b></td><td><code>javax.inject</code> → <code>jakarta.inject</code>, <code>javax.annotation</code> → <code>jakarta.annotation</code></td></tr>
+      <tr><td><b>Access levels</b></td><td>Widened select internal access modifiers so packages work under strict JPMS enforcement</td></tr>
+      <tr><td><b><code>com.google.inject.gee</code></b></td><td>New package with 6 SPI interfaces for pluggable annotation handling</td></tr>
+      <tr><td><b>Multibindings</b></td><td>Bundled into the core module instead of a separate artifact</td></tr>
+      <tr><td><b>Guice internals</b></td><td><code>com.google.inject.internal</code> exported for framework-level consumers</td></tr>
+    </table>
+
+    <h3>Full Google Guice Support</h3>
+    <ul>
+      <li>Templates for creating Guice modules, providers, binding annotations, scope annotations, and method interceptors</li>
+      <li>Coding assistance: inspections, intentions, line markers, and navigation</li>
+      <li>Navigate between injection points and bindings (explicit <code>bind()</code> and JIT bindings)</li>
+      <li>18 Guice-specific inspections for common mistakes</li>
+      <li>Intention actions to move bindings and scopes to class annotations</li>
+      <li>Works with both Google Guice and GuicedEE guice-core dependencies</li>
+      <li><b>SPI-driven injection point recognition</b> — fields annotated with <code>@Endpoint</code> (REST Client)
+          or <code>@ConfigProperty</code> (MicroProfile Config) are treated as injection points,
+          with full implicit usage detection, gutter icons, and click-through navigation</li>
     </ul>
   ]]></description>
 
@@ -41,10 +96,15 @@
   <depends>com.intellij.modules.java</depends>
   <depends>org.jetbrains.idea.maven</depends>
   <depends>org.jetbrains.plugins.gradle</depends>
+  <depends>com.intellij.properties</depends>
+
+  <resource-bundle>messages.GuiceBundle</resource-bundle>
 
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
+    <!-- ========== GuicedEE Extensions ========== -->
+
     <!-- Project Template Builder -->
     <moduleBuilder builderClass="com.guicedee.intellij.wizard.GuicedEEProjectTemplateBuilder"
                   id="guicedee.project"
@@ -58,7 +118,7 @@
     <runConfigurationProducer implementation="com.guicedee.intellij.run.GuicedEERunConfigurationProducer"/>
     <runLineMarkerContributor language="JAVA" implementationClass="com.guicedee.intellij.run.GuicedEERunLineMarkerContributor"/>
 
-    <!-- Intentions -->
+    <!-- GuicedEE Intentions -->
     <intentionAction>
       <className>com.guicedee.intellij.intentions.PackageInfoAnnotationIntention</className>
       <category>GuicedEE</category>
@@ -79,13 +139,126 @@
       <className>com.guicedee.intellij.intentions.AddQueuePublisherFieldIntention</className>
       <category>GuicedEE</category>
     </intentionAction>
+
+    <!-- ========== Guice Extensions ========== -->
+
+    <!-- Guice File Templates -->
+    <fileTemplateGroup implementation="com.guicedee.intellij.guice.actions.GuiceTemplatesFactory"/>
+
+    <!-- Guice Implicit Subclass Provider -->
+    <codeInsight.implicitSubclassProvider implementation="com.guicedee.intellij.guice.inspections.GuiceImplicitSubclassProvider"/>
+
+    <!-- Guice Line Markers -->
+    <codeInsight.lineMarkerProvider language="JAVA" order="last" implementationClass="com.guicedee.intellij.guice.model.GuiceBindingClassAnnotator"/>
+    <codeInsight.lineMarkerProvider language="JAVA" order="last" implementationClass="com.guicedee.intellij.guice.model.GuiceInjectionsClassAnnotator"/>
+
+    <!-- Guice Inspections -->
+    <localInspection language="JAVA" shortName="SessionScopedInjectsRequestScoped" bundle="messages.GuiceBundle"
+                     key="session.scoped.injects.request.scoped.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="com.guicedee.intellij.guice.inspections.SessionScopedInjectsRequestScopedInspection"/>
+    <localInspection language="JAVA" shortName="SingletonInjectsScoped" bundle="messages.GuiceBundle"
+                     key="singleton.injects.scoped.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.SingletonInjectsScopedInspection"/>
+    <localInspection language="JAVA" shortName="InvalidImplementedBy" bundle="messages.GuiceBundle"
+                     key="invalid.implemented.by.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.InvalidImplementedByInspection"/>
+    <localInspection language="JAVA" shortName="InvalidProvidedBy" bundle="messages.GuiceBundle"
+                     key="invalid.provided.by.display.name"
+                     groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.InvalidProvidedByInspection"/>
+    <localInspection language="JAVA" shortName="UninstantiableImplementedByClass" bundle="messages.GuiceBundle"
+                     key="uninstantiable.implemented.by.class.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="com.guicedee.intellij.guice.inspections.UninstantiableImplementedByClassInspection"/>
+    <localInspection language="JAVA" shortName="UninstantiableBinding" bundle="messages.GuiceBundle"
+                     key="uninstantiable.binding.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.UninstantiableBindingInspection"/>
+    <localInspection language="JAVA" shortName="UninstantiableProvidedByClass" bundle="messages.GuiceBundle"
+                     key="uninstantiable.provided.by.class.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="com.guicedee.intellij.guice.inspections.UninstantiableProvidedByClassInspection"/>
+    <localInspection language="JAVA" shortName="PointlessBinding" bundle="messages.GuiceBundle"
+                     key="pointless.binding.display.name"
+                     groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.PointlessBindingInspection"/>
+    <localInspection language="JAVA" shortName="ConflictingAnnotations" bundle="messages.GuiceBundle"
+                     key="conflicting.annotations.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.ConflictingAnnotationsInspection"/>
+    <localInspection language="JAVA" shortName="RedundantToBinding" bundle="messages.GuiceBundle"
+                     key="redundant.to.binding.display.name"
+                     groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.RedundantToBindingInspection"/>
+    <localInspection language="JAVA" shortName="RedundantToProviderBinding" bundle="messages.GuiceBundle"
+                     key="redundant.to.provider.binding.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.RedundantToProviderBindingInspection"/>
+    <localInspection language="JAVA" shortName="RedundantScopeBinding" bundle="messages.GuiceBundle"
+                     key="redundant.scope.binding.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.RedundantScopeBindingInspection"/>
+    <localInspection language="JAVA" shortName="MultipleInjectedConstructorsForClass" bundle="messages.GuiceBundle"
+                     key="multiple.injected.constructors.for.class.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="com.guicedee.intellij.guice.inspections.MultipleInjectedConstructorsForClassInspection"/>
+    <localInspection language="JAVA" shortName="MultipleBindingAnnotations" bundle="messages.GuiceBundle"
+                     key="multiple.binding.annotations.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.MultipleBindingAnnotationsInspection"/>
+    <localInspection language="JAVA" shortName="InvalidRequestParameters" bundle="messages.GuiceBundle"
+                     key="invalid.request.parameters.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.InvalidRequestParametersInspection"/>
+    <localInspection language="JAVA" shortName="BindingAnnotationWithoutInject" bundle="messages.GuiceBundle"
+                     key="binding.annotation.without.inject.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true"
+                     level="WARNING" implementationClass="com.guicedee.intellij.guice.inspections.BindingAnnotationWithoutInjectInspection"/>
+    <localInspection language="JAVA" shortName="InterceptionAnnotationWithoutRuntimeRetention" bundle="messages.GuiceBundle"
+                     key="interception.annotation.without.runtime.retention.display.name" groupKey="group.guice.inspections.name"
+                     enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.InterceptionAnnotationWithoutRuntimeRetentionInspection"/>
+    <localInspection language="JAVA" shortName="UnnecessaryStaticInjection" bundle="messages.GuiceBundle"
+                     key="unnecessary.static.injection.display.name" groupKey="group.guice.inspections.name" enabledByDefault="true" level="WARNING"
+                     implementationClass="com.guicedee.intellij.guice.inspections.UnnecessaryStaticInjectionInspection"/>
+
+    <!-- Guice Intention Actions -->
+    <intentionAction>
+      <language>JAVA</language>
+      <bundleName>messages.GuiceBundle</bundleName>
+      <categoryKey>guice.intentions</categoryKey>
+      <className>com.guicedee.intellij.guice.intentions.ToggleInjectionRequiredIntention</className>
+    </intentionAction>
+    <intentionAction>
+      <language>JAVA</language>
+      <bundleName>messages.GuiceBundle</bundleName>
+      <categoryKey>guice.intentions</categoryKey>
+      <className>com.guicedee.intellij.guice.intentions.MoveBindingScopeToClassIntention</className>
+    </intentionAction>
+    <intentionAction>
+      <language>JAVA</language>
+      <bundleName>messages.GuiceBundle</bundleName>
+      <categoryKey>guice.intentions</categoryKey>
+      <className>com.guicedee.intellij.guice.intentions.MoveBindingToClassIntention</className>
+    </intentionAction>
+    <intentionAction>
+      <language>JAVA</language>
+      <bundleName>messages.GuiceBundle</bundleName>
+      <categoryKey>guice.intentions</categoryKey>
+      <className>com.guicedee.intellij.guice.intentions.MoveProviderBindingToClassIntention</className>
+    </intentionAction>
+
+    <!-- Guice Implicit Usage Provider -->
+    <implicitUsageProvider implementation="com.guicedee.intellij.guice.GuiceImplicitUsageProvider"/>
   </extensions>
 
   <actions>
-    <!-- New File Action Group -->
-    <group id="GuicedEE.NewFileGroup" class="com.guicedee.intellij.actions.GuicedEENewFileActionGroup" 
-           popup="true" text="GuicedEE" description="Create new GuicedEE files">
+    <!-- GuicedEE New File Action Group -->
+    <group id="GuicedEE.NewFileGroup" class="com.guicedee.intellij.actions.GuicedEENewFileActionGroup"
+           popup="true" text="GuicedEE" description="Create new GuicedEE files"
+           icon="com.guicedee.intellij.GuicedIcons.Logo">
       <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewFile"/>
+    </group>
+
+    <!-- Guice Action Group -->
+    <group id="GuiceActionGroup" class="com.guicedee.intellij.guice.actions.GuiceActionGroup" popup="true"
+           icon="com.guicedee.intellij.guice.GuiceIcons.GoogleSmall">
+      <action id="NewGuiceModule" class="com.guicedee.intellij.guice.actions.NewGuiceModuleAction"/>
+      <action id="NewGuiceProvider" class="com.guicedee.intellij.guice.actions.NewGuiceProviderAction"/>
+      <action id="NewGuiceBindingAnnotation" class="com.guicedee.intellij.guice.actions.NewGuiceBindingAnnotationAction"/>
+      <action id="NewGuiceScopeAnnotation" class="com.guicedee.intellij.guice.actions.NewGuiceScopeAnnotationAction"/>
+      <action id="NewGuiceMethodInterceptor" class="com.guicedee.intellij.guice.actions.NewGuiceMethodInterceptorAction"/>
+      <add-to-group group-id="NewGroup" anchor="last"/>
     </group>
   </actions>
 </idea-plugin>

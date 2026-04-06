@@ -31,7 +31,7 @@ public class GuicedEERunLineMarkerContributor extends RunLineMarkerContributor {
                     @SuppressWarnings("deprecation")
                     Info info = new Info(
                         AllIcons.RunConfigurations.Application, 
-                        psiElement -> "Run Guiced EE Application"
+                        psiElement -> "Run Gee Application"
                     );
                     return info;
                 }

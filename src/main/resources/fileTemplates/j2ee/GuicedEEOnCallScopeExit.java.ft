@@ -1,18 +1,14 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedservlets.servlets.services.IOnCallScopeExit;
-import import com.google.inject.Singleton;;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.guicedee.client.services.lifecycle.IOnCallScopeExit;
 
 /**
  * A hook that runs when a call scope is exited.
  */
-@Singleton
-public class ${NAME} implements IOnCallScopeExit {
+public class ${NAME} implements IOnCallScopeExit<${NAME}> {
 
     @Override
-    public void onScopeExit(HttpServletRequest request, HttpServletResponse response) {
+    public void onScopeExit() {
         // Add your logic here
     }
     

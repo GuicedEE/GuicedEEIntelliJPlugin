@@ -1,16 +1,15 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.Log4JConfigurator;
-import import com.google.inject.Singleton;;
+import com.guicedee.client.services.Log4JConfigurator;
+import org.apache.logging.log4j.core.config.Configuration;
 
 /**
  * A Log4J configurator that configures Log4J before the application starts.
  */
-@Singleton
-public class ${NAME} implements Log4JConfigurator {
+public class ${NAME} implements Log4JConfigurator<${NAME}> {
 
     @Override
-    public void configure() {
+    public void configure(Configuration config) {
         // Add your Log4J configuration logic here
     }
     

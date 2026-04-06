@@ -2,13 +2,14 @@ package ${PACKAGE_NAME};
 
 import com.guicedee.vertx.web.spi.VertxRouterConfigurator;
 import io.vertx.ext.web.Router;
+
 /**
  * A Vertx Router configurator that configures routes for the web server.
  */
-public class ${NAME} implements VertxRouterConfigurator {
-    
+public class ${NAME} implements VertxRouterConfigurator<${NAME}> {
+
     @Override
-    public Router builder(Router router){
+    public Router builder(Router router) {
         // Configure your routes here
         // Example:
         // router.route("/api/example").handler(ctx -> {

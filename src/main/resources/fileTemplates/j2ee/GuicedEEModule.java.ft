@@ -1,7 +1,7 @@
 package ${PACKAGE_NAME};
 
 import com.google.inject.AbstractModule;
-import com.guicedee.guicedinjection.interfaces.IGuiceModule;
+import com.guicedee.client.services.lifecycle.IGuiceModule;
 
 /**
  * A Guice module for configuring dependency injection.

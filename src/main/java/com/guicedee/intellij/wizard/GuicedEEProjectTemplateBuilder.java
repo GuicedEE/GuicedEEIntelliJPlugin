@@ -8,10 +8,10 @@ import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.module.StdModuleTypes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModifiableRootModel;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.guicedee.intellij.GuicedIcons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
@@ -27,7 +27,7 @@ import java.util.Collections;
 
 public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 {
-    private static final Icon GUICEDEE_ICON = IconLoader.getIcon("/META-INF/logo_front.png", GuicedEEProjectTemplateBuilder.class);
+    private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
     private final GuicedEEProjectWizardData myWizardData;
 
     public GuicedEEProjectTemplateBuilder()
@@ -378,11 +378,11 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         StringBuilder dependencies = new StringBuilder();
         dependencies.append("        <dependency>\n" +
                 "            <groupId>com.guicedee</groupId>\n" +
-                "            <artifactId>guice-injection</artifactId>\n" +
+                "            <artifactId>inject</artifactId>\n" +
                 "        </dependency>\n");
         dependencies.append("        <dependency>\n");
         dependencies.append("            <groupId>com.guicedee</groupId>\n");
-        dependencies.append("            <artifactId>guiced-vertx</artifactId>\n");
+        dependencies.append("            <artifactId>vertx</artifactId>\n");
         dependencies.append("        </dependency>\n");
         dependencies.append("        <dependency>\n");
         dependencies.append("            <groupId>org.projectlombok</groupId>\n");
@@ -408,7 +408,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         {
             dependencies.append("        <dependency>\n");
             dependencies.append("            <groupId>com.guicedee</groupId>\n");
-            dependencies.append("            <artifactId>guiced-vertx-web</artifactId>\n");
+            dependencies.append("            <artifactId>web</artifactId>\n");
             dependencies.append("        </dependency>\n");
 
             // Add REST dependency if web application is selected
@@ -417,7 +417,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>guiced-rest</artifactId>\n");
+                dependencies.append("            <artifactId>rest</artifactId>\n");
                 dependencies.append("        </dependency>\n");
 
                 // Set the REST option for the module-info.java file
@@ -430,16 +430,16 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         {
             // Check if JDBC is selected
             if (tempModule.isDatabaseJDBC()) {
-                // For JDBC, use a different dependency
+                // For JDBC, use guiced-persistence
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee.persistence</groupId>\n");
                 dependencies.append("            <artifactId>guiced-persistence</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             } else {
-                // For other database types, use the vertxpersistence module
+                // For reactive database types
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>guiced-vertx-persistence</artifactId>\n");
+                dependencies.append("            <artifactId>persistence</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
         }
@@ -451,7 +451,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>guiced-rabbit</artifactId>\n");
+                dependencies.append("            <artifactId>rabbitmq</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
         }
@@ -467,7 +467,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         if (tempModule.isTestsTestContainers())
         {
             dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
             dependencies.append("            <artifactId>testcontainers</artifactId>\n");
             dependencies.append("        </dependency>\n");
         }
@@ -481,16 +481,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             dependencies.append("            <scope>test</scope>\n");
             dependencies.append("        </dependency>\n");
 
-            // Add Vertx Mutiny and Mutiny dependencies
+            // Add Vertx Mutiny dependency (version managed by BOM)
             dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
             dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
-            dependencies.append("        </dependency>\n");
-
-            dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>io.smallrye.reactive</groupId>\n");
-            dependencies.append("            <artifactId>mutiny</artifactId>\n");
-            dependencies.append("            <version>2.8.0</version>\n");
             dependencies.append("        </dependency>\n");
         }
 
@@ -569,7 +563,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     private void createModuleInfo(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         StringBuilder requires = new StringBuilder();
-        requires.append("requires transitive com.guicedee.guicedinjection;\n");
+        requires.append("requires transitive com.guicedee.client;\n");
 
         // Web Reactive requirements
         if (moduleData.isWebReactive())
@@ -593,10 +587,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         {
             if (moduleData.isDatabaseJDBC()) {
                 // For JDBC, use a different requires clause
-                requires.append("\trequires transitive com.guicedee.guicedpersistence;\n");
+                requires.append("\trequires transitive com.guicedee.persistence;\n");
             } else {
-                // For other database types, use the vertxpersistence module
-                requires.append("\trequires transitive com.guicedee.vertxpersistence;\n");
+                // For other database types, use the persistence module
+                requires.append("\trequires transitive com.guicedee.persistence;\n");
             }
         }
 
@@ -695,14 +689,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             // Use DB type in class name - same as in createDatabaseModule
             String dbClassName = dbType + "DBModule";
             String dbFullClassName = myWizardData.getGroupId() + ".db." + dbClassName;
-            provides.append("\tprovides com.guicedee.guicedinjection.interfaces.IGuiceModule with " + dbFullClassName + ";\n");
+            provides.append("\tprovides com.guicedee.client.services.lifecycle.IGuiceModule with " + dbFullClassName + ";\n");
         }
 
         // Add provides statement for IWebSocketMessageReceiver if WebSockets is selected
         if (moduleData.isWebReactiveWebSockets()) {
             String receiverClassName = "WebSocketActionReceiver"; // Same as in createWebSocketClasses
             String receiverFullClassName = myWizardData.getGroupId() + "." + receiverClassName;
-            provides.append("\tprovides com.guicedee.guicedservlets.websockets.services.IWebSocketMessageReceiver with " + receiverFullClassName + ";\n");
+            provides.append("\tprovides com.guicedee.client.services.websocket.IWebSocketMessageReceiver with " + receiverFullClassName + ";\n");
         }
 
         String moduleInfo = getModuleInfoTemplate()
@@ -745,7 +739,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         // Add database requirement if database is selected
         if (moduleData.isDatabase())
         {
-            requires.append("\trequires com.guicedee.vertxpersistence;\n");
+            requires.append("\trequires com.guicedee.persistence;\n");
         }
 
         // Generate a module name based on the artifact ID with .test suffix
@@ -1133,7 +1127,6 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "        return service.deleteData(id);\n" +
             "    }\n" +
             "}";
-
         // Write the file
         FileUtil.writeToFile(new File(packageDir, "RestResource.java"), restResourceTemplate);
 
@@ -1265,7 +1258,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         FileUtil.createDirectory(metaInfServicesDir);
 
         // Create the service loader file
-        File serviceFile = new File(metaInfServicesDir, "com.guicedee.guicedservlets.websockets.services.IWebSocketMessageReceiver");
+        File serviceFile = new File(metaInfServicesDir, "com.guicedee.client.services.websocket.IWebSocketMessageReceiver");
 
         // Write the full class name of the implementation to the service loader file
         String fullClassName = myWizardData.getGroupId() + "." + receiverClassName;
@@ -1357,7 +1350,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         // Determine if we need to add the EntityManager annotation with a specific value
         String entityManagerAnnotation = "";
         if (databaseModuleCount > 1) {
-            entityManagerAnnotation = "@com.guicedee.vertxpersistence.annotations.EntityManager(\"" + persistenceUnit + "_1\")\n";
+            entityManagerAnnotation = "@com.guicedee.persistence.annotations.EntityManager(\"" + persistenceUnit + "_1\")\n";
         }
 
         String dbModule = getDatabaseModuleTemplate(moduleData)
@@ -1377,7 +1370,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         FileUtil.createDirectory(metaInfServicesDir);
 
         // Create the service loader file for IGuiceModule
-        File serviceFile = new File(metaInfServicesDir, "com.guicedee.guicedinjection.interfaces.IGuiceModule");
+        File serviceFile = new File(metaInfServicesDir, "com.guicedee.client.services.lifecycle.IGuiceModule");
 
         // Write the full class name of the database module class to the service loader file
         String fullClassName = myWizardData.getGroupId() + ".db." + className;
@@ -1515,7 +1508,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         FileUtil.createDirectory(metaInfServicesDir);
 
         // Create the service loader file
-        File serviceFile = new File(metaInfServicesDir, "com.guicedee.guicedinjection.interfaces.IGuiceScanModuleInclusions");
+        File serviceFile = new File(metaInfServicesDir, "com.guicedee.client.services.config.IGuiceScanModuleInclusions");
 
         // Write the full class name of the implementation to the service loader file
         String fullClassName = myWizardData.getGroupId() + ".impl." + className;
@@ -1667,35 +1660,35 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
         if (moduleData.isDatabasePostgreSQL()) {
             connectionInfoType = "PostgresConnectionBaseInfo";
-            importStatement = "import com.guicedee.vertxpersistence.implementations.postgres.PostgresConnectionBaseInfo;\n";
+            importStatement = "import com.guicedee.persistence.implementations.postgres.PostgresConnectionBaseInfo;\n";
         } else if (moduleData.isDatabaseMySQL()) {
             connectionInfoType = "MySQLConnectionBaseInfo";
-            importStatement = "import com.guicedee.vertxpersistence.implementations.mysql.MySQLConnectionBaseInfo;\n";
+            importStatement = "import com.guicedee.persistence.implementations.mysql.MySQLConnectionBaseInfo;\n";
         } else if (moduleData.isDatabaseOracle()) {
             connectionInfoType = "OracleConnectionBaseInfo";
-            importStatement = "import com.guicedee.vertxpersistence.implementations.oracle.OracleConnectionBaseInfo;\n";
+            importStatement = "import com.guicedee.persistence.implementations.oracle.OracleConnectionBaseInfo;\n";
         } else if (moduleData.isDatabaseDB2()) {
             connectionInfoType = "DB2ConnectionBaseInfo";
-            importStatement = "import com.guicedee.vertxpersistence.implementations.db2.DB2ConnectionBaseInfo;\n";
+            importStatement = "import com.guicedee.persistence.implementations.db2.DB2ConnectionBaseInfo;\n";
         } else if (moduleData.isDatabaseSqlServer()) {
             connectionInfoType = "SqlServerConnectionBaseInfo";
-            importStatement = "import com.guicedee.vertxpersistence.implementations.sqlserver.SqlServerConnectionBaseInfo;\n";
+            importStatement = "import com.guicedee.persistence.implementations.sqlserver.SqlServerConnectionBaseInfo;\n";
         } else if (moduleData.isDatabaseCassandra()) {
             connectionInfoType = "CassandraConnectionBaseInfo";
-            importStatement = "import com.guicedee.vertxpersistence.implementations.cassandra.CassandraConnectionBaseInfo;\n";
+            importStatement = "import com.guicedee.persistence.implementations.cassandra.CassandraConnectionBaseInfo;\n";
         } else if (moduleData.isDatabaseMongoDB()) {
             connectionInfoType = "MongoDBConnectionBaseInfo";
-            importStatement = "import com.guicedee.vertxpersistence.implementations.mongodb.MongoDBConnectionBaseInfo;\n";
+            importStatement = "import com.guicedee.persistence.implementations.mongodb.MongoDBConnectionBaseInfo;\n";
         }
 
         return "package ${PACKAGE};\n" +
                 "\n" +
-                "import com.guicedee.vertxpersistence.ConnectionBaseInfo;\n" +
-                "import com.guicedee.vertxpersistence.DatabaseModule;\n" +
-                "import com.guicedee.guicedinjection.interfaces.IGuiceModule;\n" +
-                "import com.guicedee.vertxpersistence.annotations.EntityManager;\n" +
+                "import com.guicedee.persistence.ConnectionBaseInfo;\n" +
+                "import com.guicedee.persistence.DatabaseModule;\n" +
+                "import com.guicedee.client.services.lifecycle.IGuiceModule;\n" +
+                "import com.guicedee.persistence.annotations.EntityManager;\n" +
                 importStatement +
-                "import org.hibernate.jpa.boot.internal.ParsedPersistenceXmlDescriptor;\n" +
+                "import org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor;\n" +
                 "\n" +
                 "import java.util.Properties;\n" +
                 "\n" +
@@ -1710,7 +1703,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    }\n" +
                 "\n" +
                 "    @Override\n" +
-                "    protected ConnectionBaseInfo getConnectionBaseInfo(ParsedPersistenceXmlDescriptor unit, Properties filteredProperties) {\n" +
+                "    protected ConnectionBaseInfo getConnectionBaseInfo(PersistenceUnitDescriptor unit, Properties filteredProperties) {\n" +
                 "        " + connectionInfoType + " connectionInfo = new " + connectionInfoType + "();\n" +
                 "        connectionInfo.setUrl(getSystemPropertyOrEnvironment(\"DB_URL\",\"jdbc:postgresql://localhost:5432/postgres\"));\n" +
                 "        //or\n" +
@@ -1738,11 +1731,11 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     {
         return "package ${PACKAGE};\n" +
                 "\n" +
-                "import com.guicedee.guicedpersistence.db.ConnectionBaseInfo;\n" +
-                "import com.guicedee.guicedpersistence.db.DatabaseModule;\n" +
-                "import com.guicedee.guicedinjection.interfaces.IGuiceModule;\n" +
-                "import com.guicedee.vertxpersistence.annotations.EntityManager;\n" +
-                "import org.hibernate.jpa.boot.internal.ParsedPersistenceXmlDescriptor;\n" +
+                "import com.guicedee.persistence.ConnectionBaseInfo;\n" +
+                "import com.guicedee.persistence.DatabaseModule;\n" +
+                "import com.guicedee.client.services.lifecycle.IGuiceModule;\n" +
+                "import com.guicedee.persistence.annotations.EntityManager;\n" +
+                "import org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor;\n" +
                 "\n" +
                 "import javax.sql.DataSource;\n" +
                 "import java.util.Properties;\n" +
@@ -1756,7 +1749,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    }\n" +
                 "\n" +
                 "    @Override\n" +
-                "    protected ConnectionBaseInfo getConnectionBaseInfo(ParsedPersistenceXmlDescriptor unit, Properties filteredProperties) {\n" +
+                "    protected ConnectionBaseInfo getConnectionBaseInfo(PersistenceUnitDescriptor unit, Properties filteredProperties) {\n" +
                 "        return new ConnectionBaseInfo() {\n" +
                 "            @Override\n" +
                 "            public DataSource toPooledDatasource() {\n" +
@@ -1860,11 +1853,11 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         StringBuilder dependencies = new StringBuilder();
         dependencies.append("        <dependency>\n" +
                 "            <groupId>com.guicedee</groupId>\n" +
-                "            <artifactId>guice-injection</artifactId>\n" +
+                "            <artifactId>inject</artifactId>\n" +
                 "        </dependency>\n");
         dependencies.append("        <dependency>\n");
         dependencies.append("            <groupId>com.guicedee</groupId>\n");
-        dependencies.append("            <artifactId>guiced-vertx</artifactId>\n");
+        dependencies.append("            <artifactId>vertx</artifactId>\n");
         dependencies.append("        </dependency>\n");
         dependencies.append("        <dependency>\n");
         dependencies.append("            <groupId>org.projectlombok</groupId>\n");
@@ -1876,7 +1869,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         {
             dependencies.append("        <dependency>\n");
             dependencies.append("            <groupId>com.guicedee</groupId>\n");
-            dependencies.append("            <artifactId>guiced-vertx-web</artifactId>\n");
+            dependencies.append("            <artifactId>web</artifactId>\n");
             dependencies.append("        </dependency>\n");
 
             // Web Reactive sub-options
@@ -1884,7 +1877,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>guiced-rest</artifactId>\n");
+                dependencies.append("            <artifactId>rest</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 
@@ -1907,10 +1900,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>guiced-persistence</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             } else {
-                // For other database types, use the vertxpersistence module
+                // For other database types, use the persistence module
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>guiced-vertx-persistence</artifactId>\n");
+                dependencies.append("            <artifactId>persistence</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 
@@ -1979,7 +1972,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>guiced-rabbit</artifactId>\n");
+                dependencies.append("            <artifactId>rabbitmq</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 
@@ -2083,7 +2076,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         if (moduleData.isTestsTestContainers())
         {
             dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
             dependencies.append("            <artifactId>testcontainers</artifactId>\n");
             dependencies.append("        </dependency>\n");
         }
@@ -2097,16 +2090,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             dependencies.append("            <scope>test</scope>\n");
             dependencies.append("        </dependency>\n");
 
-            // Add Vertx Mutiny and Mutiny dependencies
+            // Add Vertx Mutiny dependency (version managed by BOM)
             dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+            dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
             dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
-            dependencies.append("        </dependency>\n");
-
-            dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>io.smallrye.reactive</groupId>\n");
-            dependencies.append("            <artifactId>mutiny</artifactId>\n");
-            dependencies.append("            <version>2.8.0</version>\n");
             dependencies.append("        </dependency>\n");
         }
 

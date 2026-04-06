@@ -1,29 +1,25 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedinjection.interfaces.IFileContentsPatternScanner;
-import import com.google.inject.Singleton;;
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import com.guicedee.client.services.config.IFileContentsPatternScanner;
+import io.github.classgraph.ResourceList;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
  * A file contents pattern scanner that scans file contents using regex patterns.
  */
-@Singleton
-public class ${NAME} implements IFileContentsPatternScanner {
+public class ${NAME} implements IFileContentsPatternScanner<${NAME}> {
 
     @Override
-    public Set<Pattern> searchFor() {
-        Set<Pattern> patterns = new HashSet<>();
-        // Add regex patterns to search for in files
-        patterns.add(Pattern.compile("example.*"));
-        return patterns;
-    }
-
-    @Override
-    public void onMatch(File file, String contents, Pattern pattern) {
-        // Handle the match here
+    public Map<Pattern, ResourceList.ByteArrayConsumer> onMatch() {
+        Map<Pattern, ResourceList.ByteArrayConsumer> matches = new HashMap<>();
+        // Add regex patterns and their handlers
+        matches.put(Pattern.compile("example.*"), (resource, bytes) -> {
+            // Handle the matched file contents here
+        });
+        return matches;
     }
     
     @Override

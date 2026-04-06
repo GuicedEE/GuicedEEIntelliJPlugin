@@ -1,10 +1,10 @@
 plugins {
   id("java")
-  id("org.jetbrains.intellij.platform") version "2.3.0"
+  id("org.jetbrains.intellij.platform") version "2.5.0"
 }
 
 group = "com.guicedee.intellij"
-version = "1.0-SNAPSHOT"
+version = "2.0.0-SNAPSHOT"
 
 repositories {
   mavenCentral()
@@ -35,7 +35,17 @@ intellijPlatform {
     }
 
     changeNotes = """
-      Initial version
+      <h3>2.0.0-SNAPSHOT</h3>
+      <ul>
+        <li>Merged JetBrains Guice plugin with GuicedEE framework support</li>
+        <li>Full JIT (just-in-time) binding support — click-through navigation for concrete class injection</li>
+        <li>Bidirectional gutter navigation between injection points and bound classes</li>
+        <li>@Inject fields correctly marked as implicitly used, read, and written</li>
+        <li>REST Service creation with optional service class and DB session support</li>
+        <li>REST Client template with @Endpoint support</li>
+        <li>GuicedEE guice-core documentation and SPI extension points</li>
+        <li>Support for @ImplementedBy and @ProvidedBy navigation</li>
+      </ul>
     """.trimIndent()
   }
 }
@@ -47,3 +57,4 @@ tasks {
     targetCompatibility = "21"
   }
 }
+

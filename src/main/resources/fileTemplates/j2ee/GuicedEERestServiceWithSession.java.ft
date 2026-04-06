@@ -1,0 +1,71 @@
+package ${PACKAGE_NAME};
+
+import ${PACKAGE_NAME}.services.${NAME}Service;
+import com.google.inject.Inject;
+import io.smallrye.mutiny.Uni;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.hibernate.reactive.mutiny.Mutiny;
+
+/**
+ * A REST service endpoint with session-per-transaction.
+ * <p>
+ * The DB session is created at this resource level so that multiple service
+ * calls can participate in the <b>same transaction</b>.
+ */
+@Path("/${PATH}")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class ${NAME} {
+    @Inject
+    private ${NAME}Service service;
+
+    @Inject
+    private Mutiny.SessionFactory sessionFactory;
+
+    @GET
+    public Uni<Response> get() {
+        return sessionFactory.withTransaction(session ->
+                // Call one or more service methods inside the same transaction
+                service.getSampleData(session)
+                        .map(data -> Response.ok(data).build())
+        );
+    }
+
+    @GET
+    @Path("/{id}")
+    public Uni<Response> getById(@PathParam("id") String id) {
+        return sessionFactory.withTransaction(session ->
+                service.getDataById(session, id)
+                        .map(data -> Response.ok(data).build())
+        );
+    }
+
+    @POST
+    public Uni<Response> create(Object data) {
+        return sessionFactory.withTransaction(session ->
+                service.createData(session, data)
+                        .map(result -> Response.status(Response.Status.CREATED).entity(result).build())
+        );
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Uni<Response> update(@PathParam("id") String id, Object data) {
+        return sessionFactory.withTransaction(session ->
+                service.updateData(session, id, data)
+                        .map(result -> Response.ok(result).build())
+        );
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Uni<Response> delete(@PathParam("id") String id) {
+        return sessionFactory.withTransaction(session ->
+                service.deleteData(session, id)
+                        .map(result -> Response.ok(result).build())
+        );
+    }
+}
+

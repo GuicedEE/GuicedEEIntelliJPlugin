@@ -1,23 +1,21 @@
 package ${PACKAGE_NAME};
 
-import com.guicedee.guicedservlets.websockets.options.WebSocketMessageReceiver;
-import com.guicedee.guicedservlets.websockets.services.IWebSocketMessageReceiver;
-import lombok.extern.slf4j.Slf4j;
+import com.guicedee.client.services.websocket.WebSocketMessageReceiver;
+import com.guicedee.client.services.websocket.IWebSocketMessageReceiver;
+import io.smallrye.mutiny.Uni;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Slf4j
-public class ${NAME} implements IWebSocketMessageReceiver
-{
+public class ${NAME} implements IWebSocketMessageReceiver<Void, ${NAME}> {
+
     @Override
-    public io.smallrye.mutiny.Uni<Void> receiveMessage(com.guicedee.guicedservlets.websockets.options.WebSocketMessageReceiver<?> message) throws SecurityException {
-        return io.smallrye.mutiny.Uni.createFrom().voidItem();
+    public Uni<Void> receiveMessage(WebSocketMessageReceiver<?> message) throws SecurityException {
+        return Uni.createFrom().voidItem();
     }
 
     @Override
-    public Set<String> messageNames()
-    {
+    public Set<String> messageNames() {
         Set<String> messageNames = new HashSet<>();
         messageNames.add("ActionType");
         return messageNames;
