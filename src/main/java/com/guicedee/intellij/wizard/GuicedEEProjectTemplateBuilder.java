@@ -357,6 +357,12 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 createRabbitMQConsumer(moduleSrcDir, moduleData);
             }
 
+            // Create Kafka consumer if needed
+            if (moduleData.isMessagingKafka())
+            {
+                createKafkaConsumer(moduleSrcDir, moduleData);
+            }
+
             // Don't create scan module inclusions file during app creation
             // createScanModuleInclusions(moduleSrcDir, moduleData);
         }
@@ -602,9 +608,13 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 requires.append("\trequires transitive com.guicedee.rabbit;\n");
             }
 
-            if (moduleData.isMessagingKafka() || moduleData.isMessagingAMQP() || moduleData.isMessagingMQTT())
+            if (moduleData.isMessagingKafka())
             {
-                requires.append("\trequires io.vertx.kafka.client;\n");
+                requires.append("\trequires transitive com.guicedee.kafka;\n");
+            }
+
+            if (moduleData.isMessagingAMQP() || moduleData.isMessagingMQTT())
+            {
                 requires.append("\trequires io.vertx.amqp.client;\n");
                 requires.append("\trequires io.vertx.mqtt;\n");
             }
@@ -1463,6 +1473,75 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         createRabbitMQConsumer(srcDir, defaultModule);
     }
 
+    private void createKafkaConsumer(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
+    {
+        String packagePath = myWizardData.getGroupId().replace('.', '/');
+
+        // Create package-info.java in the base package with KafkaConnectionOptions
+        File basePackageDir = new File(srcDir, packagePath);
+        FileUtil.createDirectory(basePackageDir);
+
+        String packageInfo = getKafkaPackageInfoTemplate()
+                .replace("${PACKAGE}", myWizardData.getGroupId());
+
+        FileUtil.writeToFile(new File(basePackageDir, "package-info.java"), packageInfo);
+
+        // Create Kafka consumer in the kafka subpackage
+        File packageDir = new File(srcDir, packagePath + "/kafka");
+        FileUtil.createDirectory(packageDir);
+
+        String consumer = getKafkaConsumerTemplate()
+                .replace("${PACKAGE}", myWizardData.getGroupId() + ".kafka");
+
+        FileUtil.writeToFile(new File(packageDir, "ExampleTopicConsumer.java"), consumer);
+    }
+
+    private String getKafkaPackageInfoTemplate()
+    {
+        return "/**\n" +
+                " * Kafka messaging package.\n" +
+                " * Connection options are declared at the package level.\n" +
+                " */\n" +
+                "@KafkaConnectionOptions(\n" +
+                "        value = \"default\",\n" +
+                "        bootstrapServers = \"localhost:9092\",\n" +
+                "        groupId = \"my-group\"\n" +
+                ")\n" +
+                "package ${PACKAGE};\n" +
+                "\n" +
+                "import com.guicedee.kafka.KafkaConnectionOptions;\n";
+    }
+
+    private String getKafkaConsumerTemplate()
+    {
+        return "package ${PACKAGE};\n" +
+                "\n" +
+                "import com.guicedee.kafka.KafkaTopicConsumer;\n" +
+                "import com.guicedee.kafka.KafkaTopicDefinition;\n" +
+                "import com.guicedee.kafka.KafkaTopicOptions;\n" +
+                "import io.vertx.kafka.client.consumer.KafkaConsumerRecord;\n" +
+                "import com.google.inject.Singleton;\n" +
+                "\n" +
+                "/**\n" +
+                " * An example Kafka consumer that processes messages from a topic.\n" +
+                " */\n" +
+                "@KafkaTopicDefinition(\n" +
+                "        value = \"example-topic\",\n" +
+                "        options = @KafkaTopicOptions(worker = true)\n" +
+                ")\n" +
+                "@Singleton\n" +
+                "public class ExampleTopicConsumer implements KafkaTopicConsumer<String, String> {\n" +
+                "\n" +
+                "    @Override\n" +
+                "    public void consume(KafkaConsumerRecord<String, String> record) {\n" +
+                "        System.out.println(\"Consumed - key=\" + record.key() + \", value=\" + record.value()\n" +
+                "                + \", partition=\" + record.partition() + \", offset=\" + record.offset());\n" +
+                "\n" +
+                "        // Implement your message processing logic here\n" +
+                "    }\n" +
+                "}\n";
+    }
+
     private void createScanModuleInclusions(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         String packagePath = myWizardData.getGroupId().replace('.', '/');
@@ -1979,8 +2058,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isMessagingKafka())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>io.vertx</groupId>\n");
-                dependencies.append("            <artifactId>vertx-kafka-client</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>kafka</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 

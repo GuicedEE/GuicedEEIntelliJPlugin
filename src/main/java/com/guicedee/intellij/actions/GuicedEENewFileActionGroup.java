@@ -48,6 +48,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 GuicedEEFileTemplateProvider.GUICE_MODULE_TEMPLATE));
         add(new CreateGuicedEEFileAction("RabbitMQ Consumer", "Create a new RabbitMQ Consumer",
                 GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE));
+        add(new CreateGuicedEEFileAction("Kafka Consumer", "Create a new Kafka Consumer",
+                GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE));
 
         // Add Web subgroup
         DefaultActionGroup webGroup = new DefaultActionGroup("Web", true);
@@ -277,6 +279,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         private JCheckBox databaseJDBCCheckBox;
 
         private JCheckBox messagingRabbitMQCheckBox;
+        private JCheckBox messagingKafkaCheckBox;
 
         private GuicedEEProjectWizardData.ModuleData moduleData;
 
@@ -332,8 +335,10 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             messagingPanel.setBorder(BorderFactory.createTitledBorder("Messaging Options"));
 
             messagingRabbitMQCheckBox = new JCheckBox("RabbitMQ");
+            messagingKafkaCheckBox = new JCheckBox("Kafka");
 
             messagingPanel.add(messagingRabbitMQCheckBox);
+            messagingPanel.add(messagingKafkaCheckBox);
 
             // Add all panels to main panel
             JPanel optionsPanel = new JPanel(new GridLayout(0, 1));
@@ -360,6 +365,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             messagingCheckBox.addActionListener(e -> {
                 boolean selected = messagingCheckBox.isSelected();
                 messagingRabbitMQCheckBox.setEnabled(selected);
+                messagingKafkaCheckBox.setEnabled(selected);
             });
 
             // Initialize enabled state
@@ -368,6 +374,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             webReactiveSwaggerCheckBox.setEnabled(false);
             databaseJDBCCheckBox.setEnabled(false);
             messagingRabbitMQCheckBox.setEnabled(false);
+            messagingKafkaCheckBox.setEnabled(false);
 
             return panel;
         }
@@ -388,6 +395,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             moduleData.setDatabaseJDBC(databaseJDBCCheckBox.isSelected());
 
             moduleData.setMessagingRabbitMQ(messagingRabbitMQCheckBox.isSelected());
+            moduleData.setMessagingKafka(messagingKafkaCheckBox.isSelected());
 
             super.doOKAction();
         }
@@ -611,6 +619,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToInterface.put(GuicedEEFileTemplateProvider.LOG4J_CONFIGURATOR_TEMPLATE, "com.guicedee.client.services.Log4JConfigurator");
             templateToInterface.put(GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceModule");
             templateToInterface.put(GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE, "com.guicedee.rabbit.QueueConsumer");
+            templateToInterface.put(GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE, "com.guicedee.kafka.KafkaTopicConsumer");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_STARTUP_TEMPLATE, "com.guicedee.vertx.spi.VerticleStartup");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_CONFIGURATOR_TEMPLATE, "com.guicedee.vertx.spi.VertxConfigurator");
 
@@ -885,6 +894,10 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             String[][] rabbitDeps = {{"com.guicedee", "rabbitmq", "com.guicedee.rabbit"}};
             templateToDependencies.put(GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE, rabbitDeps);
 
+            // Kafka: com.guicedee:kafka -> requires com.guicedee.kafka
+            String[][] kafkaDeps = {{"com.guicedee", "kafka", "com.guicedee.kafka"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE, kafkaDeps);
+
             // WebSockets: com.guicedee:websockets -> requires com.guicedee.vertx.sockets
             String[][] wsDeps = {{"com.guicedee", "websockets", "com.guicedee.vertx.sockets"}};
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE, wsDeps);
@@ -1124,6 +1137,12 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 boolean isRabbitMQEnabled = isRabbitMQEnabled(project);
                 e.getPresentation().setEnabledAndVisible(isRabbitMQEnabled);
             }
+
+            if (templateName.equals(GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE)) {
+                // Only enable Kafka Consumer if Kafka is enabled in the project
+                boolean isKafkaEnabled = isKafkaEnabled(project);
+                e.getPresentation().setEnabledAndVisible(isKafkaEnabled);
+            }
         }
 
         private boolean isRabbitMQEnabled(Project project) {
@@ -1136,6 +1155,24 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                     String text = file.getText();
                     // Check if the module-info.java file contains a reference to com.guicedee.rabbit
                     if (text.contains("requires") && text.contains("com.guicedee.rabbit")) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private boolean isKafkaEnabled(Project project) {
+            // Look for module-info.java files
+            PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
+                    project, "module-info.java", GlobalSearchScope.projectScope(project));
+
+            for (PsiFile file : moduleInfoFiles) {
+                if (file instanceof PsiJavaFile) {
+                    String text = file.getText();
+                    // Check if the module-info.java file contains a reference to com.guicedee.kafka
+                    if (text.contains("requires") && text.contains("com.guicedee.kafka")) {
                         return true;
                     }
                 }

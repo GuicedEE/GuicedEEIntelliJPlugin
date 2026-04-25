@@ -29,6 +29,7 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String WEBSOCKET_ON_PUBLISH_TEMPLATE = "GuicedEEWebSocketOnPublish.java";
     public static final String ROUTER_CONFIGURATION_TEMPLATE = "GuicedEERouterConfiguration.java";
     public static final String RABBITMQ_CONSUMER_TEMPLATE = "GuicedEERabbitMQConsumer.java";
+    public static final String KAFKA_CONSUMER_TEMPLATE = "GuicedEEKafkaConsumer.java";
     public static final String SCAN_MODULE_INCLUSIONS_TEMPLATE = "GuicedEEScanModuleInclusions.java";
     public static final String CONFIGURATOR_TEMPLATE = "GuicedEEConfigurator.java";
     public static final String FILE_CONTENTS_SCANNER_TEMPLATE = "GuicedEEFileContentsScanner.java";
@@ -46,6 +47,7 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
 
         group.addTemplate(new FileTemplateDescriptor(GUICE_MODULE_TEMPLATE, GUICEDEE_ICON));
         group.addTemplate(new FileTemplateDescriptor(RABBITMQ_CONSUMER_TEMPLATE, GUICEDEE_ICON));
+        group.addTemplate(new FileTemplateDescriptor(KAFKA_CONSUMER_TEMPLATE, GUICEDEE_ICON));
 
         // Create Web subgroup (1st feature)
         FileTemplateGroupDescriptor webGroup = new FileTemplateGroupDescriptor("Web", GUICEDEE_ICON);

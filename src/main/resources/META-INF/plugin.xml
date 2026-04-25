@@ -29,6 +29,7 @@
           <li>Persistence / Database Modules</li>
           <li>WebSocket Channels, Message Receivers, and Hooks</li>
           <li>RabbitMQ Consumers</li>
+          <li>Kafka Consumers</li>
           <li>Vert.x Startup and Configurators</li>
           <li>Classpath Scanner SPIs</li>
         </ul>
@@ -137,6 +138,10 @@
     </intentionAction>
     <intentionAction>
       <className>com.guicedee.intellij.intentions.AddQueuePublisherFieldIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddKafkaConnectionOptionsIntention</className>
       <category>GuicedEE</category>
     </intentionAction>
 

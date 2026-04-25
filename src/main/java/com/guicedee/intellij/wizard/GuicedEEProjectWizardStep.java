@@ -1004,6 +1004,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         boolean webApplication = false;
         boolean databaseApplication = false;
         boolean rabbitMQSupport = false;
+        boolean kafkaSupport = false;
 
         // Check all modules for feature flags
         for (GuicedEEProjectWizardData.ModuleData module : myWizardData.getModules()) {
@@ -1021,6 +1022,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             if (module.isMessagingRabbitMQ()) {
                 rabbitMQSupport = true;
             }
+
+            // Kafka support if any module has Kafka messaging
+            if (module.isMessagingKafka()) {
+                kafkaSupport = true;
+            }
         }
 
         // Set project-level flags
@@ -1030,6 +1036,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
         System.out.println("[DEBUG_LOG] Updated project-level flags: webApplication=" + webApplication + 
                            ", databaseApplication=" + databaseApplication + 
-                           ", rabbitMQSupport=" + rabbitMQSupport);
+                           ", rabbitMQSupport=" + rabbitMQSupport +
+                           ", kafkaSupport=" + kafkaSupport);
     }
 }

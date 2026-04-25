@@ -1,0 +1,27 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.kafka.KafkaTopicConsumer;
+import com.guicedee.kafka.KafkaTopicDefinition;
+import com.guicedee.kafka.KafkaTopicOptions;
+import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
+import com.google.inject.Singleton;
+
+/**
+ * A Kafka consumer that processes messages from a topic.
+ */
+@KafkaTopicDefinition(
+        value = "${TOPIC_NAME}",
+        options = @KafkaTopicOptions(worker = true)
+)
+@Singleton
+public class ${NAME} implements KafkaTopicConsumer<String, String> {
+
+    @Override
+    public void consume(KafkaConsumerRecord<String, String> record) {
+        System.out.println("Consumed - key=" + record.key() + ", value=" + record.value()
+                + ", partition=" + record.partition() + ", offset=" + record.offset());
+
+        // Implement your message processing logic here
+    }
+}
+

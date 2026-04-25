@@ -42,6 +42,7 @@ public class GuicedEEProjectWizardData {
 
         // Messaging sub-options
         private boolean messagingRabbitMQ;
+        private boolean messagingKafka;
 
         // MicroProfile sub-options
         private boolean microProfileHealth;
@@ -75,6 +76,7 @@ public class GuicedEEProjectWizardData {
             this.databaseJDBC = false;
 
             this.messagingRabbitMQ = false;
+            this.messagingKafka = false;
 
             this.microProfileHealth = false;
             this.microProfileConfig = false;
@@ -410,8 +412,13 @@ public class GuicedEEProjectWizardData {
         @Deprecated public boolean isDatabaseMongoDB() { return false; }
         @Deprecated public void setDatabaseMongoDB(boolean v) { }
 
-        @Deprecated public boolean isMessagingKafka() { return false; }
-        @Deprecated public void setMessagingKafka(boolean v) { }
+        public boolean isMessagingKafka() { return messagingKafka; }
+        public void setMessagingKafka(boolean messagingKafka) {
+            this.messagingKafka = messagingKafka;
+            if (messagingKafka) {
+                this.messaging = true;
+            }
+        }
 
         @Deprecated public boolean isMessagingAMQP() { return false; }
         @Deprecated public void setMessagingAMQP(boolean v) { }

@@ -1,0 +1,9 @@
+@KafkaConnectionOptions(
+        value = "default",
+        bootstrapServers = "localhost:9092",
+        groupId = "my-group"
+)
+package com.example;
+
+import com.guicedee.kafka.KafkaConnectionOptions;
+
