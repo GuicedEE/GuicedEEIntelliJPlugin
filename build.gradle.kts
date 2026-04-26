@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.0.0-RC10"
+version = "2.0.0"
 
 repositories {
   mavenCentral()
@@ -17,7 +17,7 @@ repositories {
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
   intellijPlatform {
-    create("IC", "2024.2.5")
+    create("IC", "2025.2.6.1")
     testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
     // Add necessary plugin dependencies for compilation here
@@ -31,11 +31,11 @@ dependencies {
 intellijPlatform {
   pluginConfiguration {
     ideaVersion {
-      sinceBuild = "242"
+      sinceBuild = "252"
     }
 
     changeNotes = """
-      <h3>2.0.0-RC10</h3>
+      <h3>2.0.0</h3>
       <ul>
         <li>Merged JetBrains Guice plugin with GuicedEE framework support</li>
         <li>Full JIT (just-in-time) binding support — click-through navigation for concrete class injection</li>
@@ -43,6 +43,13 @@ intellijPlatform {
         <li>@Inject fields correctly marked as implicitly used, read, and written</li>
         <li>REST Service creation with optional service class and DB session support</li>
         <li>REST Client template with @Endpoint support</li>
+        <li>Kafka Consumer template and Kafka wizard integration</li>
+        <li>Mail Client template for GuicedEE mail module</li>
+        <li>MicroProfile Health Check template</li>
+        <li>Authentication and Authorization Provider templates</li>
+        <li>Hazelcast caching support in project wizard</li>
+        <li>MicroProfile Config, Health, Metrics, Telemetry, and OpenAPI wizard options</li>
+        <li>REST Client checkbox in Web Reactive wizard options</li>
         <li>GuicedEE guice-core documentation and SPI extension points</li>
         <li>Support for @ImplementedBy and @ProvidedBy navigation</li>
       </ul>

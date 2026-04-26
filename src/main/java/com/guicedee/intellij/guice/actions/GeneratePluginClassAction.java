@@ -14,6 +14,7 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class GeneratePluginClassAction extends CreateElementActionBase {
@@ -27,14 +28,13 @@ public abstract class GeneratePluginClassAction extends CreateElementActionBase 
   }
 
   @Override
-  protected PsiElement @NotNull [] invokeDialog(@NotNull Project project, @NotNull PsiDirectory directory) {
+  protected void invokeDialog(@NotNull Project project, @NotNull PsiDirectory directory, @NotNull Consumer<? super PsiElement[]> elementsConsumer) {
     final PsiElement[] psiElements = invokeDialogImpl(project, directory);
     if (psiElements == CANCELED) {
-      return PsiElement.EMPTY_ARRAY;
+      elementsConsumer.accept(PsiElement.EMPTY_ARRAY);
+    } else {
+      elementsConsumer.accept(psiElements);
     }
-
-    //   new EditorCaretMover(project).openInEditor(psiElements[0]);
-    return psiElements;
   }
 
   protected abstract PsiElement[] invokeDialogImpl(Project project, PsiDirectory directory);

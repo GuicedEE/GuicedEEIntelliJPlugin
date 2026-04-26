@@ -133,10 +133,12 @@ public class AddQueuePublisherFieldIntention extends PsiElementBaseIntentionActi
 
     private boolean isRabbitMQEnabled(Project project) {
         // Look for module-info.java files
-        PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
-                project, "module-info.java", GlobalSearchScope.projectScope(project));
+        PsiManager psiManager = PsiManager.getInstance(project);
+        java.util.Collection<com.intellij.openapi.vfs.VirtualFile> moduleInfoVFiles = FilenameIndex.getVirtualFilesByName(
+                "module-info.java", GlobalSearchScope.projectScope(project));
 
-        for (PsiFile file : moduleInfoFiles) {
+        for (com.intellij.openapi.vfs.VirtualFile vf : moduleInfoVFiles) {
+            PsiFile file = psiManager.findFile(vf);
             if (file instanceof PsiJavaFile) {
                 String text = file.getText();
                 // Check if the module-info.java file contains a reference to com.guicedee.rabbit

@@ -3,7 +3,6 @@ package com.guicedee.intellij.guice.model;
 
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.codeInsight.MetaAnnotationUtil;
-import com.intellij.codeInspection.dataFlow.StringExpressionHelper;
 import com.intellij.concurrency.ConcurrentCollectionFactory;
 import com.guicedee.intellij.guice.constants.GuiceAnnotations;
 import com.guicedee.intellij.guice.constants.GuiceClasses;
@@ -19,6 +18,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
+import com.intellij.psi.search.searches.MethodReferencesSearch;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiModificationTracker;
@@ -168,10 +168,13 @@ public final class GuiceInjectorManager {
     if (moduleClass != null) {
       final PsiMethod[] binds = moduleClass.findMethodsByName(methodName, false);
       for (PsiMethod bind : binds) {
-        Set<PsiCall> calls = StringExpressionHelper.searchMethodCalls(bind, scope);
-        for (PsiCall call : calls) {
-          if (call instanceof PsiMethodCallExpression) expressions.add((PsiMethodCallExpression)call);
-        }
+        MethodReferencesSearch.search(bind, scope, true).forEach(ref -> {
+          PsiElement element = ref.getElement();
+          PsiElement parent = element.getParent();
+          if (parent instanceof PsiMethodCallExpression) {
+            expressions.add((PsiMethodCallExpression) parent);
+          }
+        });
       }
     }
     return expressions;

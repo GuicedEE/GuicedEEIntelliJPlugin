@@ -1,8 +1,8 @@
 package com.guicedee.intellij.run;
 
+import com.intellij.execution.lineMarker.ExecutorAction;
 import com.intellij.execution.lineMarker.RunLineMarkerContributor;
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiMethodUtil;
 import org.jetbrains.annotations.NotNull;
@@ -26,14 +26,11 @@ public class GuicedEERunLineMarkerContributor extends RunLineMarkerContributor {
             if (PsiMethodUtil.isMainMethod(method)) {
                 // Check if the method contains GuiceContext.inject() call
                 if (containsGuiceContextInject(method)) {
-                    // Using deprecated constructor with suppressed warning
-                    // This is the best approach available until a better API is provided
-                    @SuppressWarnings("deprecation")
-                    Info info = new Info(
-                        AllIcons.RunConfigurations.Application, 
+                    return new Info(
+                        AllIcons.RunConfigurations.Application,
+                        ExecutorAction.getActions(0),
                         psiElement -> "Run Gee Application"
                     );
-                    return info;
                 }
             }
         }

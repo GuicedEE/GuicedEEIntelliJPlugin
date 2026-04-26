@@ -5,7 +5,7 @@ import com.guicedee.intellij.guice.GuiceBundle;
 import com.intellij.ide.actions.CreateFileFromTemplateDialog;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDirectory;
-import com.intellij.util.PlatformIcons;
+import com.intellij.icons.AllIcons;
 import org.jetbrains.annotations.NotNull;
 
 public class NewGuiceBindingAnnotationAction extends AbstractNewGuiceClassAction {
@@ -29,7 +29,7 @@ public class NewGuiceBindingAnnotationAction extends AbstractNewGuiceClassAction
                              @NotNull CreateFileFromTemplateDialog.Builder builder) {
     builder
       .setTitle(GuiceBundle.message("new.guice.binding.annotation.action.name"))
-      .addKind(GuiceBundle.message("new.guice.binding.annotation.action.name"), PlatformIcons.ANNOTATION_TYPE_ICON,
+      .addKind(GuiceBundle.message("new.guice.binding.annotation.action.name"), AllIcons.Nodes.Annotationtype,
                "GuiceNewBindingAnnotation.java");
   }
 }

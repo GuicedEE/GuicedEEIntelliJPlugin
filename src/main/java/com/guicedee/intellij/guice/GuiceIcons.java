@@ -1,17 +1,10 @@
 package com.guicedee.intellij.guice;
 
-import com.intellij.ui.IconManager;
+import com.intellij.openapi.util.IconLoader;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-/**
- * NOTE THIS FILE IS AUTO-GENERATED
- * DO NOT EDIT IT BY HAND, run "Generate icon classes" configuration instead
- */
 public final class GuiceIcons {
-  private static @NotNull Icon load(@NotNull String path, int cacheKey, int flags) {
-    return IconManager.getInstance().loadRasterizedIcon(path, GuiceIcons.class.getClassLoader(), cacheKey, flags);
-  }
-  /** 16x16 */ public static final @NotNull Icon GoogleSmall = load("icons/google-small.svg", 1937432057, 0);
+  /** 16x16 */ public static final @NotNull Icon GoogleSmall = IconLoader.getIcon("/icons/google-small.svg", GuiceIcons.class);
 }

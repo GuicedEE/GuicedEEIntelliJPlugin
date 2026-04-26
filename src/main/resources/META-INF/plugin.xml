@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
   <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-  <id>com.guicedee.intellij.GEEIntelliJPlugin</id>
+  <id>com.guicedee.guiced</id>
 
   <!-- Public plugin name should be written in Title Case.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
@@ -13,7 +13,7 @@
   <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    <p><b>Guiced 2.0.0-RC10</b> is an IntelliJ IDEA plugin based on the JetBrains Guice plugin, providing full Google Guice and GuicedEE framework support for IntelliJ 2026+.</p>
+    <p><b>Guiced </b> is an IntelliJ IDEA plugin based on the JetBrains Guice plugin, providing full Google Guice and GuicedEE framework support for IntelliJ 2026+.</p>
 
     <h3>GuicedEE Framework Support</h3>
     <ul>
@@ -30,9 +30,8 @@
           <li>WebSocket Channels, Message Receivers, and Hooks</li>
           <li>RabbitMQ Consumers</li>
           <li>Kafka Consumers</li>
+          <li>IBM MQ Consumers</li>
           <li>Vert.x Startup and Configurators</li>
-          <li>Authentication Providers (IGuicedAuthenticationProvider)</li>
-          <li>Authorization Providers (IGuicedAuthorizationProvider)</li>
           <li>Classpath Scanner SPIs</li>
         </ul>
       </li>
@@ -91,6 +90,9 @@
           or <code>@ConfigProperty</code> (MicroProfile Config) are treated as injection points,
           with full implicit usage detection, gutter icons, and click-through navigation</li>
     </ul>
+
+    <hr/>
+    <p>☕ <b>Support this plugin:</b> <a href="https://patreon.com/GedMarc">Buy me a coffee on Patreon</a></p>
   ]]></description>
 
   <!-- Product and plugin compatibility requirements.
@@ -127,7 +129,15 @@
       <category>GuicedEE</category>
     </intentionAction>
     <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddRabbitConnectionOptionsIntention</className>
+      <className>com.guicedee.intellij.intentions.AddKafkaConnectionOptionsIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddHazelcastServerOptionsIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddHazelcastClientOptionsIntention</className>
       <category>GuicedEE</category>
     </intentionAction>
     <intentionAction>
@@ -143,43 +153,7 @@
       <category>GuicedEE</category>
     </intentionAction>
     <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddAuthOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddOAuth2OptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddJwtAuthOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddAbacOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddOtpAuthOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddPropertyFileAuthOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddLdapAuthOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddHtpasswdAuthOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddHtdigestAuthOptionsIntention</className>
-      <category>GuicedEE</category>
-    </intentionAction>
-    <intentionAction>
-      <className>com.guicedee.intellij.intentions.AddKafkaConnectionOptionsIntention</className>
+      <className>com.guicedee.intellij.intentions.AddIBMMQConnectionOptionsIntention</className>
       <category>GuicedEE</category>
     </intentionAction>
 

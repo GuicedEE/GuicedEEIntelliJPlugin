@@ -40,8 +40,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JBTextField myDeveloperOrganizationField;
     private JBTextField myDeveloperOrganizationUrlField;
     private JCheckBox myMultiModuleCheckBox;
-    private JCheckBox myJmodPackagingCheckBox;
     private JCheckBox myJlinkPackagingCheckBox;
+    private JRadioButton myModitectRadioButton;
+    private JRadioButton myJlinkPluginRadioButton;
+    private ButtonGroup myRuntimeImageToolGroup;
+    private JPanel myRuntimeImageToolPanel;
     private JPanel myOptionalPanel;
 
     // Module-specific UI components
@@ -64,8 +67,19 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     // Web Reactive sub-options
     private JPanel myModuleWebReactiveOptionsPanel;
     private JCheckBox myModuleWebReactiveRestCheckBox;
+    private JCheckBox myModuleWebReactiveRestClientCheckBox;
     private JCheckBox myModuleWebReactiveWebSocketsCheckBox;
     private JCheckBox myModuleWebReactiveSwaggerCheckBox;
+    private JCheckBox myModuleWebReactiveAuthCheckBox;
+    private JPanel myModuleAuthOptionsPanel;
+    private JCheckBox myModuleAuthOAuth2CheckBox;
+    private JCheckBox myModuleAuthJwtCheckBox;
+    private JCheckBox myModuleAuthAbacCheckBox;
+    private JCheckBox myModuleAuthOtpCheckBox;
+    private JCheckBox myModuleAuthPropertyFileCheckBox;
+    private JCheckBox myModuleAuthLdapCheckBox;
+    private JCheckBox myModuleAuthHtpasswdCheckBox;
+    private JCheckBox myModuleAuthHtdigestCheckBox;
 
     // Database sub-options
     private JPanel myModuleDatabaseOptionsPanel;
@@ -83,8 +97,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JPanel myModuleMessagingOptionsPanel;
     private JCheckBox myModuleMessagingRabbitMQCheckBox;
     private JCheckBox myModuleMessagingKafkaCheckBox;
+    private JCheckBox myModuleMessagingIBMMQCheckBox;
     private JCheckBox myModuleMessagingAMQPCheckBox;
     private JCheckBox myModuleMessagingMQTTCheckBox;
+    private JCheckBox myModuleMessagingMailClientCheckBox;
 
     // Caching sub-options
     private JPanel myModuleCachingOptionsPanel;
@@ -94,8 +110,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     // MicroProfile sub-options
     private JPanel myModuleMicroProfileOptionsPanel;
     private JCheckBox myModuleMicroProfileHealthCheckBox;
+    private JCheckBox myModuleMicroProfileConfigCheckBox;
     private JCheckBox myModuleMicroProfileTelemetryCheckBox;
     private JCheckBox myModuleMicroProfileOpenAPICheckBox;
+    private JCheckBox myModuleMicroProfileJwtCheckBox;
     private JCheckBox myModuleMicroProfileLoggingCheckBox;
     private JCheckBox myModuleMicroProfileZipkinCheckBox;
 
@@ -117,8 +135,22 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myGroupIdField = new JBTextField("com.example");
         myVersionField = new JBTextField("1.0-SNAPSHOT");
         myMultiModuleCheckBox = new JCheckBox("Multi-Module Project");
-        myJmodPackagingCheckBox = new JCheckBox("JMOD Packaging");
-        myJlinkPackagingCheckBox = new JCheckBox("JLink Packaging");
+        myJlinkPackagingCheckBox = new JCheckBox("Runtime Image Packaging");
+
+        myModitectRadioButton = new JRadioButton("Moditect (recommended)", true);
+        myJlinkPluginRadioButton = new JRadioButton("maven-jlink-plugin");
+        myRuntimeImageToolGroup = new ButtonGroup();
+        myRuntimeImageToolGroup.add(myModitectRadioButton);
+        myRuntimeImageToolGroup.add(myJlinkPluginRadioButton);
+
+        myRuntimeImageToolPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        myRuntimeImageToolPanel.add(myModitectRadioButton);
+        myRuntimeImageToolPanel.add(myJlinkPluginRadioButton);
+        myRuntimeImageToolPanel.setVisible(false);
+
+        myJlinkPackagingCheckBox.addActionListener(e -> {
+            myRuntimeImageToolPanel.setVisible(myJlinkPackagingCheckBox.isSelected());
+        });
 
         // Add document listener to group ID field to update module names when group ID changes
         myGroupIdField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -202,6 +234,9 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
                 myAddModuleButton.setVisible(isMultiModule);
                 myRemoveModuleButton.setVisible(isMultiModule);
 
+                // Update the recommended tool based on multi-module selection
+                updateRuntimeImageToolRecommendation(isMultiModule);
+
                 // Handle switching between single and multi-module mode
                 if (isMultiModule) {
                     // If multi-module is enabled, initialize modules if empty
@@ -241,8 +276,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
                 .addVerticalGap(10)
                 .addComponent(packagingLabel)
                 .addComponent(myMultiModuleCheckBox)
-                .addComponent(myJmodPackagingCheckBox)
                 .addComponent(myJlinkPackagingCheckBox)
+                .addComponent(myRuntimeImageToolPanel)
                 .addVerticalGap(10)
                 .addComponent(new JBLabel("Project Configuration:"))
                 .addComponent(myModulesPanel)
@@ -271,8 +306,9 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
         // Application features are set at the module level in updateSelectedModule()
         myWizardData.setMultiModuleProject(myMultiModuleCheckBox.isSelected());
-        myWizardData.setJmodPackaging(myJmodPackagingCheckBox.isSelected());
+        myWizardData.setJmodPackaging(false);
         myWizardData.setJlinkPackaging(myJlinkPackagingCheckBox.isSelected());
+        myWizardData.setUseModitect(myModitectRadioButton.isSelected());
 
         // Get artifact ID from the selected module or module-specific field
         if (myWizardData.isMultiModuleProject()) {
@@ -320,7 +356,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             System.out.println("[DEBUG_LOG] validateFields() returned: " + (validationInfo == null ? "null" : validationInfo.message));
             return superValidate && validationInfo == null;
         } catch (ConfigurationException e) {
-            System.out.println("[DEBUG_LOG] ConfigurationException in validate(): " + e.getMessage());
+            System.out.println("[DEBUG_LOG] ConfigurationException in validate(): " + e.getTitle());
             return false;
         }
     }
@@ -494,15 +530,40 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMicroProfileCheckBox = new JCheckBox("MicroProfile");
 
         // Initialize Web Reactive sub-options
-        myModuleWebReactiveOptionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        myModuleWebReactiveOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         myModuleWebReactiveRestCheckBox = new JCheckBox("Rest");
+        myModuleWebReactiveRestClientCheckBox = new JCheckBox("Rest Client");
         myModuleWebReactiveWebSocketsCheckBox = new JCheckBox("Web Sockets");
         myModuleWebReactiveSwaggerCheckBox = new JCheckBox("Swagger");
+        myModuleWebReactiveAuthCheckBox = new JCheckBox("Auth");
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveRestCheckBox);
+        myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveRestClientCheckBox);
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveWebSocketsCheckBox);
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveSwaggerCheckBox);
+        myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveAuthCheckBox);
         myModuleWebReactiveOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleWebReactiveOptionsPanel.setVisible(false);
+
+        // Initialize Auth sub-options
+        myModuleAuthOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        myModuleAuthOAuth2CheckBox = new JCheckBox("OAuth2 / OIDC");
+        myModuleAuthJwtCheckBox = new JCheckBox("JWT");
+        myModuleAuthAbacCheckBox = new JCheckBox("ABAC");
+        myModuleAuthOtpCheckBox = new JCheckBox("OTP / TOTP / HOTP");
+        myModuleAuthPropertyFileCheckBox = new JCheckBox("Property File");
+        myModuleAuthLdapCheckBox = new JCheckBox("LDAP");
+        myModuleAuthHtpasswdCheckBox = new JCheckBox("Htpasswd");
+        myModuleAuthHtdigestCheckBox = new JCheckBox("Htdigest");
+        myModuleAuthOptionsPanel.add(myModuleAuthOAuth2CheckBox);
+        myModuleAuthOptionsPanel.add(myModuleAuthJwtCheckBox);
+        myModuleAuthOptionsPanel.add(myModuleAuthAbacCheckBox);
+        myModuleAuthOptionsPanel.add(myModuleAuthOtpCheckBox);
+        myModuleAuthOptionsPanel.add(myModuleAuthPropertyFileCheckBox);
+        myModuleAuthOptionsPanel.add(myModuleAuthLdapCheckBox);
+        myModuleAuthOptionsPanel.add(myModuleAuthHtpasswdCheckBox);
+        myModuleAuthOptionsPanel.add(myModuleAuthHtdigestCheckBox);
+        myModuleAuthOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 0));
+        myModuleAuthOptionsPanel.setVisible(false);
 
         // Initialize Database sub-options
         myModuleDatabaseOptionsPanel = new JPanel(new GridLayout(0, 3));
@@ -528,20 +589,24 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleDatabaseOptionsPanel.setVisible(false);
 
         // Initialize Messaging sub-options
-        myModuleMessagingOptionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        myModuleMessagingOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         myModuleMessagingRabbitMQCheckBox = new JCheckBox("RabbitMQ");
         myModuleMessagingKafkaCheckBox = new JCheckBox("Kafka");
+        myModuleMessagingIBMMQCheckBox = new JCheckBox("IBM MQ");
         myModuleMessagingAMQPCheckBox = new JCheckBox("AMQP");
         myModuleMessagingMQTTCheckBox = new JCheckBox("MQTT");
+        myModuleMessagingMailClientCheckBox = new JCheckBox("Mail Client");
         myModuleMessagingOptionsPanel.add(myModuleMessagingRabbitMQCheckBox);
         myModuleMessagingOptionsPanel.add(myModuleMessagingKafkaCheckBox);
+        myModuleMessagingOptionsPanel.add(myModuleMessagingIBMMQCheckBox);
         myModuleMessagingOptionsPanel.add(myModuleMessagingAMQPCheckBox);
         myModuleMessagingOptionsPanel.add(myModuleMessagingMQTTCheckBox);
+        myModuleMessagingOptionsPanel.add(myModuleMessagingMailClientCheckBox);
         myModuleMessagingOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleMessagingOptionsPanel.setVisible(false);
 
         // Initialize Caching sub-options
-        myModuleCachingOptionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        myModuleCachingOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         myModuleCachingHazelcastCheckBox = new JCheckBox("Hazelcast");
         myModuleCachingVertxHazelcastCheckBox = new JCheckBox("VertxHazelcast");
         myModuleCachingOptionsPanel.add(myModuleCachingHazelcastCheckBox);
@@ -550,15 +615,19 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleCachingOptionsPanel.setVisible(false);
 
         // Initialize MicroProfile sub-options
-        myModuleMicroProfileOptionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        myModuleMicroProfileOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         myModuleMicroProfileHealthCheckBox = new JCheckBox("Health");
+        myModuleMicroProfileConfigCheckBox = new JCheckBox("Config");
         myModuleMicroProfileTelemetryCheckBox = new JCheckBox("Telemetry");
         myModuleMicroProfileOpenAPICheckBox = new JCheckBox("OpenAPI");
+        myModuleMicroProfileJwtCheckBox = new JCheckBox("JWT");
         myModuleMicroProfileLoggingCheckBox = new JCheckBox("Logging");
         myModuleMicroProfileZipkinCheckBox = new JCheckBox("Zipkin");
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileHealthCheckBox);
+        myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileConfigCheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileTelemetryCheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileOpenAPICheckBox);
+        myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileJwtCheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileLoggingCheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileZipkinCheckBox);
         myModuleMicroProfileOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
@@ -568,10 +637,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleTestsCheckBox = new JCheckBox("Tests");
 
         // Initialize Tests sub-options
-        myModuleTestsOptionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        myModuleTestsOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         myModuleTestsTestContainersCheckBox = new JCheckBox("Test Containers");
         myModuleTestsOptionsPanel.add(myModuleTestsTestContainersCheckBox);
-        myModuleTestsOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 0));
+        myModuleTestsOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleTestsOptionsPanel.setVisible(false);
 
         // Add action listeners to update the module data when fields change
@@ -664,8 +733,23 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
         // Add action listeners for sub-options
         myModuleWebReactiveRestCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleWebReactiveRestClientCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleWebReactiveWebSocketsCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleWebReactiveSwaggerCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleWebReactiveAuthCheckBox.addActionListener(e -> {
+            myModuleAuthOptionsPanel.setVisible(myModuleWebReactiveAuthCheckBox.isSelected());
+            updateSelectedModule();
+        });
+
+        // Auth sub-options listeners
+        myModuleAuthOAuth2CheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleAuthJwtCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleAuthAbacCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleAuthOtpCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleAuthPropertyFileCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleAuthLdapCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleAuthHtpasswdCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleAuthHtdigestCheckBox.addActionListener(e -> updateSelectedModule());
 
         myModuleDatabasePersistenceCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleDatabasePostgreSQLCheckBox.addActionListener(e -> updateSelectedModule());
@@ -691,15 +775,19 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
         myModuleMessagingRabbitMQCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMessagingKafkaCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleMessagingIBMMQCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMessagingAMQPCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMessagingMQTTCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleMessagingMailClientCheckBox.addActionListener(e -> updateSelectedModule());
 
         myModuleCachingHazelcastCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleCachingVertxHazelcastCheckBox.addActionListener(e -> updateSelectedModule());
 
         myModuleMicroProfileHealthCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleMicroProfileConfigCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileTelemetryCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileOpenAPICheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleMicroProfileJwtCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileLoggingCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileZipkinCheckBox.addActionListener(e -> updateSelectedModule());
 
@@ -723,6 +811,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
                 .addComponent(featuresLabel)
                 .addComponent(myModuleWebReactiveCheckBox)
                 .addComponent(myModuleWebReactiveOptionsPanel)
+                .addComponent(myModuleAuthOptionsPanel)
                 .addComponent(myModuleDatabaseCheckBox)
                 .addComponent(myModuleDatabaseOptionsPanel)
                 .addComponent(myModuleMessagingCheckBox)
@@ -783,9 +872,22 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Set Web Reactive sub-options
             myModuleWebReactiveRestCheckBox.setSelected(selectedModule.isWebReactiveRest());
+            myModuleWebReactiveRestClientCheckBox.setSelected(selectedModule.isWebReactiveRestClient());
             myModuleWebReactiveWebSocketsCheckBox.setSelected(selectedModule.isWebReactiveWebSockets());
             myModuleWebReactiveSwaggerCheckBox.setSelected(selectedModule.isWebReactiveSwagger());
+            myModuleWebReactiveAuthCheckBox.setSelected(selectedModule.isAuthProvider());
             myModuleWebReactiveOptionsPanel.setVisible(selectedModule.isWebReactive());
+
+            // Set Auth sub-options
+            myModuleAuthOAuth2CheckBox.setSelected(selectedModule.isAuthOAuth2());
+            myModuleAuthJwtCheckBox.setSelected(selectedModule.isAuthJwt());
+            myModuleAuthAbacCheckBox.setSelected(selectedModule.isAuthAbac());
+            myModuleAuthOtpCheckBox.setSelected(selectedModule.isAuthOtp());
+            myModuleAuthPropertyFileCheckBox.setSelected(selectedModule.isAuthPropertyFile());
+            myModuleAuthLdapCheckBox.setSelected(selectedModule.isAuthLdap());
+            myModuleAuthHtpasswdCheckBox.setSelected(selectedModule.isAuthHtpasswd());
+            myModuleAuthHtdigestCheckBox.setSelected(selectedModule.isAuthHtdigest());
+            myModuleAuthOptionsPanel.setVisible(selectedModule.isAuthProvider());
 
             // Set Database sub-options
             myModuleDatabasePersistenceCheckBox.setSelected(selectedModule.isDatabasePersistence());
@@ -805,8 +907,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             // Set Messaging sub-options
             myModuleMessagingRabbitMQCheckBox.setSelected(selectedModule.isMessagingRabbitMQ());
             myModuleMessagingKafkaCheckBox.setSelected(selectedModule.isMessagingKafka());
+            myModuleMessagingIBMMQCheckBox.setSelected(selectedModule.isMessagingIBMMQ());
             myModuleMessagingAMQPCheckBox.setSelected(selectedModule.isMessagingAMQP());
             myModuleMessagingMQTTCheckBox.setSelected(selectedModule.isMessagingMQTT());
+            myModuleMessagingMailClientCheckBox.setSelected(selectedModule.isMailClient());
             myModuleMessagingOptionsPanel.setVisible(selectedModule.isMessaging());
 
             // Set Caching sub-options
@@ -816,8 +920,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Set MicroProfile sub-options
             myModuleMicroProfileHealthCheckBox.setSelected(selectedModule.isMicroProfileHealth());
+            myModuleMicroProfileConfigCheckBox.setSelected(selectedModule.isMicroProfileConfig());
             myModuleMicroProfileTelemetryCheckBox.setSelected(selectedModule.isMicroProfileTelemetry());
             myModuleMicroProfileOpenAPICheckBox.setSelected(selectedModule.isMicroProfileOpenAPI());
+            myModuleMicroProfileJwtCheckBox.setSelected(selectedModule.isMicroProfileJwt());
             myModuleMicroProfileLoggingCheckBox.setSelected(selectedModule.isMicroProfileLogging());
             myModuleMicroProfileZipkinCheckBox.setSelected(selectedModule.isMicroProfileZipkin());
             myModuleMicroProfileOptionsPanel.setVisible(selectedModule.isMicroProfile());
@@ -845,9 +951,22 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Clear Web Reactive sub-options
             myModuleWebReactiveRestCheckBox.setSelected(false);
+            myModuleWebReactiveRestClientCheckBox.setSelected(false);
             myModuleWebReactiveWebSocketsCheckBox.setSelected(false);
             myModuleWebReactiveSwaggerCheckBox.setSelected(false);
+            myModuleWebReactiveAuthCheckBox.setSelected(false);
             myModuleWebReactiveOptionsPanel.setVisible(false);
+
+            // Clear Auth sub-options
+            myModuleAuthOAuth2CheckBox.setSelected(false);
+            myModuleAuthJwtCheckBox.setSelected(false);
+            myModuleAuthAbacCheckBox.setSelected(false);
+            myModuleAuthOtpCheckBox.setSelected(false);
+            myModuleAuthPropertyFileCheckBox.setSelected(false);
+            myModuleAuthLdapCheckBox.setSelected(false);
+            myModuleAuthHtpasswdCheckBox.setSelected(false);
+            myModuleAuthHtdigestCheckBox.setSelected(false);
+            myModuleAuthOptionsPanel.setVisible(false);
 
             // Clear Database sub-options
             myModuleDatabasePersistenceCheckBox.setSelected(false);
@@ -867,8 +986,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             // Clear Messaging sub-options
             myModuleMessagingRabbitMQCheckBox.setSelected(false);
             myModuleMessagingKafkaCheckBox.setSelected(false);
+            myModuleMessagingIBMMQCheckBox.setSelected(false);
             myModuleMessagingAMQPCheckBox.setSelected(false);
             myModuleMessagingMQTTCheckBox.setSelected(false);
+            myModuleMessagingMailClientCheckBox.setSelected(false);
             myModuleMessagingOptionsPanel.setVisible(false);
 
             // Clear Caching sub-options
@@ -878,8 +999,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Clear MicroProfile sub-options
             myModuleMicroProfileHealthCheckBox.setSelected(false);
+            myModuleMicroProfileConfigCheckBox.setSelected(false);
             myModuleMicroProfileTelemetryCheckBox.setSelected(false);
             myModuleMicroProfileOpenAPICheckBox.setSelected(false);
+            myModuleMicroProfileJwtCheckBox.setSelected(false);
             myModuleMicroProfileLoggingCheckBox.setSelected(false);
             myModuleMicroProfileZipkinCheckBox.setSelected(false);
             myModuleMicroProfileOptionsPanel.setVisible(false);
@@ -911,8 +1034,20 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Update Web Reactive sub-options
             selectedModule.setWebReactiveRest(myModuleWebReactiveRestCheckBox.isSelected());
+            selectedModule.setWebReactiveRestClient(myModuleWebReactiveRestClientCheckBox.isSelected());
             selectedModule.setWebReactiveWebSockets(myModuleWebReactiveWebSocketsCheckBox.isSelected());
             selectedModule.setWebReactiveSwagger(myModuleWebReactiveSwaggerCheckBox.isSelected());
+            selectedModule.setAuthProvider(myModuleWebReactiveAuthCheckBox.isSelected());
+
+            // Update Auth sub-options
+            selectedModule.setAuthOAuth2(myModuleAuthOAuth2CheckBox.isSelected());
+            selectedModule.setAuthJwt(myModuleAuthJwtCheckBox.isSelected());
+            selectedModule.setAuthAbac(myModuleAuthAbacCheckBox.isSelected());
+            selectedModule.setAuthOtp(myModuleAuthOtpCheckBox.isSelected());
+            selectedModule.setAuthPropertyFile(myModuleAuthPropertyFileCheckBox.isSelected());
+            selectedModule.setAuthLdap(myModuleAuthLdapCheckBox.isSelected());
+            selectedModule.setAuthHtpasswd(myModuleAuthHtpasswdCheckBox.isSelected());
+            selectedModule.setAuthHtdigest(myModuleAuthHtdigestCheckBox.isSelected());
 
             // Update Database sub-options
             selectedModule.setDatabasePersistence(myModuleDatabasePersistenceCheckBox.isSelected());
@@ -928,8 +1063,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             // Update Messaging sub-options
             selectedModule.setMessagingRabbitMQ(myModuleMessagingRabbitMQCheckBox.isSelected());
             selectedModule.setMessagingKafka(myModuleMessagingKafkaCheckBox.isSelected());
+            selectedModule.setMessagingIBMMQ(myModuleMessagingIBMMQCheckBox.isSelected());
             selectedModule.setMessagingAMQP(myModuleMessagingAMQPCheckBox.isSelected());
             selectedModule.setMessagingMQTT(myModuleMessagingMQTTCheckBox.isSelected());
+            selectedModule.setMailClient(myModuleMessagingMailClientCheckBox.isSelected());
 
             // Update Caching sub-options
             selectedModule.setCachingHazelcast(myModuleCachingHazelcastCheckBox.isSelected());
@@ -937,8 +1074,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Update MicroProfile sub-options
             selectedModule.setMicroProfileHealth(myModuleMicroProfileHealthCheckBox.isSelected());
+            selectedModule.setMicroProfileConfig(myModuleMicroProfileConfigCheckBox.isSelected());
             selectedModule.setMicroProfileTelemetry(myModuleMicroProfileTelemetryCheckBox.isSelected());
             selectedModule.setMicroProfileOpenAPI(myModuleMicroProfileOpenAPICheckBox.isSelected());
+            selectedModule.setMicroProfileJwt(myModuleMicroProfileJwtCheckBox.isSelected());
             selectedModule.setMicroProfileLogging(myModuleMicroProfileLoggingCheckBox.isSelected());
             selectedModule.setMicroProfileZipkin(myModuleMicroProfileZipkinCheckBox.isSelected());
 
@@ -1004,7 +1143,6 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         boolean webApplication = false;
         boolean databaseApplication = false;
         boolean rabbitMQSupport = false;
-        boolean kafkaSupport = false;
 
         // Check all modules for feature flags
         for (GuicedEEProjectWizardData.ModuleData module : myWizardData.getModules()) {
@@ -1022,11 +1160,6 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             if (module.isMessagingRabbitMQ()) {
                 rabbitMQSupport = true;
             }
-
-            // Kafka support if any module has Kafka messaging
-            if (module.isMessagingKafka()) {
-                kafkaSupport = true;
-            }
         }
 
         // Set project-level flags
@@ -1036,7 +1169,28 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
         System.out.println("[DEBUG_LOG] Updated project-level flags: webApplication=" + webApplication + 
                            ", databaseApplication=" + databaseApplication + 
-                           ", rabbitMQSupport=" + rabbitMQSupport +
-                           ", kafkaSupport=" + kafkaSupport);
+                           ", rabbitMQSupport=" + rabbitMQSupport);
+    }
+
+    /**
+     * Updates the recommended runtime image tool based on multi-module selection.
+     * For single-module projects, Moditect is recommended.
+     * For multi-module projects, maven-jlink-plugin is recommended.
+     */
+    private void updateRuntimeImageToolRecommendation(boolean isMultiModule) {
+        if (isMultiModule) {
+            // For multi-module, recommend maven-jlink-plugin
+            myModitectRadioButton.setText("Moditect");
+            myModitectRadioButton.setSelected(false);
+            myJlinkPluginRadioButton.setText("maven-jlink-plugin (recommended)");
+            myJlinkPluginRadioButton.setSelected(true);
+        } else {
+            // For single-module, recommend Moditect
+            myModitectRadioButton.setText("Moditect (recommended)");
+            myModitectRadioButton.setSelected(true);
+            myJlinkPluginRadioButton.setText("maven-jlink-plugin");
+            myJlinkPluginRadioButton.setSelected(false);
+        }
     }
 }
+

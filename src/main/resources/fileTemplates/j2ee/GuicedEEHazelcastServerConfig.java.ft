@@ -1,0 +1,19 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.guicedhazelcast.services.IGuicedHazelcastServerConfig;
+import com.hazelcast.config.Config;
+
+/**
+ * Configures the embedded Hazelcast server instance.
+ * Implement buildConfig to customize the Hazelcast server Config.
+ */
+public class ${NAME} implements IGuicedHazelcastServerConfig<${NAME}> {
+
+    @Override
+    public Config buildConfig(Config serverConfig) {
+        // Customize the Hazelcast server configuration here
+        // e.g. serverConfig.setClusterName("my-cluster");
+        return serverConfig;
+    }
+}
+

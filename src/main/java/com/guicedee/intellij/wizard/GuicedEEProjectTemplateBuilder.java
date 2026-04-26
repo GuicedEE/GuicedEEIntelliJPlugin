@@ -234,6 +234,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     private void createSingleModuleProject(File baseDir) throws IOException
     {
         System.out.println("[DEBUG_LOG] GuicedEEProjectTemplateBuilder.createSingleModuleProject() called");
+        GuicedEEProjectWizardData.ModuleData moduleData = getPrimaryModuleData();
+
         // Create base directories
         File srcDir = new File(baseDir, "src/main/java");
         File resourcesDir = new File(baseDir, "src/main/resources");
@@ -250,34 +252,45 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         FileUtil.createDirectory(testResourcesDir);
 
         // Create pom.xml
-        createPomXml(baseDir);
+        createPomXml(baseDir, moduleData);
 
         // Create module-info.java
-        createModuleInfo(srcDir);
+        createModuleInfo(srcDir, moduleData);
 
         // Create test module-info.java
-        createTestModuleInfo(testSrcDir);
+        String moduleName = moduleData.getArtifactId().replace('-', '.');
+        if (!Character.isJavaIdentifierStart(moduleName.charAt(0)))
+        {
+            moduleName = "m." + moduleName;
+        }
+        createTestModuleInfo(testSrcDir, moduleName, moduleData);
 
         // Create main application class if needed
-        if (myWizardData.isWebApplication())
+        if (moduleData.isWebReactive())
         {
-            createWebApplication(srcDir);
+            createWebApplication(srcDir, moduleData);
         }
         else
         {
-            createBasicApplication(srcDir);
+            createBasicApplication(srcDir, moduleData);
         }
 
         // Create database module if needed
-        if (myWizardData.isDatabaseApplication())
+        if (moduleData.isDatabase())
         {
-            createDatabaseModule(srcDir);
+            createDatabaseModule(srcDir, moduleData);
         }
 
         // Create RabbitMQ consumer if needed
-        if (myWizardData.isRabbitMQSupport())
+        if (moduleData.isMessagingRabbitMQ())
         {
-            createRabbitMQConsumer(srcDir);
+            createRabbitMQConsumer(srcDir, moduleData);
+        }
+
+        // Create auth support files if needed
+        if (moduleData.isAuthProvider())
+        {
+            createAuthSupportFiles(srcDir, resourcesDir, moduleData);
         }
 
         // Don't create scan module inclusions file during app creation
@@ -357,10 +370,9 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 createRabbitMQConsumer(moduleSrcDir, moduleData);
             }
 
-            // Create Kafka consumer if needed
-            if (moduleData.isMessagingKafka())
+            if (moduleData.isAuthProvider())
             {
-                createKafkaConsumer(moduleSrcDir, moduleData);
+                createAuthSupportFiles(moduleSrcDir, moduleResourcesDir, moduleData);
             }
 
             // Don't create scan module inclusions file during app creation
@@ -374,7 +386,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         }
     }
 
-    private void createPomXml(File baseDir) throws IOException
+    private void createPomXml(File baseDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         Map<String, String> variables = new HashMap<>();
         variables.put("GROUP_ID", myWizardData.getGroupId());
@@ -395,47 +407,28 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         dependencies.append("            <artifactId>lombok</artifactId>\n");
         dependencies.append("        </dependency>\n");
 
-        // Create a temporary module data object to use the same logic as in createModulePom
-        GuicedEEProjectWizardData.ModuleData tempModule = new GuicedEEProjectWizardData.ModuleData(
-                "Default Module", myWizardData.getArtifactId());
-
-        // Map old feature groups to new ones
-        tempModule.setWebReactive(myWizardData.isWebApplication());
-        tempModule.setDatabase(myWizardData.isDatabaseApplication());
-        if (myWizardData.isDatabaseApplication())
-        {
-            tempModule.setDatabasePersistence(true);
-        }
-        tempModule.setMessaging(myWizardData.isRabbitMQSupport());
-        tempModule.setMessagingRabbitMQ(myWizardData.isRabbitMQSupport());
-
         // Web Reactive dependencies
-        if (tempModule.isWebReactive())
+        if (moduleData.isWebReactive())
         {
             dependencies.append("        <dependency>\n");
             dependencies.append("            <groupId>com.guicedee</groupId>\n");
             dependencies.append("            <artifactId>web</artifactId>\n");
             dependencies.append("        </dependency>\n");
 
-            // Add REST dependency if web application is selected
-            // This is needed because the old feature groups don't have a specific REST option
-            if (myWizardData.isWebApplication())
+            if (moduleData.isWebReactiveRest())
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
                 dependencies.append("            <artifactId>rest</artifactId>\n");
                 dependencies.append("        </dependency>\n");
-
-                // Set the REST option for the module-info.java file
-                tempModule.setWebReactiveRest(true);
             }
         }
 
         // Database dependencies
-        if (tempModule.isDatabase())
+        if (moduleData.isDatabase())
         {
             // Check if JDBC is selected
-            if (tempModule.isDatabaseJDBC()) {
+            if (moduleData.isDatabaseJDBC()) {
                 // For JDBC, use guiced-persistence
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee.persistence</groupId>\n");
@@ -451,13 +444,156 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         }
 
         // Messaging dependencies
-        if (tempModule.isMessaging())
+        if (moduleData.isMessaging())
         {
-            if (tempModule.isMessagingRabbitMQ())
+            if (moduleData.isMessagingRabbitMQ())
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
                 dependencies.append("            <artifactId>rabbitmq</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isMessagingKafka())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>kafka</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isMessagingIBMMQ())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>ibmmq</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+        }
+
+        // Mail Client dependency
+        if (moduleData.isMailClient())
+        {
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>com.guicedee</groupId>\n");
+            dependencies.append("            <artifactId>mailclient</artifactId>\n");
+            dependencies.append("        </dependency>\n");
+        }
+
+        // Caching dependencies
+        if (moduleData.isCaching())
+        {
+            if (moduleData.isCachingHazelcast())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>hazelcast</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+        }
+
+        // MicroProfile dependencies
+        if (moduleData.isMicroProfile())
+        {
+            if (moduleData.isMicroProfileHealth())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>health</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isMicroProfileConfig())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>config</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isMicroProfileMetrics())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>metrics</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isMicroProfileTelemetry())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>telemetry</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+             if (moduleData.isMicroProfileOpenAPI())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>openapi</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isMicroProfileJwt())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee.microprofile</groupId>\n");
+                dependencies.append("            <artifactId>jwt</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+        }
+
+        // Auth dependencies
+        if (moduleData.isAuthProvider())
+        {
+            if (moduleData.isAuthOAuth2())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>oauth2</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthJwt())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>jwt</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthAbac())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>abac</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthOtp())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>otp</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthPropertyFile())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>propertyfile</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthLdap())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>ldap</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthHtpasswd())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>htpasswd</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthHtdigest())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>htdigest</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
         }
@@ -470,7 +606,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         dependencies.append("        </dependency>\n");
 
         // Add Test Containers dependency if selected
-        if (tempModule.isTestsTestContainers())
+        if (moduleData.isTestsTestContainers())
         {
             dependencies.append("        <dependency>\n");
             dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
@@ -479,7 +615,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         }
 
         // Add JUnit Vintage Engine dependency if database is selected
-        if (tempModule.isDatabase())
+        if (moduleData.isDatabase())
         {
             dependencies.append("        <dependency>\n");
             dependencies.append("            <groupId>org.junit.vintage</groupId>\n");
@@ -566,6 +702,166 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         FileUtil.writeToFile(new File(baseDir, "pom.xml"), pomXml);
     }
 
+    private GuicedEEProjectWizardData.ModuleData getPrimaryModuleData()
+    {
+        if (!myWizardData.getModules().isEmpty())
+        {
+            return myWizardData.getModules().get(0);
+        }
+
+        GuicedEEProjectWizardData.ModuleData defaultModule = new GuicedEEProjectWizardData.ModuleData(
+                "Default Module", myWizardData.getArtifactId());
+        defaultModule.setWebReactive(myWizardData.isWebApplication());
+        defaultModule.setDatabase(myWizardData.isDatabaseApplication());
+        defaultModule.setMessagingRabbitMQ(myWizardData.isRabbitMQSupport());
+        if (myWizardData.isDatabaseApplication())
+        {
+            defaultModule.setDatabasePersistence(true);
+        }
+        if (myWizardData.isRabbitMQSupport())
+        {
+            defaultModule.setMessaging(true);
+        }
+        if (myWizardData.isWebApplication())
+        {
+            defaultModule.setWebReactiveRest(true);
+        }
+        return defaultModule;
+    }
+
+    private void createAuthSupportFiles(File srcDir, File resourcesDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
+    {
+        String authPackageInfo = buildAuthPackageInfo(moduleData);
+        if (!authPackageInfo.isEmpty())
+        {
+            String packagePath = myWizardData.getGroupId().replace('.', '/');
+            File authPackageDir = new File(srcDir, packagePath + "/auth");
+            FileUtil.createDirectory(authPackageDir);
+            FileUtil.writeToFile(new File(authPackageDir, "package-info.java"), authPackageInfo);
+        }
+
+        if (moduleData.isAuthPropertyFile())
+        {
+            FileUtil.writeToFile(new File(resourcesDir, "auth.properties"), getPropertyFileAuthTemplate());
+        }
+
+        if (moduleData.isAuthAbac())
+        {
+            File policyDir = new File(resourcesDir, "policies");
+            FileUtil.createDirectory(policyDir);
+            FileUtil.writeToFile(new File(policyDir, "admin.json"), getAbacPolicyTemplate());
+        }
+
+        if (moduleData.isAuthHtpasswd())
+        {
+            FileUtil.writeToFile(new File(resourcesDir, ".htpasswd"), getHtpasswdTemplate());
+        }
+
+        if (moduleData.isAuthHtdigest())
+        {
+            FileUtil.writeToFile(new File(resourcesDir, ".htdigest"), getHtdigestTemplate());
+        }
+    }
+
+    private String buildAuthPackageInfo(GuicedEEProjectWizardData.ModuleData moduleData)
+    {
+        StringBuilder annotations = new StringBuilder();
+        StringBuilder imports = new StringBuilder();
+
+        if (moduleData.isAuthOAuth2())
+        {
+            annotations.append("@OAuth2Options\n");
+            imports.append("import com.guicedee.vertx.auth.oauth2.OAuth2Options;\n");
+        }
+
+        if (moduleData.isAuthJwt())
+        {
+            annotations.append("@JwtAuthOptions\n");
+            imports.append("import com.guicedee.vertx.auth.jwt.JwtAuthOptions;\n");
+        }
+
+        if (moduleData.isAuthAbac())
+        {
+            annotations.append("@AbacOptions(policyFiles = {\"policies/admin.json\"})\n");
+            imports.append("import com.guicedee.vertx.auth.abac.AbacOptions;\n");
+        }
+
+        if (moduleData.isAuthOtp())
+        {
+            annotations.append("@OtpAuthOptions\n");
+            imports.append("import com.guicedee.vertx.auth.otp.OtpAuthOptions;\n");
+        }
+
+        if (moduleData.isAuthPropertyFile())
+        {
+            annotations.append("@PropertyFileAuthOptions(path = \"auth.properties\")\n");
+            imports.append("import com.guicedee.vertx.auth.properties.PropertyFileAuthOptions;\n");
+        }
+
+        if (moduleData.isAuthLdap())
+        {
+            annotations.append("@LdapAuthOptions\n");
+            imports.append("import com.guicedee.vertx.auth.ldap.LdapAuthOptions;\n");
+        }
+
+        if (moduleData.isAuthHtpasswd())
+        {
+            annotations.append("@HtpasswdAuthOptions(path = \".htpasswd\", plainTextEnabled = true)\n");
+            imports.append("import com.guicedee.vertx.auth.htpasswd.HtpasswdAuthOptions;\n");
+        }
+
+        if (moduleData.isAuthHtdigest())
+        {
+            annotations.append("@HtdigestAuthOptions(path = \".htdigest\")\n");
+            imports.append("import com.guicedee.vertx.auth.htdigest.HtdigestAuthOptions;\n");
+        }
+
+        if (annotations.isEmpty())
+        {
+            return "";
+        }
+
+        return annotations +
+                "package " + myWizardData.getGroupId() + ".auth;\n\n" +
+                imports +
+                "// Generated by the GuicedEE project wizard.\n" +
+                "// Generated examples may rely on local resource files or further environment/SPI setup.\n" +
+                "// Replace these files before production use.\n";
+    }
+
+    private String getPropertyFileAuthTemplate()
+    {
+        return "# Generated development credentials only - replace before production use\n" +
+                "user.admin = admin,administrator\n" +
+                "role.administrator = *\n";
+    }
+
+    private String getAbacPolicyTemplate()
+    {
+        return "{\n" +
+                "  \"name\": \"Admin Only\",\n" +
+                "  \"attributes\": {},\n" +
+                "  \"authorizations\": [\n" +
+                "    {\n" +
+                "      \"type\": \"wildcard\",\n" +
+                "      \"permission\": \"*\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}\n";
+    }
+
+    private String getHtpasswdTemplate()
+    {
+        return "# Generated development credentials only - replace before production use\n" +
+                "admin:admin\n";
+    }
+
+    private String getHtdigestTemplate()
+    {
+        return "# Generated development credentials only - replace before production use\n" +
+                "admin:Protected Area:6094dc75b0d1e9c1fba933686a38d1b6\n";
+    }
+
     private void createModuleInfo(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         StringBuilder requires = new StringBuilder();
@@ -582,9 +878,57 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 requires.append("\trequires transitive com.guicedee.rest;\n");
             }
 
+            if (moduleData.isWebReactiveRestClient())
+            {
+                requires.append("\trequires transitive com.guicedee.rest.client;\n");
+            }
+
             if (moduleData.isWebReactiveSwagger())
             {
                 requires.append("\trequires transitive com.guicedee.swagger;\n");
+            }
+        }
+
+        // Mail Client requirements
+        if (moduleData.isMailClient())
+        {
+            requires.append("\trequires transitive com.guicedee.mail;\n");
+        }
+
+        // Auth requirements
+        if (moduleData.isAuthProvider())
+        {
+            if (moduleData.isAuthOAuth2())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.oauth2;\n");
+            }
+            if (moduleData.isAuthJwt())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.jwt;\n");
+            }
+            if (moduleData.isAuthAbac())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.abac;\n");
+            }
+            if (moduleData.isAuthOtp())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.otp;\n");
+            }
+            if (moduleData.isAuthPropertyFile())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.propertyfile;\n");
+            }
+            if (moduleData.isAuthLdap())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.ldap;\n");
+            }
+            if (moduleData.isAuthHtpasswd())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.htpasswd;\n");
+            }
+            if (moduleData.isAuthHtdigest())
+            {
+                requires.append("\trequires transitive com.guicedee.auth.htdigest;\n");
             }
         }
 
@@ -613,8 +957,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 requires.append("\trequires transitive com.guicedee.kafka;\n");
             }
 
-            if (moduleData.isMessagingAMQP() || moduleData.isMessagingMQTT())
+            if (moduleData.isMessagingIBMMQ())
             {
+                requires.append("\trequires transitive com.guicedee.ibmmq;\n");
+            }
+
+            if (moduleData.isMessagingKafka() || moduleData.isMessagingAMQP() || moduleData.isMessagingMQTT())
+            {
+                requires.append("\trequires io.vertx.kafka.client;\n");
                 requires.append("\trequires io.vertx.amqp.client;\n");
                 requires.append("\trequires io.vertx.mqtt;\n");
             }
@@ -625,7 +975,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         {
             if (moduleData.isCachingHazelcast())
             {
-                requires.append("\trequires com.hazelcast.core;\n");
+                requires.append("\trequires transitive com.guicedee.guicedhazelcast;\n");
             }
 
             if (moduleData.isCachingVertxHazelcast())
@@ -639,17 +989,27 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         {
             if (moduleData.isMicroProfileHealth())
             {
-                requires.append("\trequires io.vertx.health;\n");
+                requires.append("\trequires transitive com.guicedee.health;\n");
+            }
+
+            if (moduleData.isMicroProfileConfig())
+            {
+                requires.append("\trequires transitive com.guicedee.config;\n");
             }
 
             if (moduleData.isMicroProfileTelemetry())
             {
-                requires.append("\trequires io.vertx.micrometer;\n");
+                requires.append("\trequires transitive com.guicedee.telemetry;\n");
             }
 
             if (moduleData.isMicroProfileOpenAPI())
             {
-                requires.append("\trequires com.guicedee.services.openapi;\n");
+                requires.append("\trequires transitive com.guicedee.services.openapi;\n");
+            }
+
+            if (moduleData.isMicroProfileJwt())
+            {
+                requires.append("\trequires transitive com.guicedee.microprofile.jwt;\n");
             }
 
             if (moduleData.isMicroProfileLogging())
@@ -949,23 +1309,16 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         File packageDir = new File(srcDir, packagePath);
         FileUtil.createDirectory(packageDir);
 
-        // Create the REST resource class with entity integration
-        String restResourceTemplate = 
+        // Create the REST resource class with entity integration (no OpenAPI)
+        String restResourceTemplate =
             "package " + myWizardData.getGroupId() + ".resources;\n\n" +
             "import " + myWizardData.getGroupId() + ".db.entity.YourEntity;\n" +
             "import " + myWizardData.getGroupId() + ".resources.services.RestResourceService;\n" +
-            "import io.swagger.v3.oas.annotations.Operation;\n" +
-            "import io.swagger.v3.oas.annotations.Parameter;\n" +
-            "import io.swagger.v3.oas.annotations.media.Content;\n" +
-            "import io.swagger.v3.oas.annotations.media.Schema;\n" +
-            "import io.swagger.v3.oas.annotations.responses.ApiResponse;\n" +
-            "import io.swagger.v3.oas.annotations.responses.ApiResponses;\n" +
-            "import io.swagger.v3.oas.annotations.tags.Tag;\n" +
-            "import io.vertx.core.Future;\n" +
+            "import io.smallrye.mutiny.Uni;\n" +
             "import com.google.inject.Inject;\n" +
             "import jakarta.ws.rs.*;\n" +
             "import jakarta.ws.rs.core.MediaType;\n" +
-            "import lombok.extern.slf4j.Slf4j;\n\n" +
+            "import lombok.extern.log4j.Log4j2;\n\n" +
             "/**\n" +
             " * REST endpoint for managing YourEntity resources.\n" +
             " * Provides CRUD operations for entity management using asynchronous processing.\n" +
@@ -973,96 +1326,38 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "@Path(\"/resources\")\n" +
             "@Produces(MediaType.APPLICATION_JSON)\n" +
             "@Consumes(MediaType.APPLICATION_JSON)\n" +
-            "@Tag(name = \"Resource Management\", description = \"Operations for managing YourEntity resources\")\n" +
-            "@Slf4j\n" +
+            "@Log4j2\n" +
             "public class RestResource {\n\n" +
             "    @Inject\n" +
             "    private RestResourceService service;\n\n" +
             "    /**\n" +
             "     * Retrieves a sample integer value.\n" +
             "     *\n" +
-            "     * @return Future containing a sample integer value\n" +
+            "     * @return Uni containing a sample integer value\n" +
             "     */\n" +
             "    @GET\n" +
-            "    @Operation(\n" +
-            "            summary = \"Get sample data\",\n" +
-            "            description = \"Retrieves a sample integer value for testing purposes\"\n" +
-            "    )\n" +
-            "    @ApiResponses({\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"200\",\n" +
-            "                    description = \"Successfully retrieved sample data\",\n" +
-            "                    content = @Content(schema = @Schema(implementation = Integer.class))\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"500\",\n" +
-            "                    description = \"Internal server error\"\n" +
-            "            )\n" +
-            "    })\n" +
-            "    public Future<Integer> get() {\n" +
+            "    public Uni<Integer> get() {\n" +
             "        return service.getSampleData();\n" +
             "    }\n\n" +
             "    /**\n" +
             "     * Retrieves an entity by its ID.\n" +
             "     *\n" +
             "     * @param id The unique identifier of the entity\n" +
-            "     * @return Future containing the requested entity\n" +
+            "     * @return Uni containing the requested entity\n" +
             "     */\n" +
             "    @GET\n" +
             "    @Path(\"/{id}\")\n" +
-            "    @Operation(\n" +
-            "            summary = \"Get entity by ID\",\n" +
-            "            description = \"Retrieves a specific entity based on its unique identifier\"\n" +
-            "    )\n" +
-            "    @ApiResponses({\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"200\",\n" +
-            "                    description = \"Entity found\",\n" +
-            "                    content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"404\",\n" +
-            "                    description = \"Entity not found\"\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"500\",\n" +
-            "                    description = \"Internal server error\"\n" +
-            "            )\n" +
-            "    })\n" +
-            "    public Future<YourEntity> getById(\n" +
-            "            @Parameter(description = \"ID of the entity to retrieve\", required = true)\n" +
-            "            @PathParam(\"id\") String id) {\n" +
+            "    public Uni<YourEntity> getById(@PathParam(\"id\") String id) {\n" +
             "        return service.getDataById(id);\n" +
             "    }\n\n" +
             "    /**\n" +
             "     * Creates a new entity.\n" +
             "     *\n" +
             "     * @param entity The entity to create\n" +
-            "     * @return Future containing the created entity\n" +
+            "     * @return Uni containing the created entity\n" +
             "     */\n" +
             "    @POST\n" +
-            "    @Operation(\n" +
-            "            summary = \"Create new entity\",\n" +
-            "            description = \"Creates a new entity with the provided data\"\n" +
-            "    )\n" +
-            "    @ApiResponses({\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"200\",\n" +
-            "                    description = \"Entity created successfully\",\n" +
-            "                    content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"400\",\n" +
-            "                    description = \"Invalid entity data provided\"\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"500\",\n" +
-            "                    description = \"Internal server error\"\n" +
-            "            )\n" +
-            "    })\n" +
-            "    public Future<YourEntity> create(\n" +
-            "            @Parameter(description = \"Entity to create\", required = true)\n" +
-            "            YourEntity entity) {\n" +
+            "    public Uni<YourEntity> create(YourEntity entity) {\n" +
             "        return service.createData(entity);\n" +
             "    }\n\n" +
             "    /**\n" +
@@ -1070,69 +1365,22 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "     *\n" +
             "     * @param id The ID of the entity to update\n" +
             "     * @param entity The updated entity data\n" +
-            "     * @return Future containing the updated entity\n" +
+            "     * @return Uni containing the updated entity\n" +
             "     */\n" +
             "    @PUT\n" +
             "    @Path(\"/{id}\")\n" +
-            "    @Operation(\n" +
-            "            summary = \"Update existing entity\",\n" +
-            "            description = \"Updates an existing entity with the provided data\"\n" +
-            "    )\n" +
-            "    @ApiResponses({\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"200\",\n" +
-            "                    description = \"Entity updated successfully\",\n" +
-            "                    content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"400\",\n" +
-            "                    description = \"Invalid entity data provided\"\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"404\",\n" +
-            "                    description = \"Entity not found\"\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"500\",\n" +
-            "                    description = \"Internal server error\"\n" +
-            "            )\n" +
-            "    })\n" +
-            "    public Future<YourEntity> update(\n" +
-            "            @Parameter(description = \"ID of the entity to update\", required = true)\n" +
-            "            @PathParam(\"id\") String id,\n" +
-            "            @Parameter(description = \"Updated entity data\", required = true)\n" +
-            "            YourEntity entity) {\n" +
+            "    public Uni<YourEntity> update(@PathParam(\"id\") String id, YourEntity entity) {\n" +
             "        return service.updateData(id, entity);\n" +
             "    }\n\n" +
             "    /**\n" +
             "     * Deletes an entity by its ID.\n" +
             "     *\n" +
             "     * @param id The ID of the entity to delete\n" +
-            "     * @return Future indicating completion of delete operation\n" +
+            "     * @return Uni indicating completion of delete operation\n" +
             "     */\n" +
             "    @DELETE\n" +
             "    @Path(\"/{id}\")\n" +
-            "    @Operation(\n" +
-            "            summary = \"Delete entity\",\n" +
-            "            description = \"Deletes an entity based on its unique identifier\"\n" +
-            "    )\n" +
-            "    @ApiResponses({\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"204\",\n" +
-            "                    description = \"Entity successfully deleted\"\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"404\",\n" +
-            "                    description = \"Entity not found\"\n" +
-            "            ),\n" +
-            "            @ApiResponse(\n" +
-            "                    responseCode = \"500\",\n" +
-            "                    description = \"Internal server error\"\n" +
-            "            )\n" +
-            "    })\n" +
-            "    public Future<Void> delete(\n" +
-            "            @Parameter(description = \"ID of the entity to delete\", required = true)\n" +
-            "            @PathParam(\"id\") String id) {\n" +
+            "    public Uni<Void> delete(@PathParam(\"id\") String id) {\n" +
             "        log.info(\"Deleting resource with ID: {}\", id);\n" +
             "        return service.deleteData(id);\n" +
             "    }\n" +
@@ -1152,9 +1400,192 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
      */
     private void createRestResourceWithEntityAndOpenAPI(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
-        // The REST resource template is the same for both with and without OpenAPI
-        // The difference is in the module-info.java and pom.xml files
-        createRestResourceWithEntity(srcDir, moduleData);
+        // Create resources package
+        String packagePath = myWizardData.getGroupId().replace('.', '/') + "/resources";
+        File packageDir = new File(srcDir, packagePath);
+        FileUtil.createDirectory(packageDir);
+
+        // Create the REST resource class with entity integration and OpenAPI annotations
+        String restResourceTemplate =
+            "package " + myWizardData.getGroupId() + ".resources;\n\n" +
+            "import " + myWizardData.getGroupId() + ".db.entity.YourEntity;\n" +
+            "import " + myWizardData.getGroupId() + ".resources.services.RestResourceService;\n" +
+            "import io.swagger.v3.oas.annotations.Operation;\n" +
+            "import io.swagger.v3.oas.annotations.Parameter;\n" +
+            "import io.swagger.v3.oas.annotations.media.Content;\n" +
+            "import io.swagger.v3.oas.annotations.media.Schema;\n" +
+            "import io.swagger.v3.oas.annotations.responses.ApiResponse;\n" +
+            "import io.swagger.v3.oas.annotations.tags.Tag;\n" +
+            "import io.smallrye.mutiny.Uni;\n" +
+            "import com.google.inject.Inject;\n" +
+            "import jakarta.ws.rs.*;\n" +
+            "import jakarta.ws.rs.core.MediaType;\n" +
+            "import lombok.extern.log4j.Log4j2;\n\n" +
+            "/**\n" +
+            " * REST endpoint for managing YourEntity resources.\n" +
+            " * Provides CRUD operations for entity management using asynchronous processing.\n" +
+            " */\n" +
+            "@Path(\"/resources\")\n" +
+            "@Produces(MediaType.APPLICATION_JSON)\n" +
+            "@Consumes(MediaType.APPLICATION_JSON)\n" +
+            "@Tag(name = \"Resource Management\", description = \"Operations for managing YourEntity resources\")\n" +
+            "@Log4j2\n" +
+            "public class RestResource {\n\n" +
+            "    @Inject\n" +
+            "    private RestResourceService service;\n\n" +
+            "    /**\n" +
+            "     * Retrieves a sample integer value.\n" +
+            "     *\n" +
+            "     * @return Uni containing a sample integer value\n" +
+            "     */\n" +
+            "    @GET\n" +
+            "    @Operation(\n" +
+            "            summary = \"Get sample data\",\n" +
+            "            description = \"Retrieves a sample integer value for testing purposes\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"200\",\n" +
+            "            description = \"Successfully retrieved sample data\",\n" +
+            "            content = @Content(schema = @Schema(implementation = Integer.class))\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"500\",\n" +
+            "            description = \"Internal server error\"\n" +
+            "    )\n" +
+            "    public Uni<Integer> get() {\n" +
+            "        return service.getSampleData();\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Retrieves an entity by its ID.\n" +
+            "     *\n" +
+            "     * @param id The unique identifier of the entity\n" +
+            "     * @return Uni containing the requested entity\n" +
+            "     */\n" +
+            "    @GET\n" +
+            "    @Path(\"/{id}\")\n" +
+            "    @Operation(\n" +
+            "            summary = \"Get entity by ID\",\n" +
+            "            description = \"Retrieves a specific entity based on its unique identifier\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"200\",\n" +
+            "            description = \"Entity found\",\n" +
+            "            content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"404\",\n" +
+            "            description = \"Entity not found\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"500\",\n" +
+            "            description = \"Internal server error\"\n" +
+            "    )\n" +
+            "    public Uni<YourEntity> getById(\n" +
+            "            @Parameter(description = \"ID of the entity to retrieve\", required = true)\n" +
+            "            @PathParam(\"id\") String id) {\n" +
+            "        return service.getDataById(id);\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Creates a new entity.\n" +
+            "     *\n" +
+            "     * @param entity The entity to create\n" +
+            "     * @return Uni containing the created entity\n" +
+            "     */\n" +
+            "    @POST\n" +
+            "    @Operation(\n" +
+            "            summary = \"Create new entity\",\n" +
+            "            description = \"Creates a new entity with the provided data\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"200\",\n" +
+            "            description = \"Entity created successfully\",\n" +
+            "            content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"400\",\n" +
+            "            description = \"Invalid entity data provided\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"500\",\n" +
+            "            description = \"Internal server error\"\n" +
+            "    )\n" +
+            "    public Uni<YourEntity> create(\n" +
+            "            @Parameter(description = \"Entity to create\", required = true)\n" +
+            "            YourEntity entity) {\n" +
+            "        return service.createData(entity);\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Updates an existing entity.\n" +
+            "     *\n" +
+            "     * @param id The ID of the entity to update\n" +
+            "     * @param entity The updated entity data\n" +
+            "     * @return Uni containing the updated entity\n" +
+            "     */\n" +
+            "    @PUT\n" +
+            "    @Path(\"/{id}\")\n" +
+            "    @Operation(\n" +
+            "            summary = \"Update existing entity\",\n" +
+            "            description = \"Updates an existing entity with the provided data\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"200\",\n" +
+            "            description = \"Entity updated successfully\",\n" +
+            "            content = @Content(schema = @Schema(implementation = YourEntity.class))\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"400\",\n" +
+            "            description = \"Invalid entity data provided\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"404\",\n" +
+            "            description = \"Entity not found\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"500\",\n" +
+            "            description = \"Internal server error\"\n" +
+            "    )\n" +
+            "    public Uni<YourEntity> update(\n" +
+            "            @Parameter(description = \"ID of the entity to update\", required = true)\n" +
+            "            @PathParam(\"id\") String id,\n" +
+            "            @Parameter(description = \"Updated entity data\", required = true)\n" +
+            "            YourEntity entity) {\n" +
+            "        return service.updateData(id, entity);\n" +
+            "    }\n\n" +
+            "    /**\n" +
+            "     * Deletes an entity by its ID.\n" +
+            "     *\n" +
+            "     * @param id The ID of the entity to delete\n" +
+            "     * @return Uni indicating completion of delete operation\n" +
+            "     */\n" +
+            "    @DELETE\n" +
+            "    @Path(\"/{id}\")\n" +
+            "    @Operation(\n" +
+            "            summary = \"Delete entity\",\n" +
+            "            description = \"Deletes an entity based on its unique identifier\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"204\",\n" +
+            "            description = \"Entity successfully deleted\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"404\",\n" +
+            "            description = \"Entity not found\"\n" +
+            "    )\n" +
+            "    @ApiResponse(\n" +
+            "            responseCode = \"500\",\n" +
+            "            description = \"Internal server error\"\n" +
+            "    )\n" +
+            "    public Uni<Void> delete(\n" +
+            "            @Parameter(description = \"ID of the entity to delete\", required = true)\n" +
+            "            @PathParam(\"id\") String id) {\n" +
+            "        log.info(\"Deleting resource with ID: {}\", id);\n" +
+            "        return service.deleteData(id);\n" +
+            "    }\n" +
+            "}";
+        // Write the file
+        FileUtil.writeToFile(new File(packageDir, "RestResource.java"), restResourceTemplate);
+
+        System.out.println("[DEBUG_LOG] REST resource with entity and OpenAPI integration created successfully");
     }
 
     /**
@@ -1177,52 +1608,40 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             "import " + myWizardData.getGroupId() + ".db.entity.YourEntity;\n" +
             "import com.google.inject.Inject;\n" +
             "import io.smallrye.mutiny.Uni;\n" +
-            "import com.google.inject.Provider;\n" +
-            "import io.vertx.core.Future;\n" +
-            "import lombok.extern.slf4j.Slf4j;\n" +
-            "import org.hibernate.reactive.mutiny.Mutiny;\n" +
-            "import io.vertx.core.Vertx;\n\n" +
-            "@Slf4j\n" +
+            "import lombok.extern.log4j.Log4j2;\n" +
+            "import org.hibernate.reactive.mutiny.Mutiny;\n\n" +
+            "@Log4j2\n" +
             "public class RestResourceService {\n\n" +
             "    @Inject\n" +
-            "    private Provider<Mutiny.Session> session;\n\n" +
-            "    @Inject\n" +
-            "    private Vertx vertx;\n\n" +
-            "    public Future<Integer> getSampleData() {\n" +
-            "        return Future.fromCompletionStage(\n" +
-            "                session.get().createNativeQuery(\"SELECT 1\", Integer.class)\n" +
+            "    private Mutiny.SessionFactory sessionFactory;\n\n" +
+            "    public Uni<Integer> getSampleData() {\n" +
+            "        return sessionFactory.withTransaction(session ->\n" +
+            "                session.createNativeQuery(\"SELECT 1\", Integer.class)\n" +
             "                        .getSingleResult()\n" +
-            "                        .log()\n" +
-            "                        .subscribeAsCompletionStage()\n" +
             "        );\n" +
             "    }\n\n" +
-            "    public Future<YourEntity> getDataById(String id) {\n" +
-            "        return Future.fromCompletionStage(\n" +
-            "                session.get().find(YourEntity.class, id)\n" +
-            "                        .subscribeAsCompletionStage()\n" +
+            "    public Uni<YourEntity> getDataById(String id) {\n" +
+            "        return sessionFactory.withTransaction(session ->\n" +
+            "                session.find(YourEntity.class, id)\n" +
             "        );\n" +
             "    }\n\n" +
-            "    public Future<YourEntity> createData(YourEntity data) {\n" +
-            "        return Future.fromCompletionStage(\n" +
-            "                session.get().persist(data)\n" +
-            "                        .chain(() -> session.flush())\n" +
+            "    public Uni<YourEntity> createData(YourEntity data) {\n" +
+            "        return sessionFactory.withTransaction(session ->\n" +
+            "                session.persist(data)\n" +
             "                        .replaceWith(data)\n" +
-            "                        .subscribeAsCompletionStage()\n" +
             "        );\n" +
             "    }\n\n" +
-            "    public Future<YourEntity> updateData(String id, YourEntity data) {\n" +
-            "        return Future.fromCompletionStage(\n" +
-            "                session.get().merge(data)\n" +
-            "                        .subscribeAsCompletionStage()\n" +
+            "    public Uni<YourEntity> updateData(String id, YourEntity data) {\n" +
+            "        return sessionFactory.withTransaction(session ->\n" +
+            "                session.merge(data)\n" +
             "        );\n" +
             "    }\n\n" +
-            "    public Future<Void> deleteData(String id) {\n" +
-            "        return Future.fromCompletionStage(\n" +
-            "                session.get().find(YourEntity.class, id)\n" +
+            "    public Uni<Void> deleteData(String id) {\n" +
+            "        return sessionFactory.withTransaction(session ->\n" +
+            "                session.find(YourEntity.class, id)\n" +
             "                        .chain(entity -> entity != null\n" +
             "                                ? session.remove(entity)\n" +
-            "                                : Uni.createFrom().nullItem())\n" +
-            "                        .subscribeAsCompletionStage()\n" +
+            "                                : Uni.createFrom().voidItem())\n" +
             "        );\n" +
             "    }\n" +
             "}";
@@ -1357,7 +1776,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             }
         }
 
-        // Determine if we need to add the EntityManager annotation with a specific value
+        // Determine if we need to add the EntityManager annotation with a specific value - only if more than db module is active
         String entityManagerAnnotation = "";
         if (databaseModuleCount > 1) {
             entityManagerAnnotation = "@com.guicedee.persistence.annotations.EntityManager(\"" + persistenceUnit + "_1\")\n";
@@ -1473,75 +1892,6 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         createRabbitMQConsumer(srcDir, defaultModule);
     }
 
-    private void createKafkaConsumer(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
-    {
-        String packagePath = myWizardData.getGroupId().replace('.', '/');
-
-        // Create package-info.java in the base package with KafkaConnectionOptions
-        File basePackageDir = new File(srcDir, packagePath);
-        FileUtil.createDirectory(basePackageDir);
-
-        String packageInfo = getKafkaPackageInfoTemplate()
-                .replace("${PACKAGE}", myWizardData.getGroupId());
-
-        FileUtil.writeToFile(new File(basePackageDir, "package-info.java"), packageInfo);
-
-        // Create Kafka consumer in the kafka subpackage
-        File packageDir = new File(srcDir, packagePath + "/kafka");
-        FileUtil.createDirectory(packageDir);
-
-        String consumer = getKafkaConsumerTemplate()
-                .replace("${PACKAGE}", myWizardData.getGroupId() + ".kafka");
-
-        FileUtil.writeToFile(new File(packageDir, "ExampleTopicConsumer.java"), consumer);
-    }
-
-    private String getKafkaPackageInfoTemplate()
-    {
-        return "/**\n" +
-                " * Kafka messaging package.\n" +
-                " * Connection options are declared at the package level.\n" +
-                " */\n" +
-                "@KafkaConnectionOptions(\n" +
-                "        value = \"default\",\n" +
-                "        bootstrapServers = \"localhost:9092\",\n" +
-                "        groupId = \"my-group\"\n" +
-                ")\n" +
-                "package ${PACKAGE};\n" +
-                "\n" +
-                "import com.guicedee.kafka.KafkaConnectionOptions;\n";
-    }
-
-    private String getKafkaConsumerTemplate()
-    {
-        return "package ${PACKAGE};\n" +
-                "\n" +
-                "import com.guicedee.kafka.KafkaTopicConsumer;\n" +
-                "import com.guicedee.kafka.KafkaTopicDefinition;\n" +
-                "import com.guicedee.kafka.KafkaTopicOptions;\n" +
-                "import io.vertx.kafka.client.consumer.KafkaConsumerRecord;\n" +
-                "import com.google.inject.Singleton;\n" +
-                "\n" +
-                "/**\n" +
-                " * An example Kafka consumer that processes messages from a topic.\n" +
-                " */\n" +
-                "@KafkaTopicDefinition(\n" +
-                "        value = \"example-topic\",\n" +
-                "        options = @KafkaTopicOptions(worker = true)\n" +
-                ")\n" +
-                "@Singleton\n" +
-                "public class ExampleTopicConsumer implements KafkaTopicConsumer<String, String> {\n" +
-                "\n" +
-                "    @Override\n" +
-                "    public void consume(KafkaConsumerRecord<String, String> record) {\n" +
-                "        System.out.println(\"Consumed - key=\" + record.key() + \", value=\" + record.value()\n" +
-                "                + \", partition=\" + record.partition() + \", offset=\" + record.offset());\n" +
-                "\n" +
-                "        // Implement your message processing logic here\n" +
-                "    }\n" +
-                "}\n";
-    }
-
     private void createScanModuleInclusions(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         String packagePath = myWizardData.getGroupId().replace('.', '/');
@@ -1631,9 +1981,9 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "${DEVELOPERS}" +
                 "\n" +
                 "    <properties>\n" +
-                "        <maven.compiler.release>24</maven.compiler.release>\n" +
+                "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.0.0-RC10</guicedee.version>\n" +
+                "        <guicedee.version>2.0.0</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 "    <dependencyManagement>\n" +
@@ -1691,7 +2041,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "import com.guicedee.vertx.spi.Verticle;\n" +
                 "\n" +
                 "@VertX(blockedThreadCheckInterval = 10000) //optional configuration\n" +
-                "@Verticle(workerPoolName = \"my-app\") //optional configuration\n" +
+                "@Verticle(\"my-app\") //optional configuration\n" +
                 "public class Application {\n" +
                 "\n" +
                 "    public static void main(String[] args) {\n" +
@@ -1710,7 +2060,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "import com.guicedee.vertx.spi.Verticle;\n" +
                 "\n" +
                 "@VertX(blockedThreadCheckInterval = 10000) //optional configuration\n" +
-                "@Verticle(workerPoolName = \"my-web-app\") //optional configuration\n" +
+                "@Verticle(\"my-web-app\") //optional configuration\n" +
                 "public class WebApplication {\n" +
                 "\n" +
                 "    public static void main(String[] args) {\n" +
@@ -1960,6 +2310,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("        </dependency>\n");
             }
 
+            if (moduleData.isWebReactiveRestClient())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>rest-client</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
             if (moduleData.isWebReactiveSwagger())
             {
                 dependencies.append("        <dependency>\n");
@@ -2063,6 +2421,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("        </dependency>\n");
             }
 
+            if (moduleData.isMessagingIBMMQ())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>ibmmq</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
             if (moduleData.isMessagingAMQP())
             {
                 dependencies.append("        <dependency>\n");
@@ -2086,7 +2452,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isCachingHazelcast())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
                 dependencies.append("            <artifactId>hazelcast</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
@@ -2100,29 +2466,54 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             }
         }
 
+        // Mail Client dependency
+        if (moduleData.isMailClient())
+        {
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>com.guicedee</groupId>\n");
+            dependencies.append("            <artifactId>mailclient</artifactId>\n");
+            dependencies.append("        </dependency>\n");
+        }
+
         // MicroProfile dependencies
         if (moduleData.isMicroProfile())
         {
             if (moduleData.isMicroProfileHealth())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>io.vertx</groupId>\n");
-                dependencies.append("            <artifactId>vertx-health-check</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>health</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isMicroProfileConfig())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>config</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isMicroProfileMetrics())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>metrics</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 
             if (moduleData.isMicroProfileTelemetry())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>io.vertx</groupId>\n");
-                dependencies.append("            <artifactId>vertx-micrometer-metrics</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>telemetry</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
 
             if (moduleData.isMicroProfileOpenAPI())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>com.guicedee.services</groupId>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
                 dependencies.append("            <artifactId>openapi</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
@@ -2356,7 +2747,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        <maven.compiler.source>24</maven.compiler.source>\n" +
                 "        <maven.compiler.target>24</maven.compiler.target>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.0.0-RC10</guicedee.version>\n" +
+                "        <guicedee.version>2.0.0</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 modules.toString() +
@@ -2412,6 +2803,75 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
     private String getJLinkPomTemplate()
     {
+        if (myWizardData.isUseModitect()) {
+            return getModitectPomTemplate();
+        } else {
+            return getJLinkPluginPomTemplate();
+        }
+    }
+
+    private String getModitectPomTemplate()
+    {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+                "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+                "    <modelVersion>4.0.0</modelVersion>\n" +
+                "\n" +
+                "    <parent>\n" +
+                "        <groupId>${GROUP_ID}</groupId>\n" +
+                "        <artifactId>${PARENT_ARTIFACT_ID}</artifactId>\n" +
+                "        <version>${VERSION}</version>\n" +
+                "    </parent>\n" +
+                "\n" +
+                "    <artifactId>${ARTIFACT_ID}</artifactId>\n" +
+                "\n" +
+                "    <dependencies>\n" +
+                "${DEPENDENCIES}" +
+                "    </dependencies>\n" +
+                "\n" +
+                "    <build>\n" +
+                "        <plugins>\n" +
+                "            <plugin>\n" +
+                "                <groupId>org.moditect</groupId>\n" +
+                "                <artifactId>moditect-maven-plugin</artifactId>\n" +
+                "                <executions>\n" +
+                "                    <execution>\n" +
+                "                        <id>create-runtime-image</id>\n" +
+                "                        <phase>package</phase>\n" +
+                "                        <goals>\n" +
+                "                            <goal>create-runtime-image</goal>\n" +
+                "                        </goals>\n" +
+                "                        <configuration>\n" +
+                "                            <modulePath>\n" +
+                "                                <path>${project.build.directory}/libs</path>\n" +
+                "                                <path>${project.build.directory}/${project.build.finalName}.jar</path>\n" +
+                "                            </modulePath>\n" +
+                "                            <modules>\n" +
+                "                                <module>${MODULE_NAME}</module>\n" +
+                "                            </modules>\n" +
+                "                            <jarInclusionPolicy>NONE</jarInclusionPolicy>\n" +
+                "                            <launcher>\n" +
+                "                                <name>${ARTIFACT_ID}</name>\n" +
+                "                                <module>${MODULE_NAME}/${MAIN_CLASS}</module>\n" +
+                "                            </launcher>\n" +
+                "                            <noHeaderFiles>true</noHeaderFiles>\n" +
+                "                            <noManPages>true</noManPages>\n" +
+                "                            <stripDebug>true</stripDebug>\n" +
+                "                            <outputDirectory>\n" +
+                "                                ${project.build.directory}/jlink-image\n" +
+                "                            </outputDirectory>\n" +
+                "                        </configuration>\n" +
+                "                    </execution>\n" +
+                "                </executions>\n" +
+                "            </plugin>\n" +
+                "        </plugins>\n" +
+                "    </build>\n" +
+                "</project>";
+    }
+
+    private String getJLinkPluginPomTemplate()
+    {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
                 "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -2441,7 +2901,6 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "                    <noHeaderFiles>true</noHeaderFiles>\n" +
                 "                    <noManPages>true</noManPages>\n" +
                 "                    <stripDebug>true</stripDebug>\n" +
-                "                    <verbose>true</verbose>\n" +
                 "                    <compress>zip-9</compress>\n" +
                 "                    <launcher>launch=${MODULE_NAME}/${MAIN_CLASS}</launcher>\n" +
                 "                </configuration>\n" +

@@ -1,0 +1,36 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.ibmmq.IBMMQConsumer;
+import com.guicedee.ibmmq.IBMMQQueueDefinition;
+import com.guicedee.ibmmq.IBMMQQueueOptions;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.TextMessage;
+import com.google.inject.Singleton;
+
+/**
+ * An IBM MQ consumer that processes messages from a queue.
+ */
+@IBMMQQueueDefinition(
+        value = "${QUEUE_NAME}",
+        options = @IBMMQQueueOptions(worker = true)
+)
+@Singleton
+public class ${NAME} implements IBMMQConsumer {
+
+    @Override
+    public void consume(Message message) {
+        try {
+            if (message instanceof TextMessage tm) {
+                System.out.println("Consumed - " + tm.getText());
+            } else {
+                System.out.println("Consumed message: " + message.getJMSMessageID());
+            }
+        } catch (JMSException e) {
+            throw new RuntimeException("Failed to process message", e);
+        }
+
+        // Implement your message processing logic here
+    }
+}
+

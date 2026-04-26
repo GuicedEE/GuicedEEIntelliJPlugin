@@ -2,7 +2,6 @@
 package com.guicedee.intellij.guice.model;
 
 import com.intellij.codeInsight.AnnotationUtil;
-import com.intellij.codeInspection.dataFlow.StringExpressionHelper;
 import com.guicedee.intellij.guice.constants.GuiceAnnotations;
 import com.guicedee.intellij.guice.model.beans.BindDescriptor;
 import com.guicedee.intellij.guice.model.jam.GuiceInject;
@@ -232,9 +231,11 @@ public final class GuiceInjectionUtil {
   private static @Nullable String getNameValue(@NotNull PsiExpression annotatedWithExpression) {
     final PsiExpression namedExpression = findNamedExpression(annotatedWithExpression);
     if (namedExpression != null) {
-      final Pair<PsiElement, String> pair = StringExpressionHelper.evaluateExpression(namedExpression);
-      if (pair != null) {
-        return pair.getSecond();
+      Object value = JavaPsiFacade.getInstance(namedExpression.getProject())
+          .getConstantEvaluationHelper()
+          .computeConstantExpression(namedExpression);
+      if (value instanceof String) {
+        return (String) value;
       }
     }
     return null;

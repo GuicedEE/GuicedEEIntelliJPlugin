@@ -8,7 +8,6 @@ import com.guicedee.intellij.guice.GuiceBundle;
 import com.guicedee.intellij.guice.GuiceIcons;
 import com.guicedee.intellij.guice.model.beans.BindDescriptor;
 import com.guicedee.intellij.guice.model.beans.BindToProviderDescriptor;
-import com.guicedee.intellij.guice.model.renderers.GuiceBindingClassPsiElementListCellRenderer;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.psi.*;
@@ -56,7 +55,6 @@ public final class GuiceBindingClassAnnotator extends RelatedItemLineMarkerProvi
           NavigationGutterIconBuilder.create(GuiceIcons.GoogleSmall, DEFAULT_CONVERTOR).
             setPopupTitle(GuiceBundle.message("GuiceClassAnnotator.popup.title")).
             setTooltipText(GuiceBundle.message("GuiceClassAnnotator.popup.tooltip.text")).
-            setCellRenderer(GuiceBindingClassPsiElementListCellRenderer::new).
             setTargets(bindingDescriptors);
 
         final PsiIdentifier identifier = psiClass.getNameIdentifier();

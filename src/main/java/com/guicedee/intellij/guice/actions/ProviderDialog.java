@@ -10,7 +10,7 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiNameHelper;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.ui.JBInsets;
+import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +52,7 @@ public class ProviderDialog extends DialogWrapper implements DocumentListener{
         gbConstraints.gridwidth = 1;
         gbConstraints.gridx = 0;
         gbConstraints.gridy = 0;
-      gbConstraints.insets = JBInsets.emptyInsets();
+      gbConstraints.insets = JBUI.emptyInsets();
         final JPanel classNamePanel = new JPanel(new BorderLayout());
 
         final JLabel label1 = new JLabel(GuiceBundle.message("provider.class.name"));

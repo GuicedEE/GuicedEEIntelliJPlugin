@@ -43,6 +43,27 @@ public class GuicedEEProjectWizardData {
         // Messaging sub-options
         private boolean messagingRabbitMQ;
         private boolean messagingKafka;
+        private boolean messagingIBMMQ;
+
+        // Caching
+        private boolean caching;
+
+        // Caching sub-options
+        private boolean cachingHazelcast;
+
+        // Mail
+        private boolean mailClient;
+
+        // Auth sub-options
+        private boolean authProvider;
+        private boolean authOAuth2;
+        private boolean authJwt;
+        private boolean authAbac;
+        private boolean authOtp;
+        private boolean authPropertyFile;
+        private boolean authLdap;
+        private boolean authHtpasswd;
+        private boolean authHtdigest;
 
         // MicroProfile sub-options
         private boolean microProfileHealth;
@@ -50,6 +71,7 @@ public class GuicedEEProjectWizardData {
         private boolean microProfileMetrics;
         private boolean microProfileTelemetry;
         private boolean microProfileOpenAPI;
+        private boolean microProfileJwt;
 
         public ModuleData(String name, String artifactId) {
             this.name = name;
@@ -77,12 +99,28 @@ public class GuicedEEProjectWizardData {
 
             this.messagingRabbitMQ = false;
             this.messagingKafka = false;
+            this.messagingIBMMQ = false;
+
+            this.caching = false;
+            this.cachingHazelcast = false;
+
+            this.mailClient = false;
+            this.authProvider = false;
+            this.authOAuth2 = false;
+            this.authJwt = false;
+            this.authAbac = false;
+            this.authOtp = false;
+            this.authPropertyFile = false;
+            this.authLdap = false;
+            this.authHtpasswd = false;
+            this.authHtdigest = false;
 
             this.microProfileHealth = false;
             this.microProfileConfig = false;
             this.microProfileMetrics = false;
             this.microProfileTelemetry = false;
             this.microProfileOpenAPI = false;
+            this.microProfileJwt = false;
 
             this.tests = false;
             this.testsTestContainers = false;
@@ -380,6 +418,17 @@ public class GuicedEEProjectWizardData {
             }
         }
 
+        public boolean isMicroProfileJwt() {
+            return microProfileJwt;
+        }
+
+        public void setMicroProfileJwt(boolean microProfileJwt) {
+            this.microProfileJwt = microProfileJwt;
+            if (microProfileJwt) {
+                this.microProfile = true;
+            }
+        }
+
         public boolean isTests() {
             return tests;
         }
@@ -399,12 +448,83 @@ public class GuicedEEProjectWizardData {
             }
         }
 
-        // ── Backward-compatible stubs for removed features ──
-        // These exist so callers (WizardStep, TemplateBuilder) compile without errors.
-        // They always return false and setters are no-ops.
+        public boolean isMessagingKafka() { return messagingKafka; }
+        public void setMessagingKafka(boolean v) {
+            this.messagingKafka = v;
+            if (v) this.messaging = true;
+        }
 
-        @Deprecated public boolean isCaching() { return false; }
-        @Deprecated public void setCaching(boolean caching) { }
+        public boolean isMessagingIBMMQ() { return messagingIBMMQ; }
+        public void setMessagingIBMMQ(boolean v) {
+            this.messagingIBMMQ = v;
+            if (v) this.messaging = true;
+        }
+
+        public boolean isCaching() { return caching; }
+        public void setCaching(boolean caching) { this.caching = caching; }
+
+        public boolean isCachingHazelcast() { return cachingHazelcast; }
+        public void setCachingHazelcast(boolean v) {
+            this.cachingHazelcast = v;
+            if (v) this.caching = true;
+        }
+
+        public boolean isMailClient() { return mailClient; }
+        public void setMailClient(boolean v) { this.mailClient = v; }
+
+        public boolean isAuthProvider() { return authProvider; }
+        public void setAuthProvider(boolean v) { this.authProvider = v; }
+
+        // Auth sub-options
+        public boolean isAuthOAuth2() { return authOAuth2; }
+        public void setAuthOAuth2(boolean v) {
+            this.authOAuth2 = v;
+            if (v) this.authProvider = true;
+        }
+
+        public boolean isAuthJwt() { return authJwt; }
+        public void setAuthJwt(boolean v) {
+            this.authJwt = v;
+            if (v) this.authProvider = true;
+        }
+
+        public boolean isAuthAbac() { return authAbac; }
+        public void setAuthAbac(boolean v) {
+            this.authAbac = v;
+            if (v) this.authProvider = true;
+        }
+
+        public boolean isAuthOtp() { return authOtp; }
+        public void setAuthOtp(boolean v) {
+            this.authOtp = v;
+            if (v) this.authProvider = true;
+        }
+
+        public boolean isAuthPropertyFile() { return authPropertyFile; }
+        public void setAuthPropertyFile(boolean v) {
+            this.authPropertyFile = v;
+            if (v) this.authProvider = true;
+        }
+
+        public boolean isAuthLdap() { return authLdap; }
+        public void setAuthLdap(boolean v) {
+            this.authLdap = v;
+            if (v) this.authProvider = true;
+        }
+
+        public boolean isAuthHtpasswd() { return authHtpasswd; }
+        public void setAuthHtpasswd(boolean v) {
+            this.authHtpasswd = v;
+            if (v) this.authProvider = true;
+        }
+
+        public boolean isAuthHtdigest() { return authHtdigest; }
+        public void setAuthHtdigest(boolean v) {
+            this.authHtdigest = v;
+            if (v) this.authProvider = true;
+        }
+
+        // ── Backward-compatible stubs for removed features ──
 
         @Deprecated public boolean isDatabaseCassandra() { return false; }
         @Deprecated public void setDatabaseCassandra(boolean v) { }
@@ -412,22 +532,12 @@ public class GuicedEEProjectWizardData {
         @Deprecated public boolean isDatabaseMongoDB() { return false; }
         @Deprecated public void setDatabaseMongoDB(boolean v) { }
 
-        public boolean isMessagingKafka() { return messagingKafka; }
-        public void setMessagingKafka(boolean messagingKafka) {
-            this.messagingKafka = messagingKafka;
-            if (messagingKafka) {
-                this.messaging = true;
-            }
-        }
-
         @Deprecated public boolean isMessagingAMQP() { return false; }
         @Deprecated public void setMessagingAMQP(boolean v) { }
 
         @Deprecated public boolean isMessagingMQTT() { return false; }
         @Deprecated public void setMessagingMQTT(boolean v) { }
 
-        @Deprecated public boolean isCachingHazelcast() { return false; }
-        @Deprecated public void setCachingHazelcast(boolean v) { }
 
         @Deprecated public boolean isCachingVertxHazelcast() { return false; }
         @Deprecated public void setCachingVertxHazelcast(boolean v) { }
@@ -457,6 +567,7 @@ public class GuicedEEProjectWizardData {
     private boolean multiModuleProject;
     private boolean jmodPackaging;
     private boolean jlinkPackaging;
+    private boolean useModitect = true; // true = Moditect, false = maven-jlink-plugin
 
     // List of modules for multi-module projects
     private List<ModuleData> modules = new ArrayList<>();
@@ -521,6 +632,7 @@ public class GuicedEEProjectWizardData {
         multiModuleProject = false;
         jmodPackaging = false;
         jlinkPackaging = false;
+        useModitect = true;
     }
 
     public String getGroupId() {
@@ -593,6 +705,14 @@ public class GuicedEEProjectWizardData {
 
     public void setJlinkPackaging(boolean jlinkPackaging) {
         this.jlinkPackaging = jlinkPackaging;
+    }
+
+    public boolean isUseModitect() {
+        return useModitect;
+    }
+
+    public void setUseModitect(boolean useModitect) {
+        this.useModitect = useModitect;
     }
 
     public String getDescription() {

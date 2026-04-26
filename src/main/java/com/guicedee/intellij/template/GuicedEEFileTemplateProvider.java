@@ -29,7 +29,6 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String WEBSOCKET_ON_PUBLISH_TEMPLATE = "GuicedEEWebSocketOnPublish.java";
     public static final String ROUTER_CONFIGURATION_TEMPLATE = "GuicedEERouterConfiguration.java";
     public static final String RABBITMQ_CONSUMER_TEMPLATE = "GuicedEERabbitMQConsumer.java";
-    public static final String KAFKA_CONSUMER_TEMPLATE = "GuicedEEKafkaConsumer.java";
     public static final String SCAN_MODULE_INCLUSIONS_TEMPLATE = "GuicedEEScanModuleInclusions.java";
     public static final String CONFIGURATOR_TEMPLATE = "GuicedEEConfigurator.java";
     public static final String FILE_CONTENTS_SCANNER_TEMPLATE = "GuicedEEFileContentsScanner.java";
@@ -38,8 +37,14 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String PATH_CONTENTS_SCANNER_TEMPLATE = "GuicedEEPathContentsScanner.java";
     public static final String ON_CALL_SCOPE_ENTER_TEMPLATE = "GuicedEEOnCallScopeEnter.java";
     public static final String ON_CALL_SCOPE_EXIT_TEMPLATE = "GuicedEEOnCallScopeExit.java";
+    public static final String KAFKA_CONSUMER_TEMPLATE = "GuicedEEKafkaConsumer.java";
+    public static final String IBMMQ_CONSUMER_TEMPLATE = "GuicedEEIBMMQConsumer.java";
     public static final String AUTHENTICATION_PROVIDER_TEMPLATE = "GuicedEEAuthenticationProvider.java";
     public static final String AUTHORIZATION_PROVIDER_TEMPLATE = "GuicedEEAuthorizationProvider.java";
+    public static final String MAIL_CLIENT_TEMPLATE = "GuicedEEMailClient.java";
+    public static final String HEALTH_CHECK_TEMPLATE = "GuicedEEHealthCheck.java";
+    public static final String HAZELCAST_SERVER_CONFIG_TEMPLATE = "GuicedEEHazelcastServerConfig.java";
+    public static final String HAZELCAST_CLIENT_CONFIG_TEMPLATE = "GuicedEEHazelcastClientConfig.java";
 
     private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
@@ -48,8 +53,14 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         FileTemplateGroupDescriptor group = new FileTemplateGroupDescriptor("GuicedEE", GUICEDEE_ICON);
 
         group.addTemplate(new FileTemplateDescriptor(GUICE_MODULE_TEMPLATE, GUICEDEE_ICON));
-        group.addTemplate(new FileTemplateDescriptor(RABBITMQ_CONSUMER_TEMPLATE, GUICEDEE_ICON));
-        group.addTemplate(new FileTemplateDescriptor(KAFKA_CONSUMER_TEMPLATE, GUICEDEE_ICON));
+
+        // Create Messaging subgroup
+        FileTemplateGroupDescriptor messagingGroup = new FileTemplateGroupDescriptor("Messaging", GUICEDEE_ICON);
+        group.addTemplate(messagingGroup);
+
+        messagingGroup.addTemplate(new FileTemplateDescriptor(RABBITMQ_CONSUMER_TEMPLATE, GUICEDEE_ICON));
+        messagingGroup.addTemplate(new FileTemplateDescriptor(KAFKA_CONSUMER_TEMPLATE, GUICEDEE_ICON));
+        messagingGroup.addTemplate(new FileTemplateDescriptor(IBMMQ_CONSUMER_TEMPLATE, GUICEDEE_ICON));
 
         // Create Web subgroup (1st feature)
         FileTemplateGroupDescriptor webGroup = new FileTemplateGroupDescriptor("Web", GUICEDEE_ICON);
@@ -57,6 +68,13 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
 
         webGroup.addTemplate(new FileTemplateDescriptor(ROUTER_CONFIGURATION_TEMPLATE, GUICEDEE_ICON));
         webGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_CHANNEL_TEMPLATE, GUICEDEE_ICON));
+
+        // Create Auth subgroup
+        FileTemplateGroupDescriptor authGroup = new FileTemplateGroupDescriptor("Auth", GUICEDEE_ICON);
+        group.addTemplate(authGroup);
+
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTHENTICATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTHORIZATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
 
         // Create REST subgroup (2nd feature)
         FileTemplateGroupDescriptor restGroup = new FileTemplateGroupDescriptor("REST", GUICEDEE_ICON);
@@ -76,9 +94,24 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
 
         databaseGroup.addTemplate(new FileTemplateDescriptor(PERSISTENCE_MODULE_TEMPLATE, GUICEDEE_ICON));
 
-        // Create Caching subgroup (4th feature)
-        FileTemplateGroupDescriptor cachingGroup = new FileTemplateGroupDescriptor("Caching", GUICEDEE_ICON);
-        group.addTemplate(cachingGroup);
+        // Create Mail subgroup
+        FileTemplateGroupDescriptor mailGroup = new FileTemplateGroupDescriptor("Mail", GUICEDEE_ICON);
+        group.addTemplate(mailGroup);
+
+        mailGroup.addTemplate(new FileTemplateDescriptor(MAIL_CLIENT_TEMPLATE, GUICEDEE_ICON));
+
+        // Create MicroProfile subgroup
+        FileTemplateGroupDescriptor microProfileGroup = new FileTemplateGroupDescriptor("MicroProfile", GUICEDEE_ICON);
+        group.addTemplate(microProfileGroup);
+
+        microProfileGroup.addTemplate(new FileTemplateDescriptor(HEALTH_CHECK_TEMPLATE, GUICEDEE_ICON));
+
+        // Create Hazelcast subgroup
+        FileTemplateGroupDescriptor hazelcastGroup = new FileTemplateGroupDescriptor("Hazelcast", GUICEDEE_ICON);
+        group.addTemplate(hazelcastGroup);
+
+        hazelcastGroup.addTemplate(new FileTemplateDescriptor(HAZELCAST_SERVER_CONFIG_TEMPLATE, GUICEDEE_ICON));
+        hazelcastGroup.addTemplate(new FileTemplateDescriptor(HAZELCAST_CLIENT_CONFIG_TEMPLATE, GUICEDEE_ICON));
 
         // Add separator
         group.addTemplate(new FileTemplateDescriptor("", null));
@@ -91,13 +124,6 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         hooksGroup.addTemplate(new FileTemplateDescriptor(POST_STARTUP_TEMPLATE, GUICEDEE_ICON));
         hooksGroup.addTemplate(new FileTemplateDescriptor(VERTX_STARTUP_TEMPLATE, GUICEDEE_ICON));
         hooksGroup.addTemplate(new FileTemplateDescriptor(VERTX_CONFIGURATOR_TEMPLATE, GUICEDEE_ICON));
-
-        // Create Auth subgroup
-        FileTemplateGroupDescriptor authGroup = new FileTemplateGroupDescriptor("Auth", GUICEDEE_ICON);
-        group.addTemplate(authGroup);
-
-        authGroup.addTemplate(new FileTemplateDescriptor(AUTHENTICATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
-        authGroup.addTemplate(new FileTemplateDescriptor(AUTHORIZATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
 
         // Create Lifecycle group for service loaders
         FileTemplateGroupDescriptor lifecycleGroup = new FileTemplateGroupDescriptor("Lifecycle", GUICEDEE_ICON);

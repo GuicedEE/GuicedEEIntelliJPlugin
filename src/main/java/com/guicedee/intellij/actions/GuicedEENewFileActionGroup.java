@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Properties;
 
 /**
@@ -46,10 +47,18 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         // Add core items
         add(new CreateGuicedEEFileAction("Module", "Create a new Module", 
                 GuicedEEFileTemplateProvider.GUICE_MODULE_TEMPLATE));
-        add(new CreateGuicedEEFileAction("RabbitMQ Consumer", "Create a new RabbitMQ Consumer",
+
+        // Add Messaging subgroup
+        DefaultActionGroup messagingGroup = new DefaultActionGroup("Messaging", true);
+        messagingGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(messagingGroup);
+
+        messagingGroup.add(new CreateGuicedEEFileAction("RabbitMQ Consumer", "Create a new RabbitMQ Consumer",
                 GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE));
-        add(new CreateGuicedEEFileAction("Kafka Consumer", "Create a new Kafka Consumer",
+        messagingGroup.add(new CreateGuicedEEFileAction("Kafka Consumer", "Create a new Kafka Consumer",
                 GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE));
+        messagingGroup.add(new CreateGuicedEEFileAction("IBM MQ Consumer", "Create a new IBM MQ Consumer",
+                GuicedEEFileTemplateProvider.IBMMQ_CONSUMER_TEMPLATE));
 
         // Add Web subgroup
         DefaultActionGroup webGroup = new DefaultActionGroup("Web", true);
@@ -60,6 +69,16 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 GuicedEEFileTemplateProvider.ROUTER_CONFIGURATION_TEMPLATE));
         webGroup.add(new CreateGuicedEEFileAction("WebSocket Channel", "Create a new WebSocket Channel", 
                 GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE));
+
+        // Add Auth subgroup
+        DefaultActionGroup authGroup = new DefaultActionGroup("Auth", true);
+        authGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(authGroup);
+
+        authGroup.add(new CreateGuicedEEFileAction("Authentication Provider", "Create a new Authentication Provider",
+                GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("Authorization Provider", "Create a new Authorization Provider",
+                GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE));
 
         // Add WebSockets group
         DefaultActionGroup webSocketsGroup = new DefaultActionGroup("WebSockets", true);
@@ -91,20 +110,31 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         databaseGroup.add(new CreateGuicedEEFileAction("Persistence Module", "Create a new Persistence Module", 
                 GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
 
-        // Add Caching subgroup
-        DefaultActionGroup cachingGroup = new DefaultActionGroup("Caching", true);
-        cachingGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(cachingGroup);
+        // Add Mail subgroup
+        DefaultActionGroup mailGroup = new DefaultActionGroup("Mail", true);
+        mailGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(mailGroup);
 
-        // Add Auth subgroup
-        DefaultActionGroup authGroup = new DefaultActionGroup("Auth", true);
-        authGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(authGroup);
+        mailGroup.add(new CreateGuicedEEFileAction("Mail Client", "Create a new Mail Client",
+                GuicedEEFileTemplateProvider.MAIL_CLIENT_TEMPLATE));
 
-        authGroup.add(new CreateGuicedEEFileAction("Authentication Provider", "Create a new Authentication Provider (IGuicedAuthenticationProvider)",
-                GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE));
-        authGroup.add(new CreateGuicedEEFileAction("Authorization Provider", "Create a new Authorization Provider (IGuicedAuthorizationProvider)",
-                GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE));
+        // Add MicroProfile subgroup
+        DefaultActionGroup microProfileGroup = new DefaultActionGroup("MicroProfile", true);
+        microProfileGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(microProfileGroup);
+
+        microProfileGroup.add(new CreateGuicedEEFileAction("Health Check", "Create a new Health Check",
+                GuicedEEFileTemplateProvider.HEALTH_CHECK_TEMPLATE));
+
+        // Add Hazelcast subgroup
+        DefaultActionGroup hazelcastGroup = new DefaultActionGroup("Hazelcast", true);
+        hazelcastGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(hazelcastGroup);
+
+        hazelcastGroup.add(new CreateGuicedEEFileAction("Server Config", "Create a new Hazelcast Server Configuration",
+                GuicedEEFileTemplateProvider.HAZELCAST_SERVER_CONFIG_TEMPLATE));
+        hazelcastGroup.add(new CreateGuicedEEFileAction("Client Config", "Create a new Hazelcast Client Configuration",
+                GuicedEEFileTemplateProvider.HAZELCAST_CLIENT_CONFIG_TEMPLATE));
 
         // Add global Hooks group
         DefaultActionGroup globalHooksGroup = new DefaultActionGroup("Hooks", true);
@@ -184,10 +214,13 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
      */
     private static boolean isGuicedEEApplication(Project project) {
         // Look for module-info.java files
-        PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
-                project, "module-info.java", GlobalSearchScope.projectScope(project));
+        PsiManager psiManager = PsiManager.getInstance(project);
+        Collection<VirtualFile> moduleInfoVFiles = FilenameIndex.getVirtualFilesByName(
+                "module-info.java", GlobalSearchScope.projectScope(project));
 
-        for (PsiFile file : moduleInfoFiles) {
+        for (VirtualFile vf : moduleInfoVFiles) {
+            PsiFile file = psiManager.findFile(vf);
+            if (file == null) continue;
             if (file instanceof PsiJavaFile) {
                 String text = file.getText();
                 // Check if the module-info.java file contains references to GuicedEE dependencies
@@ -288,7 +321,6 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         private JCheckBox databaseJDBCCheckBox;
 
         private JCheckBox messagingRabbitMQCheckBox;
-        private JCheckBox messagingKafkaCheckBox;
 
         private GuicedEEProjectWizardData.ModuleData moduleData;
 
@@ -344,10 +376,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             messagingPanel.setBorder(BorderFactory.createTitledBorder("Messaging Options"));
 
             messagingRabbitMQCheckBox = new JCheckBox("RabbitMQ");
-            messagingKafkaCheckBox = new JCheckBox("Kafka");
 
             messagingPanel.add(messagingRabbitMQCheckBox);
-            messagingPanel.add(messagingKafkaCheckBox);
 
             // Add all panels to main panel
             JPanel optionsPanel = new JPanel(new GridLayout(0, 1));
@@ -374,7 +404,6 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             messagingCheckBox.addActionListener(e -> {
                 boolean selected = messagingCheckBox.isSelected();
                 messagingRabbitMQCheckBox.setEnabled(selected);
-                messagingKafkaCheckBox.setEnabled(selected);
             });
 
             // Initialize enabled state
@@ -383,7 +412,6 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             webReactiveSwaggerCheckBox.setEnabled(false);
             databaseJDBCCheckBox.setEnabled(false);
             messagingRabbitMQCheckBox.setEnabled(false);
-            messagingKafkaCheckBox.setEnabled(false);
 
             return panel;
         }
@@ -404,7 +432,6 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             moduleData.setDatabaseJDBC(databaseJDBCCheckBox.isSelected());
 
             moduleData.setMessagingRabbitMQ(messagingRabbitMQCheckBox.isSelected());
-            moduleData.setMessagingKafka(messagingKafkaCheckBox.isSelected());
 
             super.doOKAction();
         }
@@ -629,10 +656,13 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToInterface.put(GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceModule");
             templateToInterface.put(GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE, "com.guicedee.rabbit.QueueConsumer");
             templateToInterface.put(GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE, "com.guicedee.kafka.KafkaTopicConsumer");
+            templateToInterface.put(GuicedEEFileTemplateProvider.IBMMQ_CONSUMER_TEMPLATE, "com.guicedee.ibmmq.IBMMQConsumer");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_STARTUP_TEMPLATE, "com.guicedee.vertx.spi.VerticleStartup");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_CONFIGURATOR_TEMPLATE, "com.guicedee.vertx.spi.VertxConfigurator");
             templateToInterface.put(GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthenticationProvider");
             templateToInterface.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthorizationProvider");
+            templateToInterface.put(GuicedEEFileTemplateProvider.HAZELCAST_SERVER_CONFIG_TEMPLATE, "com.guicedee.guicedhazelcast.services.IGuicedHazelcastServerConfig");
+            templateToInterface.put(GuicedEEFileTemplateProvider.HAZELCAST_CLIENT_CONFIG_TEMPLATE, "com.guicedee.guicedhazelcast.services.IGuicedHazelcastClientConfig");
 
             // Check if this template corresponds to a service interface
             String interfaceName = templateToInterface.get(templateName);
@@ -736,7 +766,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             }
 
             // Fallback: use project base dir / src / main / resources
-            VirtualFile projectDir = dir.getProject().getBaseDir();
+            VirtualFile projectDir = com.intellij.openapi.project.ProjectUtil.guessProjectDir(dir.getProject());
             if (projectDir == null) {
                 return null;
             }
@@ -762,10 +792,11 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         private void updateModuleInfoFile(Project project, String interfaceName, String fullClassName, PsiDirectory dir) {
             try {
                 // Find module-info.java files
-                PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
-                    project, "module-info.java", GlobalSearchScope.projectScope(project));
+                PsiManager psiManager = PsiManager.getInstance(project);
+                Collection<VirtualFile> moduleInfoVFiles = FilenameIndex.getVirtualFilesByName(
+                    "module-info.java", GlobalSearchScope.projectScope(project));
 
-                if (moduleInfoFiles.length == 0) {
+                if (moduleInfoVFiles.isEmpty()) {
                     return; // No module-info.java found
                 }
 
@@ -773,7 +804,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 VirtualFile dirFile = dir.getVirtualFile();
                 VirtualFile sourceRoot = findSourceRoot(dirFile);
 
-                for (PsiFile moduleInfoFile : moduleInfoFiles) {
+                for (VirtualFile vf : moduleInfoVFiles) {
+                    PsiFile moduleInfoFile = psiManager.findFile(vf);
                     if (!(moduleInfoFile instanceof PsiJavaFile)) {
                         continue;
                     }
@@ -909,17 +941,33 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             String[][] kafkaDeps = {{"com.guicedee", "kafka", "com.guicedee.kafka"}};
             templateToDependencies.put(GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE, kafkaDeps);
 
+            // IBM MQ: com.guicedee:ibmmq -> requires com.guicedee.ibmmq
+            String[][] ibmmqDeps = {{"com.guicedee", "ibmmq", "com.guicedee.ibmmq"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.IBMMQ_CONSUMER_TEMPLATE, ibmmqDeps);
+
+            // Auth: com.guicedee:web -> requires com.guicedee.vertx.web
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE, webDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, webDeps);
+
+            // Mail: com.guicedee:mailclient -> requires com.guicedee.mail
+            String[][] mailDeps = {{"com.guicedee", "mailclient", "com.guicedee.mail"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.MAIL_CLIENT_TEMPLATE, mailDeps);
+
+            // Health: com.guicedee:health -> requires com.guicedee.health
+            String[][] healthDeps = {{"com.guicedee", "health", "com.guicedee.health"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.HEALTH_CHECK_TEMPLATE, healthDeps);
+
+            // Hazelcast: com.guicedee:hazelcast -> requires com.guicedee.guicedhazelcast
+            String[][] hazelcastDeps = {{"com.guicedee", "hazelcast", "com.guicedee.guicedhazelcast"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.HAZELCAST_SERVER_CONFIG_TEMPLATE, hazelcastDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.HAZELCAST_CLIENT_CONFIG_TEMPLATE, hazelcastDeps);
+
             // WebSockets: com.guicedee:websockets -> requires com.guicedee.vertx.sockets
             String[][] wsDeps = {{"com.guicedee", "websockets", "com.guicedee.vertx.sockets"}};
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE, wsDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE, wsDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE, wsDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_ON_PUBLISH_TEMPLATE, wsDeps);
-
-            // Auth: com.guicedee:vertx -> requires com.guicedee.vertx (auth is part of the vertx module)
-            String[][] authDeps = {{"com.guicedee", "vertx", "com.guicedee.vertx"}};
-            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE, authDeps);
-            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, authDeps);
 
             String[][] deps = templateToDependencies.get(templateName);
             if (deps == null) {
@@ -994,17 +1042,19 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
          */
         private void addRequiresToModuleInfo(Project project, String moduleName, PsiDirectory dir) {
             try {
-                PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
-                    project, "module-info.java", GlobalSearchScope.projectScope(project));
+                PsiManager psiManager = PsiManager.getInstance(project);
+                Collection<VirtualFile> moduleInfoVFiles = FilenameIndex.getVirtualFilesByName(
+                    "module-info.java", GlobalSearchScope.projectScope(project));
 
-                if (moduleInfoFiles.length == 0) {
+                if (moduleInfoVFiles.isEmpty()) {
                     return;
                 }
 
                 VirtualFile dirFile = dir.getVirtualFile();
                 VirtualFile sourceRoot = findSourceRoot(dirFile);
 
-                for (PsiFile moduleInfoFile : moduleInfoFiles) {
+                for (VirtualFile vf : moduleInfoVFiles) {
+                    PsiFile moduleInfoFile = psiManager.findFile(vf);
                     if (!(moduleInfoFile instanceof PsiJavaFile)) continue;
 
                     String path = moduleInfoFile.getVirtualFile().getPath();
@@ -1153,42 +1203,20 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 boolean isRabbitMQEnabled = isRabbitMQEnabled(project);
                 e.getPresentation().setEnabledAndVisible(isRabbitMQEnabled);
             }
-
-            if (templateName.equals(GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE)) {
-                // Only enable Kafka Consumer if Kafka is enabled in the project
-                boolean isKafkaEnabled = isKafkaEnabled(project);
-                e.getPresentation().setEnabledAndVisible(isKafkaEnabled);
-            }
         }
 
         private boolean isRabbitMQEnabled(Project project) {
             // Look for module-info.java files
-            PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
-                    project, "module-info.java", GlobalSearchScope.projectScope(project));
+            PsiManager psiManager = PsiManager.getInstance(project);
+            Collection<VirtualFile> moduleInfoVFiles = FilenameIndex.getVirtualFilesByName(
+                    "module-info.java", GlobalSearchScope.projectScope(project));
 
-            for (PsiFile file : moduleInfoFiles) {
+            for (VirtualFile vf : moduleInfoVFiles) {
+                PsiFile file = psiManager.findFile(vf);
                 if (file instanceof PsiJavaFile) {
                     String text = file.getText();
                     // Check if the module-info.java file contains a reference to com.guicedee.rabbit
                     if (text.contains("requires") && text.contains("com.guicedee.rabbit")) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private boolean isKafkaEnabled(Project project) {
-            // Look for module-info.java files
-            PsiFile[] moduleInfoFiles = FilenameIndex.getFilesByName(
-                    project, "module-info.java", GlobalSearchScope.projectScope(project));
-
-            for (PsiFile file : moduleInfoFiles) {
-                if (file instanceof PsiJavaFile) {
-                    String text = file.getText();
-                    // Check if the module-info.java file contains a reference to com.guicedee.kafka
-                    if (text.contains("requires") && text.contains("com.guicedee.kafka")) {
                         return true;
                     }
                 }

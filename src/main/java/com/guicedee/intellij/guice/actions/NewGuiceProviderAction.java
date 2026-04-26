@@ -2,6 +2,7 @@
 package com.guicedee.intellij.guice.actions;
 
 import com.guicedee.intellij.guice.GuiceBundle;
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDirectory;
@@ -55,7 +56,7 @@ public class NewGuiceProviderAction extends GeneratePluginClassAction{
             return PsiElement.EMPTY_ARRAY;
         }
         try{
-            final PsiFile newFile = elementFactory.createFileFromText(newName + ".java", beanClassString);
+            final PsiFile newFile = elementFactory.createFileFromText(newName + ".java", JavaFileType.INSTANCE, beanClassString);
             final JavaCodeStyleManager codeStyleManager = JavaCodeStyleManager.getInstance(project);
             final PsiElement shortenedFile = codeStyleManager.shortenClassReferences(newFile);
             final PsiElement reformattedFile = CodeStyleManager.getInstance(project).reformat(shortenedFile);

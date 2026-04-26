@@ -9,7 +9,6 @@ import com.guicedee.intellij.guice.GuiceBundle;
 import com.guicedee.intellij.guice.constants.GuiceAnnotations;
 import com.guicedee.intellij.guice.model.beans.BindDescriptor;
 import com.guicedee.intellij.guice.model.jam.GuiceProvides;
-import com.guicedee.intellij.guice.model.renderers.GuiceBindingClassPsiElementListCellRenderer;
 import com.guicedee.intellij.guice.GuiceIcons;
 import com.guicedee.intellij.guice.utils.GuiceUtils;
 import com.intellij.openapi.module.Module;
@@ -165,7 +164,6 @@ public final class GuiceInjectionsClassAnnotator extends RelatedItemLineMarkerPr
         NavigationGutterIconBuilder.create(GuiceIcons.GoogleSmall, GuiceBundle.GUICE)
           .setPopupTitle(GuiceBundle.message("GuiceClassAnnotator.popup.title"))
           .setTooltipText(GuiceBundle.message("GuiceClassAnnotator.popup.tooltip.text"))
-          .setCellRenderer(GuiceBindingClassPsiElementListCellRenderer::new)
           .setTargets(allTargets);
 
       result.add(builder.createLineMarkerInfo(identifier));

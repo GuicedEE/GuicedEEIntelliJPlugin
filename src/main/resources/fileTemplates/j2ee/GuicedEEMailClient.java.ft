@@ -1,0 +1,25 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.guicedservlets.services.mailing.GuicedMail;
+import com.guicedee.guicedservlets.services.mailing.EmailMessage;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+/**
+ * A mail client service for sending emails.
+ */
+@Singleton
+public class ${NAME} {
+
+    @Inject
+    private GuicedMail mailClient;
+
+    public void sendEmail(String to, String subject, String body) {
+        EmailMessage message = new EmailMessage()
+                .setTo(to)
+                .setSubject(subject)
+                .setBody(body);
+        mailClient.send(message);
+    }
+}
+

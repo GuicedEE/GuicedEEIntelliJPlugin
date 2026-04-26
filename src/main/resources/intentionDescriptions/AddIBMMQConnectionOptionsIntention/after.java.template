@@ -1,0 +1,9 @@
+@com.guicedee.ibmmq.IBMMQConnectionOptions(
+    value = "default",
+    host = "localhost",
+    port = 1414,
+    queueManager = "QM1",
+    channel = "DEV.APP.SVRCONN"
+)
+package com.example.messaging;
+
