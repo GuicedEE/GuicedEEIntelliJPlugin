@@ -96,6 +96,15 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         cachingGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
         add(cachingGroup);
 
+        // Add Auth subgroup
+        DefaultActionGroup authGroup = new DefaultActionGroup("Auth", true);
+        authGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(authGroup);
+
+        authGroup.add(new CreateGuicedEEFileAction("Authentication Provider", "Create a new Authentication Provider (IGuicedAuthenticationProvider)",
+                GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("Authorization Provider", "Create a new Authorization Provider (IGuicedAuthorizationProvider)",
+                GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE));
 
         // Add global Hooks group
         DefaultActionGroup globalHooksGroup = new DefaultActionGroup("Hooks", true);
@@ -622,6 +631,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToInterface.put(GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE, "com.guicedee.kafka.KafkaTopicConsumer");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_STARTUP_TEMPLATE, "com.guicedee.vertx.spi.VerticleStartup");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_CONFIGURATOR_TEMPLATE, "com.guicedee.vertx.spi.VertxConfigurator");
+            templateToInterface.put(GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthenticationProvider");
+            templateToInterface.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthorizationProvider");
 
             // Check if this template corresponds to a service interface
             String interfaceName = templateToInterface.get(templateName);
@@ -904,6 +915,11 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE, wsDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE, wsDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_ON_PUBLISH_TEMPLATE, wsDeps);
+
+            // Auth: com.guicedee:vertx -> requires com.guicedee.vertx (auth is part of the vertx module)
+            String[][] authDeps = {{"com.guicedee", "vertx", "com.guicedee.vertx"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE, authDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, authDeps);
 
             String[][] deps = templateToDependencies.get(templateName);
             if (deps == null) {

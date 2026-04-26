@@ -1,0 +1,15 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.vertx.auth.IGuicedAuthorizationProvider;
+import io.vertx.ext.auth.authorization.AuthorizationProvider;
+
+public class ${NAME} implements IGuicedAuthorizationProvider {
+
+    @Override
+    public AuthorizationProvider getAuthorizationProvider() {
+        // Return your authorization provider implementation
+        // e.g. role-based, permission-based, wildcard, etc.
+        throw new UnsupportedOperationException("Implement your authorization provider");
+    }
+}
+

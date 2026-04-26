@@ -38,6 +38,8 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String PATH_CONTENTS_SCANNER_TEMPLATE = "GuicedEEPathContentsScanner.java";
     public static final String ON_CALL_SCOPE_ENTER_TEMPLATE = "GuicedEEOnCallScopeEnter.java";
     public static final String ON_CALL_SCOPE_EXIT_TEMPLATE = "GuicedEEOnCallScopeExit.java";
+    public static final String AUTHENTICATION_PROVIDER_TEMPLATE = "GuicedEEAuthenticationProvider.java";
+    public static final String AUTHORIZATION_PROVIDER_TEMPLATE = "GuicedEEAuthorizationProvider.java";
 
     private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
@@ -89,6 +91,13 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         hooksGroup.addTemplate(new FileTemplateDescriptor(POST_STARTUP_TEMPLATE, GUICEDEE_ICON));
         hooksGroup.addTemplate(new FileTemplateDescriptor(VERTX_STARTUP_TEMPLATE, GUICEDEE_ICON));
         hooksGroup.addTemplate(new FileTemplateDescriptor(VERTX_CONFIGURATOR_TEMPLATE, GUICEDEE_ICON));
+
+        // Create Auth subgroup
+        FileTemplateGroupDescriptor authGroup = new FileTemplateGroupDescriptor("Auth", GUICEDEE_ICON);
+        group.addTemplate(authGroup);
+
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTHENTICATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTHORIZATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
 
         // Create Lifecycle group for service loaders
         FileTemplateGroupDescriptor lifecycleGroup = new FileTemplateGroupDescriptor("Lifecycle", GUICEDEE_ICON);

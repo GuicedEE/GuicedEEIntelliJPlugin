@@ -1,0 +1,15 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.vertx.auth.IGuicedAuthenticationProvider;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
+
+public class ${NAME} implements IGuicedAuthenticationProvider {
+
+    @Override
+    public AuthenticationProvider getAuthenticationProvider() {
+        // Return your authentication provider implementation
+        // e.g. UsernamePasswordCredentials-based, JWT, OAuth2, etc.
+        throw new UnsupportedOperationException("Implement your authentication provider");
+    }
+}
+

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.0.0-RC9"
+version = "2.0.0-RC10"
 
 repositories {
   mavenCentral()
@@ -35,7 +35,7 @@ intellijPlatform {
     }
 
     changeNotes = """
-      <h3>2.0.0-RC9</h3>
+      <h3>2.0.0-RC10</h3>
       <ul>
         <li>Merged JetBrains Guice plugin with GuicedEE framework support</li>
         <li>Full JIT (just-in-time) binding support — click-through navigation for concrete class injection</li>
