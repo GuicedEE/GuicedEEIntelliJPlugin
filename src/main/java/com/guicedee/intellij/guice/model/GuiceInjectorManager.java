@@ -174,6 +174,7 @@ public final class GuiceInjectorManager {
           if (parent instanceof PsiMethodCallExpression) {
             expressions.add((PsiMethodCallExpression) parent);
           }
+          return true;
         });
       }
     }
