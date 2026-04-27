@@ -561,7 +561,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isAuthJwt())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <groupId>com.guicedee.microprofile</groupId>\n");
                 dependencies.append("            <artifactId>jwt</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
