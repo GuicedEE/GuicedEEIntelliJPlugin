@@ -1,0 +1,22 @@
+package ${PACKAGE_NAME};
+
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+
+/**
+ * SOAP web service contract for ${NAME}.
+ * <p>
+ * Define your operations here with JAX-WS annotations.
+ * The implementation class must reference this interface
+ * via {@code @WebService(endpointInterface = "...")}.
+ */
+@WebService(targetNamespace = "http://${PACKAGE_NAME}/${NAME}", name = "${NAME}")
+public interface ${NAME} {
+
+    @WebMethod(operationName = "hello")
+    @WebResult(name = "greeting")
+    String hello(@WebParam(name = "name") String name);
+}
+

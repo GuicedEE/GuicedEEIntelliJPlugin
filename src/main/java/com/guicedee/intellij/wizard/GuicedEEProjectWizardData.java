@@ -30,6 +30,7 @@ public class GuicedEEProjectWizardData {
         private boolean webReactiveRestClient;
         private boolean webReactiveWebSockets;
         private boolean webReactiveSwagger;
+        private boolean webReactiveWebServices;
 
         // Database sub-options
         private boolean databasePersistence;
@@ -50,6 +51,7 @@ public class GuicedEEProjectWizardData {
 
         // Caching sub-options
         private boolean cachingHazelcast;
+        private boolean cachingEhCache;
 
         // Mail
         private boolean mailClient;
@@ -88,6 +90,7 @@ public class GuicedEEProjectWizardData {
             this.webReactiveRestClient = false;
             this.webReactiveWebSockets = false;
             this.webReactiveSwagger = false;
+            this.webReactiveWebServices = false;
 
             this.databasePersistence = false;
             this.databasePostgreSQL = false;
@@ -103,6 +106,7 @@ public class GuicedEEProjectWizardData {
 
             this.caching = false;
             this.cachingHazelcast = false;
+            this.cachingEhCache = false;
 
             this.mailClient = false;
             this.authProvider = false;
@@ -247,6 +251,17 @@ public class GuicedEEProjectWizardData {
         public void setWebReactiveSwagger(boolean webReactiveSwagger) {
             this.webReactiveSwagger = webReactiveSwagger;
             if (webReactiveSwagger) {
+                this.webReactive = true;
+            }
+        }
+
+        public boolean isWebReactiveWebServices() {
+            return webReactiveWebServices;
+        }
+
+        public void setWebReactiveWebServices(boolean webReactiveWebServices) {
+            this.webReactiveWebServices = webReactiveWebServices;
+            if (webReactiveWebServices) {
                 this.webReactive = true;
             }
         }
@@ -466,6 +481,12 @@ public class GuicedEEProjectWizardData {
         public boolean isCachingHazelcast() { return cachingHazelcast; }
         public void setCachingHazelcast(boolean v) {
             this.cachingHazelcast = v;
+            if (v) this.caching = true;
+        }
+
+        public boolean isCachingEhCache() { return cachingEhCache; }
+        public void setCachingEhCache(boolean v) {
+            this.cachingEhCache = v;
             if (v) this.caching = true;
         }
 

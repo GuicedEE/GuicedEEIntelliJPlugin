@@ -422,6 +422,13 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>rest</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
+            if (moduleData.isWebReactiveWebServices())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>webservices</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
         }
 
         // Database dependencies
@@ -487,6 +494,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
                 dependencies.append("            <artifactId>hazelcast</artifactId>\n");
                 dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCachingEhCache())
+            {
+                appendEhCacheDependencies(dependencies);
             }
         }
 
@@ -862,6 +873,18 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "admin:Protected Area:6094dc75b0d1e9c1fba933686a38d1b6\n";
     }
 
+    private void appendEhCacheDependencies(StringBuilder dependencies)
+    {
+        dependencies.append("        <dependency>\n");
+        dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
+        dependencies.append("            <artifactId>ehcache</artifactId>\n");
+        dependencies.append("        </dependency>\n");
+        dependencies.append("        <dependency>\n");
+        dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
+        dependencies.append("            <artifactId>hibernate-jcache</artifactId>\n");
+        dependencies.append("        </dependency>\n");
+    }
+
     private void createModuleInfo(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         StringBuilder requires = new StringBuilder();
@@ -886,6 +909,11 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isWebReactiveSwagger())
             {
                 requires.append("\trequires transitive com.guicedee.swagger;\n");
+            }
+
+            if (moduleData.isWebReactiveWebServices())
+            {
+                requires.append("\trequires transitive com.guicedee.webservices;\n");
             }
         }
 
@@ -978,9 +1006,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 requires.append("\trequires transitive com.guicedee.guicedhazelcast;\n");
             }
 
-            if (moduleData.isCachingVertxHazelcast())
+            if (moduleData.isCachingEhCache())
             {
-                requires.append("\trequires io.vertx.hazelcast;\n");
+                requires.append("\trequires transitive com.guicedee.modules.services.ehcache;\n");
+                requires.append("\trequires transitive org.hibernate.orm.jcache;\n");
             }
         }
 
@@ -2325,6 +2354,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>guiced-swagger</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
+
+            if (moduleData.isWebReactiveWebServices())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>webservices</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
         }
 
         // Database dependencies
@@ -2457,12 +2494,9 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("        </dependency>\n");
             }
 
-            if (moduleData.isCachingVertxHazelcast())
+            if (moduleData.isCachingEhCache())
             {
-                dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>io.vertx</groupId>\n");
-                dependencies.append("            <artifactId>vertx-hazelcast</artifactId>\n");
-                dependencies.append("        </dependency>\n");
+                appendEhCacheDependencies(dependencies);
             }
         }
 

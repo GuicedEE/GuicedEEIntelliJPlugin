@@ -45,6 +45,8 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String HEALTH_CHECK_TEMPLATE = "GuicedEEHealthCheck.java";
     public static final String HAZELCAST_SERVER_CONFIG_TEMPLATE = "GuicedEEHazelcastServerConfig.java";
     public static final String HAZELCAST_CLIENT_CONFIG_TEMPLATE = "GuicedEEHazelcastClientConfig.java";
+    public static final String SOAP_SERVICE_INTERFACE_TEMPLATE = "GuicedEESoapServiceInterface.java";
+    public static final String SOAP_SERVICE_IMPL_TEMPLATE = "GuicedEESoapServiceImpl.java";
 
     private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
@@ -87,6 +89,13 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_IMPL_WITH_SESSION_TEMPLATE, GUICEDEE_ICON));
         restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_IMPL_WITH_SESSION_PARAM_TEMPLATE, GUICEDEE_ICON));
         restGroup.addTemplate(new FileTemplateDescriptor(REST_CLIENT_TEMPLATE, GUICEDEE_ICON));
+
+        // Create SOAP subgroup
+        FileTemplateGroupDescriptor soapGroup = new FileTemplateGroupDescriptor("SOAP", GUICEDEE_ICON);
+        group.addTemplate(soapGroup);
+
+        soapGroup.addTemplate(new FileTemplateDescriptor(SOAP_SERVICE_INTERFACE_TEMPLATE, GUICEDEE_ICON));
+        soapGroup.addTemplate(new FileTemplateDescriptor(SOAP_SERVICE_IMPL_TEMPLATE, GUICEDEE_ICON));
 
         // Create Database subgroup (3rd feature)
         FileTemplateGroupDescriptor databaseGroup = new FileTemplateGroupDescriptor("Database", GUICEDEE_ICON);

@@ -1,0 +1,22 @@
+package ${PACKAGE_NAME};
+
+import jakarta.jws.WebService;
+
+/**
+ * Implementation of the ${INTERFACE_NAME} SOAP endpoint.
+ * <p>
+ * This class is discovered automatically via classpath scanning
+ * and published by GuicedEE's WebServicePostStartup.
+ */
+@WebService(endpointInterface = "${PACKAGE_NAME}.${INTERFACE_NAME}",
+        serviceName = "${INTERFACE_NAME}",
+        portName = "${INTERFACE_NAME}Port",
+        targetNamespace = "http://${PACKAGE_NAME}/${INTERFACE_NAME}")
+public class ${NAME} implements ${INTERFACE_NAME} {
+
+    @Override
+    public String hello(String name) {
+        return "Hello " + name;
+    }
+}
+

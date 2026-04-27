@@ -70,6 +70,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JCheckBox myModuleWebReactiveRestClientCheckBox;
     private JCheckBox myModuleWebReactiveWebSocketsCheckBox;
     private JCheckBox myModuleWebReactiveSwaggerCheckBox;
+    private JCheckBox myModuleWebReactiveWebServicesCheckBox;
     private JCheckBox myModuleWebReactiveAuthCheckBox;
     private JPanel myModuleAuthOptionsPanel;
     private JCheckBox myModuleAuthOAuth2CheckBox;
@@ -105,7 +106,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     // Caching sub-options
     private JPanel myModuleCachingOptionsPanel;
     private JCheckBox myModuleCachingHazelcastCheckBox;
-    private JCheckBox myModuleCachingVertxHazelcastCheckBox;
+    private JCheckBox myModuleCachingEhCacheCheckBox;
 
     // MicroProfile sub-options
     private JPanel myModuleMicroProfileOptionsPanel;
@@ -114,8 +115,6 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JCheckBox myModuleMicroProfileTelemetryCheckBox;
     private JCheckBox myModuleMicroProfileOpenAPICheckBox;
     private JCheckBox myModuleMicroProfileJwtCheckBox;
-    private JCheckBox myModuleMicroProfileLoggingCheckBox;
-    private JCheckBox myModuleMicroProfileZipkinCheckBox;
 
     // Tests sub-options
     private JCheckBox myModuleTestsCheckBox;
@@ -535,11 +534,13 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleWebReactiveRestClientCheckBox = new JCheckBox("Rest Client");
         myModuleWebReactiveWebSocketsCheckBox = new JCheckBox("Web Sockets");
         myModuleWebReactiveSwaggerCheckBox = new JCheckBox("Swagger");
+        myModuleWebReactiveWebServicesCheckBox = new JCheckBox("Web Services");
         myModuleWebReactiveAuthCheckBox = new JCheckBox("Auth");
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveRestCheckBox);
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveRestClientCheckBox);
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveWebSocketsCheckBox);
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveSwaggerCheckBox);
+        myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveWebServicesCheckBox);
         myModuleWebReactiveOptionsPanel.add(myModuleWebReactiveAuthCheckBox);
         myModuleWebReactiveOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleWebReactiveOptionsPanel.setVisible(false);
@@ -608,9 +609,9 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         // Initialize Caching sub-options
         myModuleCachingOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         myModuleCachingHazelcastCheckBox = new JCheckBox("Hazelcast");
-        myModuleCachingVertxHazelcastCheckBox = new JCheckBox("VertxHazelcast");
+        myModuleCachingEhCacheCheckBox = new JCheckBox("EhCache");
         myModuleCachingOptionsPanel.add(myModuleCachingHazelcastCheckBox);
-        myModuleCachingOptionsPanel.add(myModuleCachingVertxHazelcastCheckBox);
+        myModuleCachingOptionsPanel.add(myModuleCachingEhCacheCheckBox);
         myModuleCachingOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleCachingOptionsPanel.setVisible(false);
 
@@ -621,15 +622,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMicroProfileTelemetryCheckBox = new JCheckBox("Telemetry");
         myModuleMicroProfileOpenAPICheckBox = new JCheckBox("OpenAPI");
         myModuleMicroProfileJwtCheckBox = new JCheckBox("JWT");
-        myModuleMicroProfileLoggingCheckBox = new JCheckBox("Logging");
-        myModuleMicroProfileZipkinCheckBox = new JCheckBox("Zipkin");
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileHealthCheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileConfigCheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileTelemetryCheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileOpenAPICheckBox);
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileJwtCheckBox);
-        myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileLoggingCheckBox);
-        myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileZipkinCheckBox);
         myModuleMicroProfileOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleMicroProfileOptionsPanel.setVisible(false);
 
@@ -736,6 +733,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleWebReactiveRestClientCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleWebReactiveWebSocketsCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleWebReactiveSwaggerCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleWebReactiveWebServicesCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleWebReactiveAuthCheckBox.addActionListener(e -> {
             myModuleAuthOptionsPanel.setVisible(myModuleWebReactiveAuthCheckBox.isSelected());
             updateSelectedModule();
@@ -781,15 +779,13 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMessagingMailClientCheckBox.addActionListener(e -> updateSelectedModule());
 
         myModuleCachingHazelcastCheckBox.addActionListener(e -> updateSelectedModule());
-        myModuleCachingVertxHazelcastCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCachingEhCacheCheckBox.addActionListener(e -> updateSelectedModule());
 
         myModuleMicroProfileHealthCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileConfigCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileTelemetryCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileOpenAPICheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileJwtCheckBox.addActionListener(e -> updateSelectedModule());
-        myModuleMicroProfileLoggingCheckBox.addActionListener(e -> updateSelectedModule());
-        myModuleMicroProfileZipkinCheckBox.addActionListener(e -> updateSelectedModule());
 
         // Add action listener for Tests
         myModuleTestsCheckBox.addActionListener(e -> {
@@ -875,6 +871,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleWebReactiveRestClientCheckBox.setSelected(selectedModule.isWebReactiveRestClient());
             myModuleWebReactiveWebSocketsCheckBox.setSelected(selectedModule.isWebReactiveWebSockets());
             myModuleWebReactiveSwaggerCheckBox.setSelected(selectedModule.isWebReactiveSwagger());
+            myModuleWebReactiveWebServicesCheckBox.setSelected(selectedModule.isWebReactiveWebServices());
             myModuleWebReactiveAuthCheckBox.setSelected(selectedModule.isAuthProvider());
             myModuleWebReactiveOptionsPanel.setVisible(selectedModule.isWebReactive());
 
@@ -915,7 +912,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Set Caching sub-options
             myModuleCachingHazelcastCheckBox.setSelected(selectedModule.isCachingHazelcast());
-            myModuleCachingVertxHazelcastCheckBox.setSelected(selectedModule.isCachingVertxHazelcast());
+            myModuleCachingEhCacheCheckBox.setSelected(selectedModule.isCachingEhCache());
             myModuleCachingOptionsPanel.setVisible(selectedModule.isCaching());
 
             // Set MicroProfile sub-options
@@ -924,8 +921,6 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleMicroProfileTelemetryCheckBox.setSelected(selectedModule.isMicroProfileTelemetry());
             myModuleMicroProfileOpenAPICheckBox.setSelected(selectedModule.isMicroProfileOpenAPI());
             myModuleMicroProfileJwtCheckBox.setSelected(selectedModule.isMicroProfileJwt());
-            myModuleMicroProfileLoggingCheckBox.setSelected(selectedModule.isMicroProfileLogging());
-            myModuleMicroProfileZipkinCheckBox.setSelected(selectedModule.isMicroProfileZipkin());
             myModuleMicroProfileOptionsPanel.setVisible(selectedModule.isMicroProfile());
 
             // Set Tests sub-options
@@ -954,6 +949,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleWebReactiveRestClientCheckBox.setSelected(false);
             myModuleWebReactiveWebSocketsCheckBox.setSelected(false);
             myModuleWebReactiveSwaggerCheckBox.setSelected(false);
+            myModuleWebReactiveWebServicesCheckBox.setSelected(false);
             myModuleWebReactiveAuthCheckBox.setSelected(false);
             myModuleWebReactiveOptionsPanel.setVisible(false);
 
@@ -994,7 +990,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Clear Caching sub-options
             myModuleCachingHazelcastCheckBox.setSelected(false);
-            myModuleCachingVertxHazelcastCheckBox.setSelected(false);
+            myModuleCachingEhCacheCheckBox.setSelected(false);
             myModuleCachingOptionsPanel.setVisible(false);
 
             // Clear MicroProfile sub-options
@@ -1003,8 +999,6 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleMicroProfileTelemetryCheckBox.setSelected(false);
             myModuleMicroProfileOpenAPICheckBox.setSelected(false);
             myModuleMicroProfileJwtCheckBox.setSelected(false);
-            myModuleMicroProfileLoggingCheckBox.setSelected(false);
-            myModuleMicroProfileZipkinCheckBox.setSelected(false);
             myModuleMicroProfileOptionsPanel.setVisible(false);
 
             // Clear Tests sub-options
@@ -1037,6 +1031,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             selectedModule.setWebReactiveRestClient(myModuleWebReactiveRestClientCheckBox.isSelected());
             selectedModule.setWebReactiveWebSockets(myModuleWebReactiveWebSocketsCheckBox.isSelected());
             selectedModule.setWebReactiveSwagger(myModuleWebReactiveSwaggerCheckBox.isSelected());
+            selectedModule.setWebReactiveWebServices(myModuleWebReactiveWebServicesCheckBox.isSelected());
             selectedModule.setAuthProvider(myModuleWebReactiveAuthCheckBox.isSelected());
 
             // Update Auth sub-options
@@ -1070,7 +1065,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Update Caching sub-options
             selectedModule.setCachingHazelcast(myModuleCachingHazelcastCheckBox.isSelected());
-            selectedModule.setCachingVertxHazelcast(myModuleCachingVertxHazelcastCheckBox.isSelected());
+            selectedModule.setCachingEhCache(myModuleCachingEhCacheCheckBox.isSelected());
 
             // Update MicroProfile sub-options
             selectedModule.setMicroProfileHealth(myModuleMicroProfileHealthCheckBox.isSelected());
@@ -1078,8 +1073,6 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             selectedModule.setMicroProfileTelemetry(myModuleMicroProfileTelemetryCheckBox.isSelected());
             selectedModule.setMicroProfileOpenAPI(myModuleMicroProfileOpenAPICheckBox.isSelected());
             selectedModule.setMicroProfileJwt(myModuleMicroProfileJwtCheckBox.isSelected());
-            selectedModule.setMicroProfileLogging(myModuleMicroProfileLoggingCheckBox.isSelected());
-            selectedModule.setMicroProfileZipkin(myModuleMicroProfileZipkinCheckBox.isSelected());
 
             // Update Tests sub-options
             selectedModule.setTests(myModuleTestsCheckBox.isSelected());

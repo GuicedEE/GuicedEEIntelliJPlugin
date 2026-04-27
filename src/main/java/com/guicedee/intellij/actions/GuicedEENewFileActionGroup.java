@@ -102,6 +102,16 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         restGroup.add(new CreateGuicedEEFileAction("REST Client", "Create a new REST Client with @Endpoint",
                 GuicedEEFileTemplateProvider.REST_CLIENT_TEMPLATE));
 
+        // Add SOAP subgroup
+        DefaultActionGroup soapGroup = new DefaultActionGroup("SOAP", true);
+        soapGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(soapGroup);
+
+        soapGroup.add(new CreateGuicedEEFileAction("SOAP Service Interface", "Create a new SOAP web service interface (contract)",
+                GuicedEEFileTemplateProvider.SOAP_SERVICE_INTERFACE_TEMPLATE));
+        soapGroup.add(new CreateGuicedEEFileAction("SOAP Service Implementation", "Create a new SOAP web service implementation",
+                GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE));
+
         // Add Database subgroup
         DefaultActionGroup databaseGroup = new DefaultActionGroup("Database", true);
         databaseGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
@@ -617,6 +627,23 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 // Create META-INF/services file and update module-info.java for service interfaces
                 createServiceRegistration(dir.getProject(), templateName, packageName, name, dir);
 
+                // If creating a SOAP service interface, also create the implementation class
+                if (templateName.equals(GuicedEEFileTemplateProvider.SOAP_SERVICE_INTERFACE_TEMPLATE)) {
+                    try {
+                        String implName = name + "Impl";
+                        FileTemplate implTemplate = fileTemplateManager.getJ2eeTemplate(GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE);
+                        if (implTemplate != null) {
+                            Properties implProps = new Properties(defaultProperties);
+                            implProps.setProperty("INTERFACE_NAME", name);
+                            FileTemplateUtil.createFromTemplate(implTemplate, implName, implProps, dir);
+                        }
+                    } catch (Exception e) {
+                        Messages.showErrorDialog(dir.getProject(),
+                            "Failed to create SOAP service implementation: " + e.getMessage(),
+                            "Error Creating SOAP Service Implementation");
+                    }
+                }
+
                 // Ensure required Maven dependency is present for this template
                 ensureRequiredDependency(dir.getProject(), templateName, dir);
 
@@ -968,6 +995,14 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE, wsDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE, wsDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.WEBSOCKET_ON_PUBLISH_TEMPLATE, wsDeps);
+
+            // SOAP Web Services: com.guicedee:web-services -> requires com.guicedee.webservices
+            String[][] soapDeps = {
+                {"com.guicedee", "web-services", "com.guicedee.webservices"},
+                {"org.glassfish.jaxb", "jaxb-runtime", null}
+            };
+            templateToDependencies.put(GuicedEEFileTemplateProvider.SOAP_SERVICE_INTERFACE_TEMPLATE, soapDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE, soapDeps);
 
             String[][] deps = templateToDependencies.get(templateName);
             if (deps == null) {
