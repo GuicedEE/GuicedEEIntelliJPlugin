@@ -45,6 +45,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JRadioButton myJlinkPluginRadioButton;
     private ButtonGroup myRuntimeImageToolGroup;
     private JPanel myRuntimeImageToolPanel;
+    private JRadioButton myMavenRadioButton;
+    private JRadioButton myGradleRadioButton;
+    private ButtonGroup myBuildToolGroup;
+    private JPanel myBuildToolPanel;
     private JPanel myOptionalPanel;
 
     // Module-specific UI components
@@ -135,6 +139,26 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myVersionField = new JBTextField("1.0-SNAPSHOT");
         myMultiModuleCheckBox = new JCheckBox("Multi-Module Project");
         myJlinkPackagingCheckBox = new JCheckBox("Runtime Image Packaging");
+
+        myMavenRadioButton = new JRadioButton("Maven", true);
+        myGradleRadioButton = new JRadioButton("Gradle");
+        myBuildToolGroup = new ButtonGroup();
+        myBuildToolGroup.add(myMavenRadioButton);
+        myBuildToolGroup.add(myGradleRadioButton);
+
+        myBuildToolPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        myBuildToolPanel.add(myMavenRadioButton);
+        myBuildToolPanel.add(myGradleRadioButton);
+
+        // Hide Maven-specific jlink tool options when Gradle is selected
+        myGradleRadioButton.addActionListener(e -> {
+            myRuntimeImageToolPanel.setVisible(false);
+            myJlinkPackagingCheckBox.setSelected(false);
+            myJlinkPackagingCheckBox.setEnabled(false);
+        });
+        myMavenRadioButton.addActionListener(e -> {
+            myJlinkPackagingCheckBox.setEnabled(true);
+        });
 
         myModitectRadioButton = new JRadioButton("Moditect (recommended)", true);
         myJlinkPluginRadioButton = new JRadioButton("maven-jlink-plugin");
@@ -274,6 +298,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
                 .addLabeledComponent(new JBLabel("Version:"), myVersionField)
                 .addVerticalGap(10)
                 .addComponent(packagingLabel)
+                .addComponent(myBuildToolPanel)
                 .addComponent(myMultiModuleCheckBox)
                 .addComponent(myJlinkPackagingCheckBox)
                 .addComponent(myRuntimeImageToolPanel)
@@ -305,6 +330,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
         // Application features are set at the module level in updateSelectedModule()
         myWizardData.setMultiModuleProject(myMultiModuleCheckBox.isSelected());
+        myWizardData.setUseGradle(myGradleRadioButton.isSelected());
         myWizardData.setJmodPackaging(false);
         myWizardData.setJlinkPackaging(myJlinkPackagingCheckBox.isSelected());
         myWizardData.setUseModitect(myModitectRadioButton.isSelected());

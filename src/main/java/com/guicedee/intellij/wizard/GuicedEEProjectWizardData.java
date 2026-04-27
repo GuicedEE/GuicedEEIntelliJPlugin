@@ -589,6 +589,7 @@ public class GuicedEEProjectWizardData {
     private boolean jmodPackaging;
     private boolean jlinkPackaging;
     private boolean useModitect = true; // true = Moditect, false = maven-jlink-plugin
+    private boolean useGradle = false; // true = Gradle, false = Maven
 
     // List of modules for multi-module projects
     private List<ModuleData> modules = new ArrayList<>();
@@ -734,6 +735,14 @@ public class GuicedEEProjectWizardData {
 
     public void setUseModitect(boolean useModitect) {
         this.useModitect = useModitect;
+    }
+
+    public boolean isUseGradle() {
+        return useGradle;
+    }
+
+    public void setUseGradle(boolean useGradle) {
+        this.useGradle = useGradle;
     }
 
     public String getDescription() {

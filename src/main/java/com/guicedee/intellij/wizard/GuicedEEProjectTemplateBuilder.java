@@ -51,7 +51,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     @Override
     public String getDescription()
     {
-        return "Creates a new GuicedEE application with Maven";
+        return "Creates a new GuicedEE application with Maven or Gradle";
     }
 
     @Override
@@ -194,7 +194,16 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                     }
                 }
 
-                // Load the project as a Maven project
+                // Load the project as a Maven or Gradle project
+                if (myWizardData.isUseGradle()) {
+                    VirtualFile buildFile = baseVirtualDir.findChild("build.gradle.kts");
+                    if (buildFile != null) {
+                        System.out.println("[DEBUG_LOG] Found build.gradle.kts file: " + buildFile.getPath());
+                        // Gradle projects are auto-detected by IntelliJ when build.gradle.kts exists
+                    } else {
+                        System.out.println("[DEBUG_LOG] No build.gradle.kts file found in: " + baseVirtualDir.getPath());
+                    }
+                } else {
                 VirtualFile pomFile = baseVirtualDir.findChild("pom.xml");
                 if (pomFile != null)
                 {
@@ -223,6 +232,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 {
                     System.out.println("[DEBUG_LOG] No pom.xml file found in: " + baseVirtualDir.getPath());
                 }
+                } // end Maven branch
             }
         }
         catch (IOException e)
@@ -251,8 +261,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         FileUtil.createDirectory(testSrcDir);
         FileUtil.createDirectory(testResourcesDir);
 
-        // Create pom.xml
-        createPomXml(baseDir, moduleData);
+        // Create pom.xml or build.gradle.kts
+        if (myWizardData.isUseGradle()) {
+            createGradleBuildFile(baseDir, moduleData);
+            createGradleSettingsFile(baseDir);
+            createGradleWrapperProperties(baseDir);
+        } else {
+            createPomXml(baseDir, moduleData);
+        }
 
         // Create module-info.java
         createModuleInfo(srcDir, moduleData);
@@ -300,8 +316,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     private void createMultiModuleProject(File baseDir) throws IOException
     {
         System.out.println("[DEBUG_LOG] GuicedEEProjectTemplateBuilder.createMultiModuleProject() called");
-        // Create parent POM
-        createParentPom(baseDir);
+        // Create parent build file
+        if (myWizardData.isUseGradle()) {
+            createGradleRootBuildFile(baseDir);
+            createGradleMultiModuleSettingsFile(baseDir);
+            createGradleWrapperProperties(baseDir);
+        } else {
+            createParentPom(baseDir);
+        }
 
         // Make sure we have at least one module
         if (myWizardData.getModules().isEmpty())
@@ -332,8 +354,12 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             FileUtil.createDirectory(moduleTestSrcDir);
             FileUtil.createDirectory(moduleTestResourcesDir);
 
-            // Create module POM
-            createModulePom(moduleDir, moduleData);
+            // Create module build file
+            if (myWizardData.isUseGradle()) {
+                createGradleModuleBuildFile(moduleDir, moduleData);
+            } else {
+                createModulePom(moduleDir, moduleData);
+            }
 
             // Create module-info.java for module
             createModuleInfo(moduleSrcDir, moduleData);
@@ -3053,5 +3079,183 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        System.out.println(\"Consumed message: \" + body.toString());\n" +
                 "    }\n" +
                 "}";
+    }
+
+    // ── Gradle generation methods ──
+
+    /**
+     * Builds Gradle dependency lines from module data.
+     */
+    private String buildGradleDependencies(GuicedEEProjectWizardData.ModuleData moduleData) {
+        StringBuilder deps = new StringBuilder();
+        deps.append("    implementation(\"com.guicedee:inject\")\n");
+        deps.append("    implementation(\"com.guicedee:vertx\")\n");
+        deps.append("    compileOnly(\"org.projectlombok:lombok\")\n");
+        deps.append("    annotationProcessor(\"org.projectlombok:lombok\")\n");
+
+        if (moduleData.isWebReactive()) {
+            deps.append("    implementation(\"com.guicedee:web\")\n");
+            if (moduleData.isWebReactiveRest()) deps.append("    implementation(\"com.guicedee:rest\")\n");
+            if (moduleData.isWebReactiveRestClient()) deps.append("    implementation(\"com.guicedee:rest-client\")\n");
+            if (moduleData.isWebReactiveSwagger()) deps.append("    implementation(\"com.guicedee:guiced-swagger\")\n");
+            if (moduleData.isWebReactiveWebServices()) deps.append("    implementation(\"com.guicedee:webservices\")\n");
+        }
+
+        if (moduleData.isDatabase()) {
+            if (moduleData.isDatabaseJDBC()) {
+                deps.append("    implementation(\"com.guicedee.persistence:guiced-persistence\")\n");
+            } else {
+                deps.append("    implementation(\"com.guicedee:persistence\")\n");
+            }
+            if (moduleData.isDatabasePostgreSQL()) deps.append("    implementation(\"org.postgresql:postgresql\")\n");
+            if (moduleData.isDatabaseMySQL()) deps.append("    implementation(\"mysql:mysql-connector-java\")\n");
+            if (moduleData.isDatabaseOracle()) deps.append("    implementation(\"com.oracle.database.jdbc:ojdbc8\")\n");
+            if (moduleData.isDatabaseDB2()) deps.append("    implementation(\"com.ibm.db2:jcc\")\n");
+            if (moduleData.isDatabaseSqlServer()) deps.append("    implementation(\"com.microsoft.sqlserver:mssql-jdbc\")\n");
+            deps.append("    implementation(\"com.guicedee.modules.services:vertx-mutiny\")\n");
+        }
+
+        if (moduleData.isMessaging()) {
+            if (moduleData.isMessagingRabbitMQ()) deps.append("    implementation(\"com.guicedee:rabbitmq\")\n");
+            if (moduleData.isMessagingKafka()) deps.append("    implementation(\"com.guicedee:kafka\")\n");
+            if (moduleData.isMessagingIBMMQ()) deps.append("    implementation(\"com.guicedee:ibmmq\")\n");
+        }
+
+        if (moduleData.isMailClient()) deps.append("    implementation(\"com.guicedee:mailclient\")\n");
+
+        if (moduleData.isCaching()) {
+            if (moduleData.isCachingHazelcast()) deps.append("    implementation(\"com.guicedee:hazelcast\")\n");
+            if (moduleData.isCachingEhCache()) {
+                deps.append("    implementation(\"com.guicedee.modules.services:ehcache\")\n");
+                deps.append("    implementation(\"com.guicedee.modules.services:hibernate-jcache\")\n");
+            }
+        }
+
+        if (moduleData.isMicroProfile()) {
+            if (moduleData.isMicroProfileHealth()) deps.append("    implementation(\"com.guicedee:health\")\n");
+            if (moduleData.isMicroProfileConfig()) deps.append("    implementation(\"com.guicedee:config\")\n");
+            if (moduleData.isMicroProfileMetrics()) deps.append("    implementation(\"com.guicedee:metrics\")\n");
+            if (moduleData.isMicroProfileTelemetry()) deps.append("    implementation(\"com.guicedee:telemetry\")\n");
+            if (moduleData.isMicroProfileOpenAPI()) deps.append("    implementation(\"com.guicedee:openapi\")\n");
+            if (moduleData.isMicroProfileJwt()) deps.append("    implementation(\"com.guicedee.microprofile:jwt\")\n");
+        }
+
+        if (moduleData.isAuthProvider()) {
+            if (moduleData.isAuthOAuth2()) deps.append("    implementation(\"com.guicedee:oauth2\")\n");
+            if (moduleData.isAuthJwt()) deps.append("    implementation(\"com.guicedee.microprofile:jwt\")\n");
+            if (moduleData.isAuthAbac()) deps.append("    implementation(\"com.guicedee:abac\")\n");
+            if (moduleData.isAuthOtp()) deps.append("    implementation(\"com.guicedee:otp\")\n");
+            if (moduleData.isAuthPropertyFile()) deps.append("    implementation(\"com.guicedee:propertyfile\")\n");
+            if (moduleData.isAuthLdap()) deps.append("    implementation(\"com.guicedee:ldap\")\n");
+            if (moduleData.isAuthHtpasswd()) deps.append("    implementation(\"com.guicedee:htpasswd\")\n");
+            if (moduleData.isAuthHtdigest()) deps.append("    implementation(\"com.guicedee:htdigest\")\n");
+        }
+
+        deps.append("    testImplementation(\"org.junit.jupiter:junit-jupiter-api\")\n");
+        if (moduleData.isTestsTestContainers()) {
+            deps.append("    testImplementation(\"com.guicedee.modules.services:testcontainers\")\n");
+        }
+        if (moduleData.isDatabase()) {
+            deps.append("    testImplementation(\"org.junit.vintage:junit-vintage-engine\")\n");
+        }
+
+        return deps.toString();
+    }
+
+    private void createGradleBuildFile(File baseDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException {
+        String deps = buildGradleDependencies(moduleData);
+        String buildGradle = "plugins {\n" +
+                "    java\n" +
+                "}\n\n" +
+                "group = \"" + myWizardData.getGroupId() + "\"\n" +
+                "version = \"" + myWizardData.getVersion() + "\"\n\n" +
+                "java {\n" +
+                "    toolchain {\n" +
+                "        languageVersion.set(JavaLanguageVersion.of(25))\n" +
+                "    }\n" +
+                "}\n\n" +
+                "repositories {\n" +
+                "    mavenCentral()\n" +
+                "}\n\n" +
+                "dependencies {\n" +
+                "    implementation(platform(\"com.guicedee:guicedee-bom:2.0.0\"))\n" +
+                "    implementation(platform(\"com.guicedee:tests-bom:2.0.0\"))\n" +
+                deps +
+                "}\n\n" +
+                "tasks.withType<JavaCompile> {\n" +
+                "    options.encoding = \"UTF-8\"\n" +
+                "}\n\n" +
+                "tasks.test {\n" +
+                "    useJUnitPlatform()\n" +
+                "}\n";
+        FileUtil.writeToFile(new File(baseDir, "build.gradle.kts"), buildGradle);
+    }
+
+    private void createGradleSettingsFile(File baseDir) throws IOException {
+        String settings = "rootProject.name = \"" + myWizardData.getArtifactId() + "\"\n";
+        FileUtil.writeToFile(new File(baseDir, "settings.gradle.kts"), settings);
+    }
+
+    private void createGradleRootBuildFile(File baseDir) throws IOException {
+        String buildGradle = "plugins {\n" +
+                "    java apply false\n" +
+                "}\n\n" +
+                "group = \"" + myWizardData.getGroupId() + "\"\n" +
+                "version = \"" + myWizardData.getVersion() + "\"\n\n" +
+                "subprojects {\n" +
+                "    apply(plugin = \"java\")\n\n" +
+                "    group = rootProject.group\n" +
+                "    version = rootProject.version\n\n" +
+                "    java {\n" +
+                "        toolchain {\n" +
+                "            languageVersion.set(JavaLanguageVersion.of(25))\n" +
+                "        }\n" +
+                "    }\n\n" +
+                "    repositories {\n" +
+                "        mavenCentral()\n" +
+                "    }\n\n" +
+                "    dependencies {\n" +
+                "        \"implementation\"(platform(\"com.guicedee:guicedee-bom:2.0.0\"))\n" +
+                "        \"implementation\"(platform(\"com.guicedee:tests-bom:2.0.0\"))\n" +
+                "    }\n\n" +
+                "    tasks.withType<JavaCompile> {\n" +
+                "        options.encoding = \"UTF-8\"\n" +
+                "    }\n\n" +
+                "    tasks.withType<Test> {\n" +
+                "        useJUnitPlatform()\n" +
+                "    }\n" +
+                "}\n";
+        FileUtil.writeToFile(new File(baseDir, "build.gradle.kts"), buildGradle);
+    }
+
+    private void createGradleMultiModuleSettingsFile(File baseDir) throws IOException {
+        StringBuilder settings = new StringBuilder();
+        settings.append("rootProject.name = \"").append(myWizardData.getArtifactId()).append("\"\n\n");
+        for (GuicedEEProjectWizardData.ModuleData moduleData : myWizardData.getModules()) {
+            String moduleDirName = moduleData.getArtifactId().replace(myWizardData.getArtifactId() + "-", "");
+            settings.append("include(\"").append(moduleDirName).append("\")\n");
+        }
+        if (myWizardData.isJlinkPackaging()) {
+            settings.append("include(\"jlink\")\n");
+        }
+        FileUtil.writeToFile(new File(baseDir, "settings.gradle.kts"), settings.toString());
+    }
+
+    private void createGradleModuleBuildFile(File moduleDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException {
+        String deps = buildGradleDependencies(moduleData);
+        String buildGradle = "dependencies {\n" + deps + "}\n";
+        FileUtil.writeToFile(new File(moduleDir, "build.gradle.kts"), buildGradle);
+    }
+
+    private void createGradleWrapperProperties(File baseDir) throws IOException {
+        File wrapperDir = new File(baseDir, "gradle/wrapper");
+        FileUtil.createDirectory(wrapperDir);
+        String props = "distributionBase=GRADLE_USER_HOME\n" +
+                "distributionPath=wrapper/dists\n" +
+                "distributionUrl=https\\://services.gradle.org/distributions/gradle-9.4.1-bin.zip\n" +
+                "networkTimeout=10000\n" +
+                "zipStoreBase=GRADLE_USER_HOME\n" +
+                "zipStorePath=wrapper/dists\n";
+        FileUtil.writeToFile(new File(wrapperDir, "gradle-wrapper.properties"), props);
     }
 }
