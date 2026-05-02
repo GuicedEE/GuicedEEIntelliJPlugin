@@ -1,0 +1,21 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.eclipse.microprofile.health.Startup;
+
+/**
+ * A MicroProfile Health startup check.
+ * Startup checks prevent liveness probes from killing the application
+ * during long initialization sequences.
+ */
+@Startup
+public class ${NAME} implements HealthCheck {
+
+    @Override
+    public HealthCheckResponse call() {
+        return HealthCheckResponse.up("${NAME}");
+    }
+}
+
+

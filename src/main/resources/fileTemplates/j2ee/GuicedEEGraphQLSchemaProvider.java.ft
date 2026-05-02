@@ -1,0 +1,30 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.vertx.graphql.services.IGraphQLSchemaProvider;
+import graphql.schema.idl.RuntimeWiring;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+
+/**
+ * A GraphQL schema provider that contributes type definitions and runtime wiring.
+ * <p>
+ * Register in both {@code module-info.java} and
+ * {@code META-INF/services/com.guicedee.vertx.graphql.services.IGraphQLSchemaProvider}.
+ */
+public class ${NAME} implements IGraphQLSchemaProvider<${NAME}> {
+
+    @Override
+    public TypeDefinitionRegistry getTypeDefinitions() {
+        return new SchemaParser().parse("""
+            type Query {
+                hello: String
+            }
+        """);
+    }
+
+    @Override
+    public RuntimeWiring.Builder configureWiring(RuntimeWiring.Builder builder) {
+        return builder.type("Query", b -> b.dataFetcher("hello", env -> "Hello, GraphQL!"));
+    }
+}
+

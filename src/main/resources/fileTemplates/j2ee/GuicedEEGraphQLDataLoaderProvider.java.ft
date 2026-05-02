@@ -1,0 +1,21 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.vertx.graphql.services.IGraphQLDataLoaderProvider;
+import org.dataloader.DataLoaderRegistry;
+
+/**
+ * A GraphQL DataLoader provider that registers batch loaders for efficient data fetching.
+ * <p>
+ * Register in both {@code module-info.java} and
+ * {@code META-INF/services/com.guicedee.vertx.graphql.services.IGraphQLDataLoaderProvider}.
+ */
+public class ${NAME} implements IGraphQLDataLoaderProvider<${NAME}> {
+
+    @Override
+    public void configureDataLoaders(DataLoaderRegistry registry) {
+        // Register your data loaders here, e.g.:
+        // BatchLoader<String, MyEntity> loader = ids -> fetchByIds(ids);
+        // registry.register("myEntities", DataLoaderFactory.newDataLoader(loader));
+    }
+}
+

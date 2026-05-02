@@ -1,0 +1,26 @@
+/**
+ * RabbitMQ connection and exchange configuration.
+ */
+@Verticle
+@RabbitConnectionOptions(
+    value = "${CONNECTION_NAME}",
+    host = "${RABBIT_HOST}",
+    port = ${RABBIT_PORT},
+    user = "${RABBIT_USER}",
+    password = "${RABBIT_PASSWORD}",
+    virtualHost = "${RABBIT_VHOST}",
+    automaticRecoveryEnabled = true,
+    reconnectAttempts = 5,
+    reconnectInterval = 1000
+)
+@QueueExchange(
+    value = "${EXCHANGE_NAME}",
+    exchangeType = QueueExchange.ExchangeType.Direct,
+    durable = true
+)
+package ${PACKAGE_NAME};
+
+import com.guicedee.rabbit.RabbitConnectionOptions;
+import com.guicedee.rabbit.QueueExchange;
+import com.guicedee.vertx.spi.Verticle;
+

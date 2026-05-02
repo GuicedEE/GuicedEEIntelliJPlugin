@@ -2,21 +2,16 @@ package ${PACKAGE_NAME};
 
 import com.guicedee.rabbit.QueueConsumer;
 import com.guicedee.rabbit.QueueDefinition;
-import com.guicedee.rabbit.RabbitConnectionOptions;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.rabbitmq.RabbitMQMessage;
-import com.google.inject.Singleton;
 
 /**
  * A RabbitMQ consumer that processes messages from a queue.
+ * <p>
+ * Ensure @RabbitConnectionOptions and @QueueExchange are declared
+ * on the package-info.java for this package (or a parent package).
  */
-@RabbitConnectionOptions(value = "${CONNECTION_NAME}",
-                         password = "guest",
-                         automaticRecoveryEnabled = false,
-                         reconnectAttempts = 2,
-                         reconnectInterval = 500)
 @QueueDefinition(value = "${QUEUE_NAME}")
-@Singleton //All QueueConsumers are Singleton, this is explicitly declaring
 public class ${NAME} implements QueueConsumer {
 
     @Override

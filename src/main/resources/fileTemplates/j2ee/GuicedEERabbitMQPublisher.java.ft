@@ -1,0 +1,28 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.rabbit.QueuePublisher;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+/**
+ * A service that publishes messages to a RabbitMQ queue.
+ * <p>
+ * The {@code QueuePublisher} is injected by Guice with the {@code @Named} qualifier
+ * matching the queue name defined in the consumer's {@code @QueueDefinition}.
+ */
+public class ${NAME} {
+
+    @Inject
+    @Named("${QUEUE_NAME}")
+    private QueuePublisher ${QUEUE_NAME}Publisher;
+
+    /**
+     * Publishes a message to the queue.
+     *
+     * @param message the message body to publish
+     */
+    public void publish(String message) {
+        ${QUEUE_NAME}Publisher.publish(message);
+    }
+}
+

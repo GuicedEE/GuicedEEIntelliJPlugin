@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.0.1-SNAPSHOT"
+version = "2.0.1"
 
 repositories {
   mavenCentral()
@@ -35,7 +35,21 @@ intellijPlatform {
     }
 
     changeNotes = """
-      <h3>2.0.1-SNAPSHOT</h3>
+      <h3>2.0.1</h3>
+      <ul>
+        <li>Added Gradle project generation support (Gradle 9.0+ with JDK 25 toolchain)</li>
+        <li>Build tool selection (Maven / Gradle) in project wizard</li>
+        <li>Kafka Consumer file template and wizard integration</li>
+        <li>IBM MQ Consumer file template and wizard integration</li>
+        <li>Cassandra Module file template for Vert.x Cassandra client</li>
+        <li>MongoDB Module file template for Vert.x Mongo client</li>
+        <li>Redis Module file template for Vert.x Redis integration</li>
+        <li>HTTP Proxy Module file template for Vert.x HttpProxy reverse proxy</li>
+        <li>Persistence template updated to use ConnectionBaseInfoFactory</li>
+        <li>Updated GuicedEE brand colour in SVG icons</li>
+        <li>Removed deprecated Query.forEach(Consumer) usage</li>
+      </ul>
+      <h3>2.0.0</h3>
       <ul>
         <li>Merged JetBrains Guice plugin with GuicedEE framework support</li>
         <li>Full JIT (just-in-time) binding support — click-through navigation for concrete class injection</li>
@@ -43,7 +57,6 @@ intellijPlatform {
         <li>@Inject fields correctly marked as implicitly used, read, and written</li>
         <li>REST Service creation with optional service class and DB session support</li>
         <li>REST Client template with @Endpoint support</li>
-        <li>Kafka Consumer template and Kafka wizard integration</li>
         <li>Mail Client template for GuicedEE mail module</li>
         <li>MicroProfile Health Check template</li>
         <li>Authentication and Authorization Provider templates</li>
@@ -52,7 +65,6 @@ intellijPlatform {
         <li>REST Client checkbox in Web Reactive wizard options</li>
         <li>GuicedEE guice-core documentation and SPI extension points</li>
         <li>Support for @ImplementedBy and @ProvidedBy navigation</li>
-        <li>Cassandra Module file template for Vert.x CassandraClient integration</li>
       </ul>
     """.trimIndent()
   }

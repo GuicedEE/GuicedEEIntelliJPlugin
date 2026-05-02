@@ -29,6 +29,8 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String WEBSOCKET_ON_PUBLISH_TEMPLATE = "GuicedEEWebSocketOnPublish.java";
     public static final String ROUTER_CONFIGURATION_TEMPLATE = "GuicedEERouterConfiguration.java";
     public static final String RABBITMQ_CONSUMER_TEMPLATE = "GuicedEERabbitMQConsumer.java";
+    public static final String RABBITMQ_PUBLISHER_TEMPLATE = "GuicedEERabbitMQPublisher.java";
+    public static final String RABBITMQ_CONNECTION_TEMPLATE = "GuicedEERabbitMQConnection.java";
     public static final String SCAN_MODULE_INCLUSIONS_TEMPLATE = "GuicedEEScanModuleInclusions.java";
     public static final String CONFIGURATOR_TEMPLATE = "GuicedEEConfigurator.java";
     public static final String FILE_CONTENTS_SCANNER_TEMPLATE = "GuicedEEFileContentsScanner.java";
@@ -43,6 +45,8 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String AUTHORIZATION_PROVIDER_TEMPLATE = "GuicedEEAuthorizationProvider.java";
     public static final String MAIL_CLIENT_TEMPLATE = "GuicedEEMailClient.java";
     public static final String HEALTH_CHECK_TEMPLATE = "GuicedEEHealthCheck.java";
+    public static final String READINESS_CHECK_TEMPLATE = "GuicedEEReadinessCheck.java";
+    public static final String STARTUP_CHECK_TEMPLATE = "GuicedEEStartupCheck.java";
     public static final String HAZELCAST_SERVER_CONFIG_TEMPLATE = "GuicedEEHazelcastServerConfig.java";
     public static final String HAZELCAST_CLIENT_CONFIG_TEMPLATE = "GuicedEEHazelcastClientConfig.java";
     public static final String SOAP_SERVICE_INTERFACE_TEMPLATE = "GuicedEESoapServiceInterface.java";
@@ -52,6 +56,8 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String MONGODB_MODULE_TEMPLATE = "GuicedEEMongoDBModule.java";
     public static final String REDIS_MODULE_TEMPLATE = "GuicedEERedisModule.java";
     public static final String GRPC_MODULE_TEMPLATE = "GuicedEEGrpcModule.java";
+    public static final String GRAPHQL_SCHEMA_PROVIDER_TEMPLATE = "GuicedEEGraphQLSchemaProvider.java";
+    public static final String GRAPHQL_DATALOADER_PROVIDER_TEMPLATE = "GuicedEEGraphQLDataLoaderProvider.java";
 
     private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
@@ -65,29 +71,30 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         FileTemplateGroupDescriptor messagingGroup = new FileTemplateGroupDescriptor("Messaging", GUICEDEE_ICON);
         group.addTemplate(messagingGroup);
 
+        messagingGroup.addTemplate(new FileTemplateDescriptor(RABBITMQ_CONNECTION_TEMPLATE, GUICEDEE_ICON));
         messagingGroup.addTemplate(new FileTemplateDescriptor(RABBITMQ_CONSUMER_TEMPLATE, GUICEDEE_ICON));
+        messagingGroup.addTemplate(new FileTemplateDescriptor(RABBITMQ_PUBLISHER_TEMPLATE, GUICEDEE_ICON));
         messagingGroup.addTemplate(new FileTemplateDescriptor(KAFKA_CONSUMER_TEMPLATE, GUICEDEE_ICON));
         messagingGroup.addTemplate(new FileTemplateDescriptor(IBMMQ_CONSUMER_TEMPLATE, GUICEDEE_ICON));
 
-        // Create Web subgroup (1st feature)
+        // Create Web subgroup
         FileTemplateGroupDescriptor webGroup = new FileTemplateGroupDescriptor("Web", GUICEDEE_ICON);
         group.addTemplate(webGroup);
 
         webGroup.addTemplate(new FileTemplateDescriptor(ROUTER_CONFIGURATION_TEMPLATE, GUICEDEE_ICON));
-        webGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_CHANNEL_TEMPLATE, GUICEDEE_ICON));
         webGroup.addTemplate(new FileTemplateDescriptor(HTTP_PROXY_MODULE_TEMPLATE, GUICEDEE_ICON));
         webGroup.addTemplate(new FileTemplateDescriptor(GRPC_MODULE_TEMPLATE, GUICEDEE_ICON));
 
-        // Create Auth subgroup
-        FileTemplateGroupDescriptor authGroup = new FileTemplateGroupDescriptor("Auth", GUICEDEE_ICON);
-        group.addTemplate(authGroup);
+        // GraphQL subgroup under Web
+        FileTemplateGroupDescriptor graphqlGroup = new FileTemplateGroupDescriptor("GraphQL", GUICEDEE_ICON);
+        webGroup.addTemplate(graphqlGroup);
 
-        authGroup.addTemplate(new FileTemplateDescriptor(AUTHENTICATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
-        authGroup.addTemplate(new FileTemplateDescriptor(AUTHORIZATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        graphqlGroup.addTemplate(new FileTemplateDescriptor(GRAPHQL_SCHEMA_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        graphqlGroup.addTemplate(new FileTemplateDescriptor(GRAPHQL_DATALOADER_PROVIDER_TEMPLATE, GUICEDEE_ICON));
 
-        // Create REST subgroup (2nd feature)
+        // REST subgroup under Web
         FileTemplateGroupDescriptor restGroup = new FileTemplateGroupDescriptor("REST", GUICEDEE_ICON);
-        group.addTemplate(restGroup);
+        webGroup.addTemplate(restGroup);
 
         restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_TEMPLATE, GUICEDEE_ICON));
         restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_NO_SERVICE_TEMPLATE, GUICEDEE_ICON));
@@ -97,12 +104,28 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         restGroup.addTemplate(new FileTemplateDescriptor(REST_SERVICE_IMPL_WITH_SESSION_PARAM_TEMPLATE, GUICEDEE_ICON));
         restGroup.addTemplate(new FileTemplateDescriptor(REST_CLIENT_TEMPLATE, GUICEDEE_ICON));
 
-        // Create SOAP subgroup
+        // SOAP subgroup under Web
         FileTemplateGroupDescriptor soapGroup = new FileTemplateGroupDescriptor("SOAP", GUICEDEE_ICON);
-        group.addTemplate(soapGroup);
+        webGroup.addTemplate(soapGroup);
 
         soapGroup.addTemplate(new FileTemplateDescriptor(SOAP_SERVICE_INTERFACE_TEMPLATE, GUICEDEE_ICON));
         soapGroup.addTemplate(new FileTemplateDescriptor(SOAP_SERVICE_IMPL_TEMPLATE, GUICEDEE_ICON));
+
+        // WebSockets subgroup under Web
+        FileTemplateGroupDescriptor webSocketsGroup = new FileTemplateGroupDescriptor("WebSockets", GUICEDEE_ICON);
+        webGroup.addTemplate(webSocketsGroup);
+
+        webSocketsGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_CHANNEL_TEMPLATE, GUICEDEE_ICON));
+        webSocketsGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE, GUICEDEE_ICON));
+        webSocketsGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_PRE_CONFIGURATION_TEMPLATE, GUICEDEE_ICON));
+        webSocketsGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_ON_PUBLISH_TEMPLATE, GUICEDEE_ICON));
+
+        // Auth subgroup under Web
+        FileTemplateGroupDescriptor authGroup = new FileTemplateGroupDescriptor("Auth", GUICEDEE_ICON);
+        webGroup.addTemplate(authGroup);
+
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTHENTICATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTHORIZATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
 
         // Create Database subgroup (3rd feature)
         FileTemplateGroupDescriptor databaseGroup = new FileTemplateGroupDescriptor("Database", GUICEDEE_ICON);
@@ -124,6 +147,8 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         group.addTemplate(microProfileGroup);
 
         microProfileGroup.addTemplate(new FileTemplateDescriptor(HEALTH_CHECK_TEMPLATE, GUICEDEE_ICON));
+        microProfileGroup.addTemplate(new FileTemplateDescriptor(READINESS_CHECK_TEMPLATE, GUICEDEE_ICON));
+        microProfileGroup.addTemplate(new FileTemplateDescriptor(STARTUP_CHECK_TEMPLATE, GUICEDEE_ICON));
 
         // Create Hazelcast subgroup
         FileTemplateGroupDescriptor hazelcastGroup = new FileTemplateGroupDescriptor("Hazelcast", GUICEDEE_ICON);

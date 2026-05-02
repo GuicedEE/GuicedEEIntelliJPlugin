@@ -53,92 +53,94 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         messagingGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
         add(messagingGroup);
 
+        messagingGroup.add(new CreateGuicedEEFileAction("RabbitMQ Connection", "Create a RabbitMQ connection and exchange package-info",
+                GuicedEEFileTemplateProvider.RABBITMQ_CONNECTION_TEMPLATE));
         messagingGroup.add(new CreateGuicedEEFileAction("RabbitMQ Consumer", "Create a new RabbitMQ Consumer",
                 GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE));
+        messagingGroup.add(new CreateGuicedEEFileAction("RabbitMQ Publisher", "Create a new RabbitMQ Publisher service",
+                GuicedEEFileTemplateProvider.RABBITMQ_PUBLISHER_TEMPLATE));
         messagingGroup.add(new CreateGuicedEEFileAction("Kafka Consumer", "Create a new Kafka Consumer",
                 GuicedEEFileTemplateProvider.KAFKA_CONSUMER_TEMPLATE));
         messagingGroup.add(new CreateGuicedEEFileAction("IBM MQ Consumer", "Create a new IBM MQ Consumer",
                 GuicedEEFileTemplateProvider.IBMMQ_CONSUMER_TEMPLATE));
 
-        // Add Web subgroup
+        // Add Web group
         DefaultActionGroup webGroup = new DefaultActionGroup("Web", true);
         webGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
         add(webGroup);
 
-        webGroup.add(new CreateGuicedEEFileAction("Router Configuration", "Create a new Router Configuration", 
-                GuicedEEFileTemplateProvider.ROUTER_CONFIGURATION_TEMPLATE));
-        webGroup.add(new CreateGuicedEEFileAction("WebSocket Channel", "Create a new WebSocket Channel", 
+        // REST subgroup under Web
+        DefaultActionGroup restGroup = new DefaultActionGroup("REST", true);
+        restGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        webGroup.add(restGroup);
+
+        restGroup.add(new CreateGuicedEEFileAction("REST Service", "Create a new REST Service",
+                GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE));
+        restGroup.add(new CreateGuicedEEFileAction("REST Client", "Create a new REST Client with @Endpoint",
+                GuicedEEFileTemplateProvider.REST_CLIENT_TEMPLATE));
+
+        webGroup.add(new CreateGuicedEEFileAction("SOAP Service", "Create a new SOAP web service (interface + implementation)",
+                GuicedEEFileTemplateProvider.SOAP_SERVICE_INTERFACE_TEMPLATE));
+
+        // WebSockets subgroup under Web
+        DefaultActionGroup webSocketsGroup = new DefaultActionGroup("WebSockets", true);
+        webSocketsGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        webGroup.add(webSocketsGroup);
+
+        webSocketsGroup.add(new CreateGuicedEEFileAction("WebSocket Channel", "Create a new WebSocket Channel",
                 GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE));
+        webSocketsGroup.add(new CreateGuicedEEFileAction("Message Receiver", "Create a new WebSocket Message Receiver",
+                GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE));
+        webSocketsGroup.add(new CreateGuicedEEFileAction("Pre-Configuration", "Create a new WebSocket Pre-Configuration",
+                GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE));
+        webSocketsGroup.add(new CreateGuicedEEFileAction("On Publish", "Create a new WebSocket On Publish",
+                GuicedEEFileTemplateProvider.WEBSOCKET_ON_PUBLISH_TEMPLATE));
+
+        webGroup.add(new CreateGuicedEEFileAction("Router Configuration", "Create a new Router Configuration",
+                GuicedEEFileTemplateProvider.ROUTER_CONFIGURATION_TEMPLATE));
         webGroup.add(new CreateGuicedEEFileAction("HTTP Proxy Module", "Create a new HTTP Proxy Module",
                 GuicedEEFileTemplateProvider.HTTP_PROXY_MODULE_TEMPLATE));
         webGroup.add(new CreateGuicedEEFileAction("gRPC Module", "Create a new gRPC Server/Client Module",
                 GuicedEEFileTemplateProvider.GRPC_MODULE_TEMPLATE));
 
-        // Add Auth subgroup
+        // GraphQL subgroup under Web
+        DefaultActionGroup graphqlGroup = new DefaultActionGroup("GraphQL", true);
+        graphqlGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        webGroup.add(graphqlGroup);
+
+        graphqlGroup.add(new CreateGuicedEEFileAction("Schema Provider", "Create a new GraphQL Schema Provider",
+                GuicedEEFileTemplateProvider.GRAPHQL_SCHEMA_PROVIDER_TEMPLATE));
+        graphqlGroup.add(new CreateGuicedEEFileAction("DataLoader Provider", "Create a new GraphQL DataLoader Provider",
+                GuicedEEFileTemplateProvider.GRAPHQL_DATALOADER_PROVIDER_TEMPLATE));
+
+        // Auth subgroup under Web
         DefaultActionGroup authGroup = new DefaultActionGroup("Auth", true);
         authGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(authGroup);
+        webGroup.add(authGroup);
 
         authGroup.add(new CreateGuicedEEFileAction("Authentication Provider", "Create a new Authentication Provider",
                 GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE));
         authGroup.add(new CreateGuicedEEFileAction("Authorization Provider", "Create a new Authorization Provider",
                 GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE));
 
-        // Add WebSockets group
-        DefaultActionGroup webSocketsGroup = new DefaultActionGroup("WebSockets", true);
-        webSocketsGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(webSocketsGroup);
-
-        webSocketsGroup.add(new CreateGuicedEEFileAction("Message Receiver", "Create a new WebSocket Message Receiver", 
-                GuicedEEFileTemplateProvider.WEBSOCKET_MESSAGE_RECEIVER_TEMPLATE));
-        webSocketsGroup.add(new CreateGuicedEEFileAction("Pre-Configuration", "Create a new WebSocket Pre-Configuration", 
-                GuicedEEFileTemplateProvider.WEBSOCKET_PRE_CONFIGURATION_TEMPLATE));
-        webSocketsGroup.add(new CreateGuicedEEFileAction("On Publish", "Create a new WebSocket On Publish", 
-                GuicedEEFileTemplateProvider.WEBSOCKET_ON_PUBLISH_TEMPLATE));
-
-        // Add REST subgroup
-        DefaultActionGroup restGroup = new DefaultActionGroup("REST", true);
-        restGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(restGroup);
-
-        restGroup.add(new CreateGuicedEEFileAction("REST Service", "Create a new REST Service", 
-                GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE));
-        restGroup.add(new CreateGuicedEEFileAction("REST Client", "Create a new REST Client with @Endpoint",
-                GuicedEEFileTemplateProvider.REST_CLIENT_TEMPLATE));
-
-        // Add SOAP subgroup
-        DefaultActionGroup soapGroup = new DefaultActionGroup("SOAP", true);
-        soapGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(soapGroup);
-
-        soapGroup.add(new CreateGuicedEEFileAction("SOAP Service Interface", "Create a new SOAP web service interface (contract)",
-                GuicedEEFileTemplateProvider.SOAP_SERVICE_INTERFACE_TEMPLATE));
-        soapGroup.add(new CreateGuicedEEFileAction("SOAP Service Implementation", "Create a new SOAP web service implementation",
-                GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE));
-
-        // Add Database subgroup
-        DefaultActionGroup databaseGroup = new DefaultActionGroup("Database", true);
-        databaseGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(databaseGroup);
-
-        databaseGroup.add(new CreateGuicedEEFileAction("Persistence Module", "Create a new Persistence Module", 
+        // Flattened groups (Database, Mail, MicroProfile)
+        add(new CreateGuicedEEFileAction("Persistence Module", "Create a new Persistence Module",
                 GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
 
-        // Add Mail subgroup
-        DefaultActionGroup mailGroup = new DefaultActionGroup("Mail", true);
-        mailGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(mailGroup);
-
-        mailGroup.add(new CreateGuicedEEFileAction("Mail Client", "Create a new Mail Client",
+        add(new CreateGuicedEEFileAction("Mail Client", "Create a new Mail Client",
                 GuicedEEFileTemplateProvider.MAIL_CLIENT_TEMPLATE));
 
-        // Add MicroProfile subgroup
-        DefaultActionGroup microProfileGroup = new DefaultActionGroup("MicroProfile", true);
-        microProfileGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
-        add(microProfileGroup);
+        // Add Health subgroup
+        DefaultActionGroup healthGroup = new DefaultActionGroup("Health", true);
+        healthGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(healthGroup);
 
-        microProfileGroup.add(new CreateGuicedEEFileAction("Health Check", "Create a new Health Check",
+        healthGroup.add(new CreateGuicedEEFileAction("Liveness Check", "Create a new Liveness Health Check",
                 GuicedEEFileTemplateProvider.HEALTH_CHECK_TEMPLATE));
+        healthGroup.add(new CreateGuicedEEFileAction("Readiness Check", "Create a new Readiness Health Check",
+                GuicedEEFileTemplateProvider.READINESS_CHECK_TEMPLATE));
+        healthGroup.add(new CreateGuicedEEFileAction("Startup Check", "Create a new Startup Health Check",
+                GuicedEEFileTemplateProvider.STARTUP_CHECK_TEMPLATE));
 
         // Add Hazelcast subgroup
         DefaultActionGroup hazelcastGroup = new DefaultActionGroup("Hazelcast", true);
@@ -542,6 +544,48 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                     // else: use default REST_SERVICE_TEMPLATE (with service, no session on resource)
                 }
 
+                // RabbitMQ Connection defaults
+                if (templateName.equals(GuicedEEFileTemplateProvider.RABBITMQ_CONNECTION_TEMPLATE)) {
+                    if (!defaultProperties.containsKey("CONNECTION_NAME")) {
+                        defaultProperties.setProperty("CONNECTION_NAME", "connection-1");
+                    }
+                    if (!defaultProperties.containsKey("RABBIT_HOST")) {
+                        defaultProperties.setProperty("RABBIT_HOST", "localhost");
+                    }
+                    if (!defaultProperties.containsKey("RABBIT_PORT")) {
+                        defaultProperties.setProperty("RABBIT_PORT", "5672");
+                    }
+                    if (!defaultProperties.containsKey("RABBIT_USER")) {
+                        defaultProperties.setProperty("RABBIT_USER", "guest");
+                    }
+                    if (!defaultProperties.containsKey("RABBIT_PASSWORD")) {
+                        defaultProperties.setProperty("RABBIT_PASSWORD", "guest");
+                    }
+                    if (!defaultProperties.containsKey("RABBIT_VHOST")) {
+                        defaultProperties.setProperty("RABBIT_VHOST", "/");
+                    }
+                    if (!defaultProperties.containsKey("EXCHANGE_NAME")) {
+                        defaultProperties.setProperty("EXCHANGE_NAME", "default");
+                    }
+                }
+
+                // RabbitMQ Consumer defaults
+                if (templateName.equals(GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE)) {
+                    if (!defaultProperties.containsKey("CONNECTION_NAME")) {
+                        defaultProperties.setProperty("CONNECTION_NAME", "connection-1");
+                    }
+                    if (!defaultProperties.containsKey("QUEUE_NAME")) {
+                        defaultProperties.setProperty("QUEUE_NAME", "example-queue");
+                    }
+                }
+
+                // RabbitMQ Publisher defaults
+                if (templateName.equals(GuicedEEFileTemplateProvider.RABBITMQ_PUBLISHER_TEMPLATE)) {
+                    if (!defaultProperties.containsKey("QUEUE_NAME")) {
+                        defaultProperties.setProperty("QUEUE_NAME", "example-queue");
+                    }
+                }
+
                 // REST Client defaults
                 if (templateName.equals(GuicedEEFileTemplateProvider.REST_CLIENT_TEMPLATE)) {
                     if (!defaultProperties.containsKey("ENDPOINT_URL")) {
@@ -552,6 +596,32 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                         String endpointName = name.replaceAll("Client$", "")
                                 .replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
                         defaultProperties.setProperty("ENDPOINT_NAME", endpointName);
+                    }
+                }
+
+                // RabbitMQ Connection is a package-info.java — handle specially
+                // since CreateFileFromTemplateAction expects a class/interface
+                if (templateName.equals(GuicedEEFileTemplateProvider.RABBITMQ_CONNECTION_TEMPLATE)) {
+                    try {
+                        FileTemplate template = fileTemplateManager.getJ2eeTemplate(templateName);
+                        if (template == null) {
+                            Messages.showErrorDialog(dir.getProject(),
+                                "Template not found: " + templateName,
+                                "Error Creating File");
+                            return null;
+                        }
+                        PsiElement created = FileTemplateUtil.createFromTemplate(
+                                template, "package-info", defaultProperties, dir);
+                        if (created instanceof PsiFile) {
+                            ensureRequiredDependency(dir.getProject(), templateName, dir);
+                            return (PsiFile) created;
+                        }
+                        return null;
+                    } catch (Exception e) {
+                        Messages.showErrorDialog(dir.getProject(),
+                            "Error creating package-info.java: " + e.getMessage(),
+                            "Error Creating File");
+                        return null;
                     }
                 }
 
@@ -696,6 +766,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToInterface.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthorizationProvider");
             templateToInterface.put(GuicedEEFileTemplateProvider.HAZELCAST_SERVER_CONFIG_TEMPLATE, "com.guicedee.guicedhazelcast.services.IGuicedHazelcastServerConfig");
             templateToInterface.put(GuicedEEFileTemplateProvider.HAZELCAST_CLIENT_CONFIG_TEMPLATE, "com.guicedee.guicedhazelcast.services.IGuicedHazelcastClientConfig");
+            templateToInterface.put(GuicedEEFileTemplateProvider.GRAPHQL_SCHEMA_PROVIDER_TEMPLATE, "com.guicedee.vertx.graphql.services.IGraphQLSchemaProvider");
+            templateToInterface.put(GuicedEEFileTemplateProvider.GRAPHQL_DATALOADER_PROVIDER_TEMPLATE, "com.guicedee.vertx.graphql.services.IGraphQLDataLoaderProvider");
 
             // Check if this template corresponds to a service interface
             String interfaceName = templateToInterface.get(templateName);
@@ -969,6 +1041,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             // RabbitMQ: com.guicedee:rabbitmq -> requires com.guicedee.rabbit
             String[][] rabbitDeps = {{"com.guicedee", "rabbitmq", "com.guicedee.rabbit"}};
             templateToDependencies.put(GuicedEEFileTemplateProvider.RABBITMQ_CONSUMER_TEMPLATE, rabbitDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.RABBITMQ_PUBLISHER_TEMPLATE, rabbitDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.RABBITMQ_CONNECTION_TEMPLATE, rabbitDeps);
 
             // Kafka: com.guicedee:kafka -> requires com.guicedee.kafka
             String[][] kafkaDeps = {{"com.guicedee", "kafka", "com.guicedee.kafka"}};
@@ -989,6 +1063,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             // Health: com.guicedee:health -> requires com.guicedee.health
             String[][] healthDeps = {{"com.guicedee", "health", "com.guicedee.health"}};
             templateToDependencies.put(GuicedEEFileTemplateProvider.HEALTH_CHECK_TEMPLATE, healthDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.READINESS_CHECK_TEMPLATE, healthDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.STARTUP_CHECK_TEMPLATE, healthDeps);
 
             // Hazelcast: com.guicedee:hazelcast -> requires com.guicedee.guicedhazelcast
             String[][] hazelcastDeps = {{"com.guicedee", "hazelcast", "com.guicedee.guicedhazelcast"}};
@@ -1020,6 +1096,11 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 {"io.vertx", "vertx-grpc-client", "io.vertx.grpc.client"}
             };
             templateToDependencies.put(GuicedEEFileTemplateProvider.GRPC_MODULE_TEMPLATE, grpcDeps);
+
+            // GraphQL: com.guicedee:graphql
+            String[][] graphqlDeps = {{"com.guicedee", "graphql", "com.guicedee.vertx.graphql"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.GRAPHQL_SCHEMA_PROVIDER_TEMPLATE, graphqlDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.GRAPHQL_DATALOADER_PROVIDER_TEMPLATE, graphqlDeps);
 
             // Redis: io.vertx:vertx-redis-client
             String[][] redisDeps = {{"io.vertx", "vertx-redis-client", "io.vertx.redis.client"}};

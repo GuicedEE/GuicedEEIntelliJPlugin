@@ -1,0 +1,21 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.eclipse.microprofile.health.Readiness;
+
+/**
+ * A MicroProfile Health readiness check.
+ * Failing readiness checks signal that the application should be temporarily
+ * removed from the load balancer until it is ready to accept traffic again.
+ */
+@Readiness
+public class ${NAME} implements HealthCheck {
+
+    @Override
+    public HealthCheckResponse call() {
+        return HealthCheckResponse.up("${NAME}");
+    }
+}
+
+
