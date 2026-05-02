@@ -14,6 +14,7 @@ Full **Google Guice** and **GuicedEE** framework support for IntelliJ IDEA 2024.
   - REST Clients with `@Endpoint`
   - Router Configurations
   - Persistence / Database Modules
+  - Cassandra Modules
   - WebSocket Channels, Message Receivers, and Hooks
   - RabbitMQ Consumers
   - Kafka Consumers

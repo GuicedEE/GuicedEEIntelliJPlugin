@@ -27,6 +27,10 @@
           <li>REST Services (with optional service class and DB session)</li>
           <li>Router Configurations</li>
           <li>Persistence / Database Modules</li>
+          <li>Cassandra Modules</li>
+          <li>MongoDB Modules</li>
+          <li>Redis Modules</li>
+          <li>HTTP Proxy Modules</li>
           <li>WebSocket Channels, Message Receivers, and Hooks</li>
           <li>RabbitMQ Consumers</li>
           <li>Kafka Consumers</li>
@@ -94,6 +98,24 @@
     <hr/>
     <p>☕ <b>Support this plugin:</b> <a href="https://patreon.com/GedMarc">Buy me a coffee on Patreon</a></p>
   ]]></description>
+
+  <change-notes><![CDATA[
+    <h3>2.0.1</h3>
+    <ul>
+      <li><b>Redis support</b> — New <code>@RedisOptions</code> annotation and <code>RedisModule</code> for
+          comprehensive Vert.x Redis integration: all 4 modes (Standalone, Sentinel, Cluster, Replication),
+          connection pooling, TLS/SSL, RESP2/RESP3, <code>${ENV_VAR:default}</code> placeholders, pub/sub,
+          and <code>@Named</code> multi-connection injection. New file template for Redis modules.</li>
+      <li><b>HTTP Proxy support</b> — New <code>ProxyModule</code> and file template for Vert.x HttpProxy
+          reverse proxy with interceptors, caching, and WebSocket support.</li>
+      <li><b>MongoDB support</b> — New <code>MongoModule</code> and file template for Vert.x Mongo client
+          with Testcontainers integration testing.</li>
+      <li><b>Cassandra support</b> — New <code>CassandraModule</code> and file template for Vert.x Cassandra
+          client with Testcontainers integration testing.</li>
+      <li><b>App Builder updates</b> — Redis, MongoDB, Cassandra, and HTTP Proxy options in
+          the project wizard with proper dependency and module-info generation.</li>
+    </ul>
+  ]]></change-notes>
 
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->

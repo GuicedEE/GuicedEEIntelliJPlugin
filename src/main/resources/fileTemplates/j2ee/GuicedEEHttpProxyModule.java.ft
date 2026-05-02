@@ -1,0 +1,33 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.vertx.proxy.ProxyConnectionInfo;
+import com.guicedee.vertx.proxy.ProxyModule;
+
+/**
+ * An HTTP reverse proxy module that forwards requests to an origin server.
+ */
+public class ${NAME} extends ProxyModule<${NAME}> {
+
+    @Override
+    protected ProxyConnectionInfo getProxyConnectionInfo() {
+        String proxyHost = System.getProperty("PROXY_HOST",
+                System.getenv().getOrDefault("PROXY_HOST", "0.0.0.0"));
+        int proxyPort = Integer.parseInt(System.getProperty("PROXY_PORT",
+                System.getenv().getOrDefault("PROXY_PORT", "${PROXY_PORT}")));
+        String originHost = System.getProperty("PROXY_ORIGIN_HOST",
+                System.getenv().getOrDefault("PROXY_ORIGIN_HOST", "${ORIGIN_HOST}"));
+        int originPort = Integer.parseInt(System.getProperty("PROXY_ORIGIN_PORT",
+                System.getenv().getOrDefault("PROXY_ORIGIN_PORT", "${ORIGIN_PORT}")));
+
+        return new ProxyConnectionInfo()
+                .setName("${PROXY_NAME}")
+                .setProxyHost(proxyHost)
+                .setProxyPort(proxyPort)
+                .setOriginHost(originHost)
+                .setOriginPort(originPort)
+                .setWebSocketEnabled(true)
+                .setCachingEnabled(false)
+                .setDefaultConnection(true);
+    }
+}
+

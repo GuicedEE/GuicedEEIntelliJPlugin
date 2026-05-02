@@ -686,6 +686,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToInterface.put(GuicedEEFileTemplateProvider.IBMMQ_CONSUMER_TEMPLATE, "com.guicedee.ibmmq.IBMMQConsumer");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_STARTUP_TEMPLATE, "com.guicedee.vertx.spi.VerticleStartup");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_CONFIGURATOR_TEMPLATE, "com.guicedee.vertx.spi.VertxConfigurator");
+            templateToInterface.put(GuicedEEFileTemplateProvider.HTTP_PROXY_MODULE_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceModule");
             templateToInterface.put(GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthenticationProvider");
             templateToInterface.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthorizationProvider");
             templateToInterface.put(GuicedEEFileTemplateProvider.HAZELCAST_SERVER_CONFIG_TEMPLATE, "com.guicedee.guicedhazelcast.services.IGuicedHazelcastServerConfig");

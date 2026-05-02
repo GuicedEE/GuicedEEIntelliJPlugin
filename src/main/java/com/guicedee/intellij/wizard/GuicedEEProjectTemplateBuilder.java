@@ -660,14 +660,17 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             dependencies.append("            <scope>test</scope>\n");
             dependencies.append("        </dependency>\n");
 
-            // Add Vertx Mutiny dependency (version managed by BOM)
-            dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
-            dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
-            dependencies.append("        </dependency>\n");
+            // Add Vertx Mutiny dependency only for JPA/Hibernate-based databases
+            if (!moduleData.isDatabaseMongoDB() && !moduleData.isDatabaseCassandra() && !moduleData.isDatabaseRedis()) {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
+                dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
         }
 
         variables.put("DEPENDENCIES", dependencies.toString());
+
 
         // Add optional information if provided
         StringBuilder description = new StringBuilder();
@@ -941,6 +944,11 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             {
                 requires.append("\trequires transitive com.guicedee.webservices;\n");
             }
+
+            if (moduleData.isWebReactiveHttpProxy())
+            {
+                requires.append("\trequires io.vertx.httpproxy;\n");
+            }
         }
 
         // Mail Client requirements
@@ -990,11 +998,18 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         if (moduleData.isDatabase())
         {
             if (moduleData.isDatabaseJDBC()) {
-                // For JDBC, use a different requires clause
                 requires.append("\trequires transitive com.guicedee.persistence;\n");
             } else {
-                // For other database types, use the persistence module
                 requires.append("\trequires transitive com.guicedee.persistence;\n");
+            }
+            if (moduleData.isDatabaseMongoDB()) {
+                requires.append("\trequires io.vertx.client.mongo;\n");
+            }
+            if (moduleData.isDatabaseCassandra()) {
+                requires.append("\trequires io.vertx.cassandra.client;\n");
+            }
+            if (moduleData.isDatabaseRedis()) {
+                requires.append("\trequires io.vertx.redis.client;\n");
             }
         }
 
@@ -1107,6 +1122,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dbType = "Cassandra";
             } else if (moduleData.isDatabaseMongoDB()) {
                 dbType = "MongoDB";
+            } else if (moduleData.isDatabaseRedis()) {
+                dbType = "Redis";
             } else if (moduleData.isDatabaseJDBC()) {
                 dbType = "JDBC";
             }
@@ -1259,7 +1276,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
         FileUtil.writeToFile(new File(packageDir, "WebApplication.java"), mainClass);
 
-        // Create REST service if REST is selected
+        // Create REST service if needed
         if (moduleData.isWebReactiveRest())
         {
             createRestService(srcDir, moduleData);
@@ -1735,7 +1752,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
         FileUtil.writeToFile(new File(packageDir, receiverClassName + ".java"), receiver);
 
-        // Create service loader file in META-INF/services
+        // Create service loader file in META-INF
         // Derive the resources directory from the srcDir
         File resourcesDir = new File(srcDir.getParentFile(), "resources");
         File metaInfServicesDir = new File(resourcesDir, "META-INF/services");
@@ -1789,10 +1806,12 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         File packageDir = new File(srcDir, packagePath + "/db");
         FileUtil.createDirectory(packageDir);
 
-        // Create entity package and class
-        File entityPackageDir = new File(packageDir, "entity");
-        FileUtil.createDirectory(entityPackageDir);
-        createEntityClass(entityPackageDir);
+        // Create entity package and class (only for JPA-based databases)
+        if (!moduleData.isDatabaseCassandra() && !moduleData.isDatabaseMongoDB()) {
+            File entityPackageDir = new File(packageDir, "entity");
+            FileUtil.createDirectory(entityPackageDir);
+            createEntityClass(entityPackageDir);
+        }
 
         // Determine persistence unit name based on database type
         String persistenceUnit = "postgres";
@@ -1845,9 +1864,11 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
         FileUtil.writeToFile(new File(packageDir, className + ".java"), dbModule);
 
-        // Create persistence.xml file in META-INF directory
+        // Create persistence.xml file in META-INF directory (only for JPA-based databases)
         File resourcesDir = new File(srcDir.getParentFile(), "resources");
-        createPersistenceXml(resourcesDir, persistenceUnit, myWizardData.getGroupId() + ".db.entity.YourEntity");
+        if (!moduleData.isDatabaseCassandra() && !moduleData.isDatabaseMongoDB()) {
+            createPersistenceXml(resourcesDir, persistenceUnit, myWizardData.getGroupId() + ".db.entity.YourEntity");
+        }
 
         // Create service loader file in META-INF/services for IGuiceModule
         File metaInfServicesDir = new File(resourcesDir, "META-INF/services");
@@ -2138,6 +2159,21 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             return getJdbcDatabaseModuleTemplate();
         }
 
+        // If Cassandra is selected, use the CassandraModule template
+        if (moduleData.isDatabaseCassandra()) {
+            return getCassandraDatabaseModuleTemplate();
+        }
+
+        // If MongoDB is selected, use the MongoModule template
+        if (moduleData.isDatabaseMongoDB()) {
+            return getMongoDatabaseModuleTemplate();
+        }
+
+        // If Redis is selected, use the RedisModule template
+        if (moduleData.isDatabaseRedis()) {
+            return getRedisDatabaseModuleTemplate();
+        }
+
         // Determine which database type is selected
         String connectionInfoType = "ConnectionBaseInfo";
         String importStatement = "";
@@ -2157,12 +2193,6 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         } else if (moduleData.isDatabaseSqlServer()) {
             connectionInfoType = "SqlServerConnectionBaseInfo";
             importStatement = "import com.guicedee.persistence.implementations.sqlserver.SqlServerConnectionBaseInfo;\n";
-        } else if (moduleData.isDatabaseCassandra()) {
-            connectionInfoType = "CassandraConnectionBaseInfo";
-            importStatement = "import com.guicedee.persistence.implementations.cassandra.CassandraConnectionBaseInfo;\n";
-        } else if (moduleData.isDatabaseMongoDB()) {
-            connectionInfoType = "MongoDBConnectionBaseInfo";
-            importStatement = "import com.guicedee.persistence.implementations.mongodb.MongoDBConnectionBaseInfo;\n";
         }
 
         return "package ${PACKAGE};\n" +
@@ -2250,6 +2280,96 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    @Override\n" +
                 "    public Integer sortOrder() {\n" +
                 "        return 20;\n" +
+                "    }\n" +
+                "}";
+    }
+
+    private String getMongoDatabaseModuleTemplate()
+    {
+        return "package ${PACKAGE};\n" +
+                "\n" +
+                "import com.guicedee.persistence.implementations.mongodb.MongoConnectionInfo;\n" +
+                "import com.guicedee.persistence.implementations.mongodb.MongoModule;\n" +
+                "\n" +
+                "import static com.guicedee.client.Environment.getSystemPropertyOrEnvironment;\n" +
+                "\n" +
+                "${ENTITY_MANAGER_ANNOTATION}" +
+                "public class ${CLASS_NAME} extends MongoModule<${CLASS_NAME}> {\n" +
+                "    \n" +
+                "    @Override\n" +
+                "    protected MongoConnectionInfo getMongoConnectionInfo() {\n" +
+                "        return new MongoConnectionInfo()\n" +
+                "                .setName(\"${PERSISTENCE_UNIT}\")\n" +
+                "                .setHost(getSystemPropertyOrEnvironment(\"MONGO_HOST\", \"localhost\"))\n" +
+                "                .setPort(Integer.parseInt(getSystemPropertyOrEnvironment(\"MONGO_PORT\", \"27017\")))\n" +
+                "                .setDbName(getSystemPropertyOrEnvironment(\"MONGO_DB\", \"${PERSISTENCE_UNIT}\"))\n" +
+                "                .setDefaultConnection(true);\n" +
+                "    }\n" +
+                "    \n" +
+                "    @Override\n" +
+                "    public Integer sortOrder() {\n" +
+                "        return 150;\n" +
+                "    }\n" +
+                "}";
+    }
+
+    private String getCassandraDatabaseModuleTemplate()
+    {
+        return "package ${PACKAGE};\n" +
+                "\n" +
+                "import com.guicedee.persistence.implementations.cassandra.CassandraConnectionInfo;\n" +
+                "import com.guicedee.persistence.implementations.cassandra.CassandraModule;\n" +
+                "\n" +
+                "import static com.guicedee.client.Environment.getSystemPropertyOrEnvironment;\n" +
+                "\n" +
+                "${ENTITY_MANAGER_ANNOTATION}" +
+                "public class ${CLASS_NAME} extends CassandraModule<${CLASS_NAME}> {\n" +
+                "    \n" +
+                "    @Override\n" +
+                "    protected CassandraConnectionInfo getCassandraConnectionInfo() {\n" +
+                "        String host = getSystemPropertyOrEnvironment(\"CASSANDRA_HOST\", \"localhost\");\n" +
+                "        int port = Integer.parseInt(getSystemPropertyOrEnvironment(\"CASSANDRA_PORT\", \"9042\"));\n" +
+                "        return new CassandraConnectionInfo()\n" +
+                "                .setName(\"${PERSISTENCE_UNIT}\")\n" +
+                "                .addContactPoint(host, port)\n" +
+                "                .setKeyspace(getSystemPropertyOrEnvironment(\"CASSANDRA_KEYSPACE\", \"${PERSISTENCE_UNIT}\"))\n" +
+                "                .setDefaultConnection(true);\n" +
+                "    }\n" +
+                "    \n" +
+                "    @Override\n" +
+                "    public Integer sortOrder() {\n" +
+                "        return 150;\n" +
+                "    }\n" +
+                "}";
+    }
+
+    private String getRedisDatabaseModuleTemplate()
+    {
+        return "package ${PACKAGE};\n" +
+                "\n" +
+                "import com.guicedee.vertx.redis.RedisConnectionInfo;\n" +
+                "import com.guicedee.vertx.redis.RedisModule;\n" +
+                "\n" +
+                "import static com.guicedee.client.Environment.getSystemPropertyOrEnvironment;\n" +
+                "\n" +
+                "${ENTITY_MANAGER_ANNOTATION}" +
+                "public class ${CLASS_NAME} extends RedisModule<${CLASS_NAME}> {\n" +
+                "    \n" +
+                "    @Override\n" +
+                "    protected RedisConnectionInfo getRedisConnectionInfo() {\n" +
+                "        String host = getSystemPropertyOrEnvironment(\"REDIS_HOST\", \"localhost\");\n" +
+                "        int port = Integer.parseInt(getSystemPropertyOrEnvironment(\"REDIS_PORT\", \"6379\"));\n" +
+                "        int db = Integer.parseInt(getSystemPropertyOrEnvironment(\"REDIS_DATABASE\", \"0\"));\n" +
+                "        return new RedisConnectionInfo()\n" +
+                "                .setName(\"${PERSISTENCE_UNIT}\")\n" +
+                "                .setConnectionString(\"redis://\" + host + \":\" + port + \"/\" + db)\n" +
+                "                .setMaxPoolSize(8)\n" +
+                "                .setDefaultConnection(true);\n" +
+                "    }\n" +
+                "    \n" +
+                "    @Override\n" +
+                "    public Integer sortOrder() {\n" +
+                "        return 150;\n" +
                 "    }\n" +
                 "}";
     }
@@ -2394,13 +2514,13 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         if (moduleData.isDatabase())
         {
             if (moduleData.isDatabaseJDBC()) {
-                // For JDBC, use a different dependency
+                // For JDBC, use guiced-persistence
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee.persistence</groupId>\n");
                 dependencies.append("            <artifactId>guiced-persistence</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             } else {
-                // For other database types, use the persistence module
+                // For reactive database types
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
                 dependencies.append("            <artifactId>persistence</artifactId>\n");
@@ -2461,6 +2581,14 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>org.mongodb</groupId>\n");
                 dependencies.append("            <artifactId>mongodb-driver-sync</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseRedis())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>io.vertx</groupId>\n");
+                dependencies.append("            <artifactId>vertx-redis-client</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
         }
@@ -2545,7 +2673,6 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>health</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
-
             if (moduleData.isMicroProfileConfig())
             {
                 dependencies.append("        <dependency>\n");
@@ -2553,7 +2680,6 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>config</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
-
             if (moduleData.isMicroProfileMetrics())
             {
                 dependencies.append("        <dependency>\n");
@@ -2561,7 +2687,6 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>metrics</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
-
             if (moduleData.isMicroProfileTelemetry())
             {
                 dependencies.append("        <dependency>\n");
@@ -2569,28 +2694,79 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>telemetry</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
-
-            if (moduleData.isMicroProfileOpenAPI())
+             if (moduleData.isMicroProfileOpenAPI())
             {
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee</groupId>\n");
                 dependencies.append("            <artifactId>openapi</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
-
-            if (moduleData.isMicroProfileLogging())
+            if (moduleData.isMicroProfileJwt())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>org.apache.logging.log4j</groupId>\n");
-                dependencies.append("            <artifactId>log4j-core</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee.microprofile</groupId>\n");
+                dependencies.append("            <artifactId>jwt</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
+        }
 
-            if (moduleData.isMicroProfileZipkin())
+        // Auth dependencies
+        if (moduleData.isAuthProvider())
+        {
+            if (moduleData.isAuthOAuth2())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>io.vertx</groupId>\n");
-                dependencies.append("            <artifactId>vertx-zipkin</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>oauth2</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthJwt())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee.microprofile</groupId>\n");
+                dependencies.append("            <artifactId>jwt</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthAbac())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>abac</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthOtp())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>otp</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthPropertyFile())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>propertyfile</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthLdap())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>ldap</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthHtpasswd())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>htpasswd</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isAuthHtdigest())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>htdigest</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
         }
@@ -2620,17 +2796,17 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             dependencies.append("            <scope>test</scope>\n");
             dependencies.append("        </dependency>\n");
 
-            // Add Vertx Mutiny dependency (version managed by BOM)
-            dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
-            dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
-            dependencies.append("        </dependency>\n");
+            // Add Vertx Mutiny dependency only for JPA/Hibernate-based databases
+            if (!moduleData.isDatabaseMongoDB() && !moduleData.isDatabaseCassandra() && !moduleData.isDatabaseRedis()) {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
+                dependencies.append("            <artifactId>vertx-mutiny</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
         }
 
         variables.put("DEPENDENCIES", dependencies.toString());
 
-        String packaging = myWizardData.isJmodPackaging() ? "jmod" : "jar";
-        variables.put("PACKAGING", packaging);
 
         // Add optional information if provided
         StringBuilder description = new StringBuilder();
@@ -3112,7 +3288,9 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isDatabaseOracle()) deps.append("    implementation(\"com.oracle.database.jdbc:ojdbc8\")\n");
             if (moduleData.isDatabaseDB2()) deps.append("    implementation(\"com.ibm.db2:jcc\")\n");
             if (moduleData.isDatabaseSqlServer()) deps.append("    implementation(\"com.microsoft.sqlserver:mssql-jdbc\")\n");
-            deps.append("    implementation(\"com.guicedee.modules.services:vertx-mutiny\")\n");
+            if (moduleData.isDatabaseCassandra()) deps.append("    implementation(\"com.datastax.cassandra:cassandra-driver-core\")\n");
+            if (moduleData.isDatabaseMongoDB()) deps.append("    implementation(\"org.mongodb:mongodb-driver-sync\")\n");
+            if (moduleData.isDatabaseRedis()) deps.append("    implementation(\"io.vertx:vertx-redis-client\")\n");
         }
 
         if (moduleData.isMessaging()) {

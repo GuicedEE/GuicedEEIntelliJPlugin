@@ -1,0 +1,25 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.persistence.implementations.cassandra.CassandraConnectionInfo;
+import com.guicedee.persistence.implementations.cassandra.CassandraModule;
+
+/**
+ * A Cassandra module for wide-column NoSQL connectivity.
+ */
+public class ${NAME} extends CassandraModule<${NAME}> {
+
+    @Override
+    protected CassandraConnectionInfo getCassandraConnectionInfo() {
+        String host = System.getProperty("CASSANDRA_HOST",
+                System.getenv().getOrDefault("CASSANDRA_HOST", "localhost"));
+        int port = Integer.parseInt(System.getProperty("CASSANDRA_PORT",
+                System.getenv().getOrDefault("CASSANDRA_PORT", "9042")));
+
+        return new CassandraConnectionInfo()
+                .setName("${CONNECTION_NAME}")
+                .addContactPoint(host, port)
+                .setKeyspace("${KEYSPACE}")
+                .setDefaultConnection(true);
+    }
+}
+

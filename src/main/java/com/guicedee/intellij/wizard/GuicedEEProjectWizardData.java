@@ -31,6 +31,7 @@ public class GuicedEEProjectWizardData {
         private boolean webReactiveWebSockets;
         private boolean webReactiveSwagger;
         private boolean webReactiveWebServices;
+        private boolean webReactiveHttpProxy;
 
         // Database sub-options
         private boolean databasePersistence;
@@ -40,6 +41,9 @@ public class GuicedEEProjectWizardData {
         private boolean databaseDB2;
         private boolean databaseSqlServer;
         private boolean databaseJDBC;
+        private boolean databaseMongoDB;
+        private boolean databaseCassandra;
+        private boolean databaseRedis;
 
         // Messaging sub-options
         private boolean messagingRabbitMQ;
@@ -91,6 +95,7 @@ public class GuicedEEProjectWizardData {
             this.webReactiveWebSockets = false;
             this.webReactiveSwagger = false;
             this.webReactiveWebServices = false;
+            this.webReactiveHttpProxy = false;
 
             this.databasePersistence = false;
             this.databasePostgreSQL = false;
@@ -99,6 +104,9 @@ public class GuicedEEProjectWizardData {
             this.databaseDB2 = false;
             this.databaseSqlServer = false;
             this.databaseJDBC = false;
+            this.databaseMongoDB = false;
+            this.databaseCassandra = false;
+            this.databaseRedis = false;
 
             this.messagingRabbitMQ = false;
             this.messagingKafka = false;
@@ -262,6 +270,17 @@ public class GuicedEEProjectWizardData {
         public void setWebReactiveWebServices(boolean webReactiveWebServices) {
             this.webReactiveWebServices = webReactiveWebServices;
             if (webReactiveWebServices) {
+                this.webReactive = true;
+            }
+        }
+
+        public boolean isWebReactiveHttpProxy() {
+            return webReactiveHttpProxy;
+        }
+
+        public void setWebReactiveHttpProxy(boolean webReactiveHttpProxy) {
+            this.webReactiveHttpProxy = webReactiveHttpProxy;
+            if (webReactiveHttpProxy) {
                 this.webReactive = true;
             }
         }
@@ -547,11 +566,23 @@ public class GuicedEEProjectWizardData {
 
         // ── Backward-compatible stubs for removed features ──
 
-        @Deprecated public boolean isDatabaseCassandra() { return false; }
-        @Deprecated public void setDatabaseCassandra(boolean v) { }
+        public boolean isDatabaseCassandra() { return databaseCassandra; }
+        public void setDatabaseCassandra(boolean v) {
+            this.databaseCassandra = v;
+            if (v) this.database = true;
+        }
 
-        @Deprecated public boolean isDatabaseMongoDB() { return false; }
-        @Deprecated public void setDatabaseMongoDB(boolean v) { }
+        public boolean isDatabaseMongoDB() { return databaseMongoDB; }
+        public void setDatabaseMongoDB(boolean v) {
+            this.databaseMongoDB = v;
+            if (v) this.database = true;
+        }
+
+        public boolean isDatabaseRedis() { return databaseRedis; }
+        public void setDatabaseRedis(boolean v) {
+            this.databaseRedis = v;
+            if (v) this.database = true;
+        }
 
         @Deprecated public boolean isMessagingAMQP() { return false; }
         @Deprecated public void setMessagingAMQP(boolean v) { }

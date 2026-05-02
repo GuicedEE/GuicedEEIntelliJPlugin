@@ -47,6 +47,10 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String HAZELCAST_CLIENT_CONFIG_TEMPLATE = "GuicedEEHazelcastClientConfig.java";
     public static final String SOAP_SERVICE_INTERFACE_TEMPLATE = "GuicedEESoapServiceInterface.java";
     public static final String SOAP_SERVICE_IMPL_TEMPLATE = "GuicedEESoapServiceImpl.java";
+    public static final String CASSANDRA_MODULE_TEMPLATE = "GuicedEECassandraModule.java";
+    public static final String HTTP_PROXY_MODULE_TEMPLATE = "GuicedEEHttpProxyModule.java";
+    public static final String MONGODB_MODULE_TEMPLATE = "GuicedEEMongoDBModule.java";
+    public static final String REDIS_MODULE_TEMPLATE = "GuicedEERedisModule.java";
 
     private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
@@ -70,6 +74,7 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
 
         webGroup.addTemplate(new FileTemplateDescriptor(ROUTER_CONFIGURATION_TEMPLATE, GUICEDEE_ICON));
         webGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_CHANNEL_TEMPLATE, GUICEDEE_ICON));
+        webGroup.addTemplate(new FileTemplateDescriptor(HTTP_PROXY_MODULE_TEMPLATE, GUICEDEE_ICON));
 
         // Create Auth subgroup
         FileTemplateGroupDescriptor authGroup = new FileTemplateGroupDescriptor("Auth", GUICEDEE_ICON);
@@ -102,6 +107,9 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         group.addTemplate(databaseGroup);
 
         databaseGroup.addTemplate(new FileTemplateDescriptor(PERSISTENCE_MODULE_TEMPLATE, GUICEDEE_ICON));
+        databaseGroup.addTemplate(new FileTemplateDescriptor(MONGODB_MODULE_TEMPLATE, GUICEDEE_ICON));
+        databaseGroup.addTemplate(new FileTemplateDescriptor(CASSANDRA_MODULE_TEMPLATE, GUICEDEE_ICON));
+        databaseGroup.addTemplate(new FileTemplateDescriptor(REDIS_MODULE_TEMPLATE, GUICEDEE_ICON));
 
         // Create Mail subgroup
         FileTemplateGroupDescriptor mailGroup = new FileTemplateGroupDescriptor("Mail", GUICEDEE_ICON);

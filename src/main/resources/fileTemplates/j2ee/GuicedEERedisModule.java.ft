@@ -1,0 +1,28 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.vertx.redis.RedisConnectionInfo;
+import com.guicedee.vertx.redis.RedisModule;
+
+/**
+ * A Redis client module that connects to a Redis server.
+ */
+public class ${NAME} extends RedisModule<${NAME}> {
+
+    @Override
+    protected RedisConnectionInfo getRedisConnectionInfo() {
+        String host = System.getProperty("REDIS_HOST",
+                System.getenv().getOrDefault("REDIS_HOST", "${REDIS_HOST}"));
+        int port = Integer.parseInt(System.getProperty("REDIS_PORT",
+                System.getenv().getOrDefault("REDIS_PORT", "${REDIS_PORT}")));
+        int database = Integer.parseInt(System.getProperty("REDIS_DATABASE",
+                System.getenv().getOrDefault("REDIS_DATABASE", "${REDIS_DATABASE}")));
+
+        return new RedisConnectionInfo()
+                .setName("${REDIS_NAME}")
+                .setConnectionString("redis://" + host + ":" + port + "/" + database)
+                .setMaxPoolSize(${MAX_POOL_SIZE})
+                .setMaxWaitingHandlers(24)
+                .setDefaultConnection(true);
+    }
+}
+

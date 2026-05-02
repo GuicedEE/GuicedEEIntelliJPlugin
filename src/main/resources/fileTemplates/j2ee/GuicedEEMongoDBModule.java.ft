@@ -1,0 +1,27 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.persistence.implementations.mongodb.MongoConnectionInfo;
+import com.guicedee.persistence.implementations.mongodb.MongoModule;
+
+/**
+ * A MongoDB module for document-oriented NoSQL connectivity.
+ */
+public class ${NAME} extends MongoModule<${NAME}> {
+
+    @Override
+    protected MongoConnectionInfo getMongoConnectionInfo() {
+        String host = System.getProperty("MONGO_HOST",
+                System.getenv().getOrDefault("MONGO_HOST", "localhost"));
+        int port = Integer.parseInt(System.getProperty("MONGO_PORT",
+                System.getenv().getOrDefault("MONGO_PORT", "27017")));
+
+        return new MongoConnectionInfo()
+                .setName("${CONNECTION_NAME}")
+                .setHost(host)
+                .setPort(port)
+                .setDbName("${DATABASE_NAME}")
+                .setDefaultConnection(true);
+    }
+}
+
+

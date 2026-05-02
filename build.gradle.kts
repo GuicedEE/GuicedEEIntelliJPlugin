@@ -52,6 +52,7 @@ intellijPlatform {
         <li>REST Client checkbox in Web Reactive wizard options</li>
         <li>GuicedEE guice-core documentation and SPI extension points</li>
         <li>Support for @ImplementedBy and @ProvidedBy navigation</li>
+        <li>Cassandra Module file template for Vert.x CassandraClient integration</li>
       </ul>
     """.trimIndent()
   }
