@@ -51,6 +51,7 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String HTTP_PROXY_MODULE_TEMPLATE = "GuicedEEHttpProxyModule.java";
     public static final String MONGODB_MODULE_TEMPLATE = "GuicedEEMongoDBModule.java";
     public static final String REDIS_MODULE_TEMPLATE = "GuicedEERedisModule.java";
+    public static final String GRPC_MODULE_TEMPLATE = "GuicedEEGrpcModule.java";
 
     private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
@@ -75,6 +76,7 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
         webGroup.addTemplate(new FileTemplateDescriptor(ROUTER_CONFIGURATION_TEMPLATE, GUICEDEE_ICON));
         webGroup.addTemplate(new FileTemplateDescriptor(WEBSOCKET_CHANNEL_TEMPLATE, GUICEDEE_ICON));
         webGroup.addTemplate(new FileTemplateDescriptor(HTTP_PROXY_MODULE_TEMPLATE, GUICEDEE_ICON));
+        webGroup.addTemplate(new FileTemplateDescriptor(GRPC_MODULE_TEMPLATE, GUICEDEE_ICON));
 
         // Create Auth subgroup
         FileTemplateGroupDescriptor authGroup = new FileTemplateGroupDescriptor("Auth", GUICEDEE_ICON);

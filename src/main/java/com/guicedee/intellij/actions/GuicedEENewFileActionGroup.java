@@ -69,6 +69,10 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 GuicedEEFileTemplateProvider.ROUTER_CONFIGURATION_TEMPLATE));
         webGroup.add(new CreateGuicedEEFileAction("WebSocket Channel", "Create a new WebSocket Channel", 
                 GuicedEEFileTemplateProvider.WEBSOCKET_CHANNEL_TEMPLATE));
+        webGroup.add(new CreateGuicedEEFileAction("HTTP Proxy Module", "Create a new HTTP Proxy Module",
+                GuicedEEFileTemplateProvider.HTTP_PROXY_MODULE_TEMPLATE));
+        webGroup.add(new CreateGuicedEEFileAction("gRPC Module", "Create a new gRPC Server/Client Module",
+                GuicedEEFileTemplateProvider.GRPC_MODULE_TEMPLATE));
 
         // Add Auth subgroup
         DefaultActionGroup authGroup = new DefaultActionGroup("Auth", true);
@@ -687,6 +691,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_STARTUP_TEMPLATE, "com.guicedee.vertx.spi.VerticleStartup");
             templateToInterface.put(GuicedEEFileTemplateProvider.VERTX_CONFIGURATOR_TEMPLATE, "com.guicedee.vertx.spi.VertxConfigurator");
             templateToInterface.put(GuicedEEFileTemplateProvider.HTTP_PROXY_MODULE_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceModule");
+            templateToInterface.put(GuicedEEFileTemplateProvider.GRPC_MODULE_TEMPLATE, "com.guicedee.client.services.lifecycle.IGuiceModule");
             templateToInterface.put(GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthenticationProvider");
             templateToInterface.put(GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE, "com.guicedee.vertx.auth.IGuicedAuthorizationProvider");
             templateToInterface.put(GuicedEEFileTemplateProvider.HAZELCAST_SERVER_CONFIG_TEMPLATE, "com.guicedee.guicedhazelcast.services.IGuicedHazelcastServerConfig");
@@ -1004,6 +1009,21 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             };
             templateToDependencies.put(GuicedEEFileTemplateProvider.SOAP_SERVICE_INTERFACE_TEMPLATE, soapDeps);
             templateToDependencies.put(GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE, soapDeps);
+
+            // HTTP Proxy: com.guicedee:vertx + io.vertx:vertx-http-proxy
+            String[][] proxyDeps = {{"io.vertx", "vertx-http-proxy", "io.vertx.httpproxy"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.HTTP_PROXY_MODULE_TEMPLATE, proxyDeps);
+
+            // gRPC: io.vertx:vertx-grpc-server + io.vertx:vertx-grpc-client
+            String[][] grpcDeps = {
+                {"io.vertx", "vertx-grpc-server", "io.vertx.grpc.server"},
+                {"io.vertx", "vertx-grpc-client", "io.vertx.grpc.client"}
+            };
+            templateToDependencies.put(GuicedEEFileTemplateProvider.GRPC_MODULE_TEMPLATE, grpcDeps);
+
+            // Redis: io.vertx:vertx-redis-client
+            String[][] redisDeps = {{"io.vertx", "vertx-redis-client", "io.vertx.redis.client"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.REDIS_MODULE_TEMPLATE, redisDeps);
 
             String[][] deps = templateToDependencies.get(templateName);
             if (deps == null) {

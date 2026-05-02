@@ -1,0 +1,27 @@
+package ${PACKAGE_NAME};
+
+import com.guicedee.vertx.grpc.GrpcConnectionInfo;
+import com.guicedee.vertx.grpc.GrpcModule;
+
+/**
+ * A gRPC server/client module using Vert.x gRPC.
+ */
+public class ${NAME} extends GrpcModule<${NAME}> {
+
+    @Override
+    protected GrpcConnectionInfo getGrpcConnectionInfo() {
+        String host = System.getProperty("GRPC_HOST",
+                System.getenv().getOrDefault("GRPC_HOST", "${GRPC_HOST}"));
+        int port = Integer.parseInt(System.getProperty("GRPC_PORT",
+                System.getenv().getOrDefault("GRPC_PORT", "${GRPC_PORT}")));
+
+        return new GrpcConnectionInfo()
+                .setName("${GRPC_NAME}")
+                .setHost(host)
+                .setPort(port)
+                .setGrpcWebEnabled(true)
+                .setTranscodingEnabled(true)
+                .setDefaultConnection(true);
+    }
+}
+
