@@ -1,0 +1,9 @@
+<html>
+<body>
+<p>Creates a new IServiceStatusChangeListener that reacts to service health transitions.</p>
+<p>Called whenever a service's status changes (UP→DOWN, DOWN→UP, etc.).
+Use for cache invalidation, circuit-breaker triggers, alerts, or schema refresh.</p>
+<p>Register via module-info.java: <code>provides IServiceStatusChangeListener with ${NAME};</code></p>
+</body>
+</html>
+

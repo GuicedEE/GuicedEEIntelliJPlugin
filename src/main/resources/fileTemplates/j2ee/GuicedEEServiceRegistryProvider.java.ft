@@ -1,0 +1,40 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.service.registry.IServiceRegistryProvider;
+import com.guicedee.service.registry.ServiceEntry;
+import com.guicedee.service.registry.ServiceStatus;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Custom service registry provider for ${NAME}.
+ * <p>
+ * Discovers services from an external source and registers them in the ServiceRegistry.
+ */
+public class ${NAME} implements IServiceRegistryProvider<${NAME}> {
+
+    @Override
+    public List<ServiceEntry> discover() {
+        List<ServiceEntry> services = new ArrayList<>();
+
+        // Discover services from your external source (Consul, Azure API, Kubernetes API, etc.)
+        // services.add(new ServiceEntry("my-service", "https://my-service.example.com",
+        //         "/health/ready", ServiceStatus.UNKNOWN, Instant.now(), Map.of()));
+
+        return services;
+    }
+
+    @Override
+    public String providerId() {
+        return "${NAME}";
+    }
+
+    @Override
+    public Integer sortOrder() {
+        return 0;
+    }
+}
+

@@ -79,6 +79,17 @@ public class GuicedEEProjectWizardData {
         private boolean microProfileOpenAPI;
         private boolean microProfileJwt;
 
+        // Cloud sub-options
+        private boolean cloud;
+        private boolean cloudServiceDiscovery;
+        private boolean cloudRuntimeAutoconfigure;
+        private boolean cloudServiceRegistry;
+        private boolean cloudConsul;
+        private boolean cloudConsulServiceResolver;
+        private boolean cloudFaultTolerance;
+        private boolean cloudGraphQL;
+        private boolean cloudMCP;
+
         public ModuleData(String name, String artifactId) {
             this.name = name;
             this.artifactId = artifactId;
@@ -136,6 +147,16 @@ public class GuicedEEProjectWizardData {
 
             this.tests = false;
             this.testsTestContainers = false;
+
+            this.cloud = false;
+            this.cloudServiceDiscovery = false;
+            this.cloudRuntimeAutoconfigure = false;
+            this.cloudServiceRegistry = false;
+            this.cloudConsul = false;
+            this.cloudConsulServiceResolver = false;
+            this.cloudFaultTolerance = false;
+            this.cloudGraphQL = false;
+            this.cloudMCP = false;
         }
 
         public String getName() {
@@ -599,6 +620,58 @@ public class GuicedEEProjectWizardData {
 
         @Deprecated public boolean isMicroProfileZipkin() { return false; }
         @Deprecated public void setMicroProfileZipkin(boolean v) { }
+
+        // Cloud
+        public boolean isCloud() { return cloud; }
+        public void setCloud(boolean cloud) { this.cloud = cloud; }
+
+        public boolean isCloudServiceDiscovery() { return cloudServiceDiscovery; }
+        public void setCloudServiceDiscovery(boolean v) {
+            this.cloudServiceDiscovery = v;
+            if (v) this.cloud = true;
+        }
+
+        public boolean isCloudRuntimeAutoconfigure() { return cloudRuntimeAutoconfigure; }
+        public void setCloudRuntimeAutoconfigure(boolean v) {
+            this.cloudRuntimeAutoconfigure = v;
+            if (v) this.cloud = true;
+        }
+
+        public boolean isCloudServiceRegistry() { return cloudServiceRegistry; }
+        public void setCloudServiceRegistry(boolean v) {
+            this.cloudServiceRegistry = v;
+            if (v) this.cloud = true;
+        }
+
+        public boolean isCloudConsul() { return cloudConsul; }
+        public void setCloudConsul(boolean v) {
+            this.cloudConsul = v;
+            if (v) this.cloud = true;
+        }
+
+        public boolean isCloudConsulServiceResolver() { return cloudConsulServiceResolver; }
+        public void setCloudConsulServiceResolver(boolean v) {
+            this.cloudConsulServiceResolver = v;
+            if (v) this.cloud = true;
+        }
+
+        public boolean isCloudFaultTolerance() { return cloudFaultTolerance; }
+        public void setCloudFaultTolerance(boolean v) {
+            this.cloudFaultTolerance = v;
+            if (v) this.cloud = true;
+        }
+
+        public boolean isCloudGraphQL() { return cloudGraphQL; }
+        public void setCloudGraphQL(boolean v) {
+            this.cloudGraphQL = v;
+            if (v) this.cloud = true;
+        }
+
+        public boolean isCloudMCP() { return cloudMCP; }
+        public void setCloudMCP(boolean v) {
+            this.cloudMCP = v;
+            if (v) this.cloud = true;
+        }
     }
 
     private String groupId;

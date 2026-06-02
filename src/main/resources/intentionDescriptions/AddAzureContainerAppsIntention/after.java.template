@@ -1,0 +1,3 @@
+@com.guicedee.runtime.autoconfigure.AzureContainerApps
+package com.myapp;
+

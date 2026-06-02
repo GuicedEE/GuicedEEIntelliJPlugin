@@ -1,0 +1,12 @@
+@com.guicedee.vertx.auth.jwt.JwtAuthOptions(
+    keystorePath = "${JWT_KEYSTORE_PATH}",
+    keystoreType = "jceks",
+    keystorePassword = "${JWT_KEYSTORE_PASSWORD}",
+    algorithm = "RS256",
+    issuer = "${JWT_ISSUER}",
+    expiresInSeconds = 3600,
+    permissionsClaimKey = "realm_access/roles"
+)
+package ${PACKAGE_NAME};
+
+

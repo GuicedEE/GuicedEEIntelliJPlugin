@@ -1,0 +1,6 @@
+@com.guicedee.vertx.auth.htdigest.HtdigestAuthOptions(
+    htdigestFile = "${HTDIGEST_FILE}"
+)
+package ${PACKAGE_NAME};
+
+

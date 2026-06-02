@@ -18,7 +18,10 @@ public class AddAnnotationDialog extends DialogWrapper {
     private final List<String> availableAnnotations = Arrays.asList(
             "com.guicedee.rabbit.RabbitConnectionOptions",
             "com.guicedee.rabbit.QueueExchange",
-            "com.guicedee.vertx.spi.Verticle"
+            "com.guicedee.vertx.spi.Verticle",
+            "com.guicedee.service.registry.ServiceRegistryOptions",
+            "com.guicedee.service.registry.RegisteredService",
+            "com.guicedee.runtime.autoconfigure.AzureContainerApps"
     );
 
     private JBList<String> annotationList;

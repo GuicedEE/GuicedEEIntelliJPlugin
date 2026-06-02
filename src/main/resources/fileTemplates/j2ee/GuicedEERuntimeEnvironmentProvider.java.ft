@@ -1,0 +1,53 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.runtime.autoconfigure.RuntimeEnvironment;
+import com.guicedee.runtime.autoconfigure.RuntimeEnvironmentProvider;
+import com.guicedee.runtime.autoconfigure.providers.AbstractEnvironmentProvider;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Custom runtime environment provider for ${NAME}.
+ * <p>
+ * Detects the cloud platform and populates runtime metadata.
+ */
+public class ${NAME} extends AbstractEnvironmentProvider implements RuntimeEnvironmentProvider {
+
+    @Override
+    public boolean detected() {
+        // Return true if this platform is detected
+        return has("MY_PLATFORM_INDICATOR_ENV_VAR");
+    }
+
+    @Override
+    public RuntimeEnvironment runtimeEnvironment() {
+        Map<String, String> extras = new HashMap<>();
+        // Populate platform-specific extras
+        ifPresent("MY_EXTRA_KEY", v -> extras.put("extraKey", v));
+
+        return new RuntimeEnvironment(
+                providerId(),           // provider
+                env("SERVICE_NAME"),    // serviceName
+                env("SERVICE_ID"),      // serviceId
+                env("HOSTNAME"),        // hostname
+                envInt("PORT", 8080),   // port
+                env("REVISION"),        // revision
+                env("REPLICA_NAME"),    // replicaName
+                env("REGION"),          // region
+                "",                     // zone
+                extras                  // extras
+        );
+    }
+
+    @Override
+    public String providerId() {
+        return "my-platform";
+    }
+
+    @Override
+    public Integer sortOrder() {
+        return 0;
+    }
+}
+

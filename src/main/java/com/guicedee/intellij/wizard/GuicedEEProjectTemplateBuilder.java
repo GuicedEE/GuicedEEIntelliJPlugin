@@ -474,6 +474,71 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>persistence</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
+
+            // Database sub-options
+            if (moduleData.isDatabasePostgreSQL())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>org.postgresql</groupId>\n");
+                dependencies.append("            <artifactId>postgresql</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseMySQL())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>mysql</groupId>\n");
+                dependencies.append("            <artifactId>mysql-connector-java</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseOracle())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.oracle.database.jdbc</groupId>\n");
+                dependencies.append("            <artifactId>ojdbc8</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseDB2())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.ibm.db2</groupId>\n");
+                dependencies.append("            <artifactId>jcc</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseSqlServer())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.microsoft.sqlserver</groupId>\n");
+                dependencies.append("            <artifactId>mssql-jdbc</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseCassandra())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.datastax.cassandra</groupId>\n");
+                dependencies.append("            <artifactId>cassandra-driver-core</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseMongoDB())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>org.mongodb</groupId>\n");
+                dependencies.append("            <artifactId>mongodb-driver-sync</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+
+            if (moduleData.isDatabaseRedis())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>io.vertx</groupId>\n");
+                dependencies.append("            <artifactId>vertx-redis-client</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
         }
 
         // Messaging dependencies
@@ -500,15 +565,20 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("            <artifactId>ibmmq</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
-        }
-
-        // Mail Client dependency
-        if (moduleData.isMailClient())
-        {
-            dependencies.append("        <dependency>\n");
-            dependencies.append("            <groupId>com.guicedee</groupId>\n");
-            dependencies.append("            <artifactId>mailclient</artifactId>\n");
-            dependencies.append("        </dependency>\n");
+            if (moduleData.isMessagingAMQP())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>io.vertx</groupId>\n");
+                dependencies.append("            <artifactId>vertx-amqp-client</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isMessagingMQTT())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>io.vertx</groupId>\n");
+                dependencies.append("            <artifactId>vertx-mqtt</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
         }
 
         // Caching dependencies
@@ -525,6 +595,15 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             {
                 appendEhCacheDependencies(dependencies);
             }
+        }
+
+        // Mail Client dependency
+        if (moduleData.isMailClient())
+        {
+            dependencies.append("        <dependency>\n");
+            dependencies.append("            <groupId>com.guicedee</groupId>\n");
+            dependencies.append("            <artifactId>mailclient</artifactId>\n");
+            dependencies.append("        </dependency>\n");
         }
 
         // MicroProfile dependencies
@@ -570,6 +649,67 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 dependencies.append("        <dependency>\n");
                 dependencies.append("            <groupId>com.guicedee.microprofile</groupId>\n");
                 dependencies.append("            <artifactId>jwt</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+        }
+
+        // Cloud dependencies
+        if (moduleData.isCloud())
+        {
+            if (moduleData.isCloudServiceDiscovery())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>service-discovery</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudRuntimeAutoconfigure())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>runtime-autoconfigure</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudServiceRegistry())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>service-registry</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudConsul())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>consul</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudConsulServiceResolver())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>consul-service-resolver</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudFaultTolerance())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>fault-tolerance</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudGraphQL())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>graphql</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudMCP())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>mcp</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
         }
@@ -737,7 +877,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 .replace("${URL}", url.toString())
                 .replace("${SCM}", scm.toString())
                 .replace("${DEVELOPERS}", developers.toString())
-                .replace("${DEPENDENCIES}", dependencies.toString());
+                .replace("${DEPENDENCIES}", variables.get("DEPENDENCIES"));
 
         FileUtil.writeToFile(new File(baseDir, "pom.xml"), pomXml);
     }
@@ -1090,6 +1230,43 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isMicroProfileZipkin())
             {
                 requires.append("\trequires io.vertx.zipkin;\n");
+            }
+        }
+
+        // Cloud requirements
+        if (moduleData.isCloud())
+        {
+            if (moduleData.isCloudServiceDiscovery())
+            {
+                requires.append("\trequires transitive com.guicedee.vertx.servicediscovery;\n");
+            }
+            if (moduleData.isCloudRuntimeAutoconfigure())
+            {
+                requires.append("\trequires transitive com.guicedee.runtime.autoconfigure;\n");
+            }
+            if (moduleData.isCloudServiceRegistry())
+            {
+                requires.append("\trequires com.guicedee.service.registry;\n");
+            }
+            if (moduleData.isCloudConsul())
+            {
+                requires.append("\trequires com.guicedee.consul;\n");
+            }
+            if (moduleData.isCloudConsulServiceResolver())
+            {
+                requires.append("\trequires com.guicedee.consul.resolver;\n");
+            }
+            if (moduleData.isCloudFaultTolerance())
+            {
+                requires.append("\trequires transitive com.guicedee.faulttolerance;\n");
+            }
+            if (moduleData.isCloudGraphQL())
+            {
+                requires.append("\trequires transitive com.guicedee.vertx.graphql;\n");
+            }
+            if (moduleData.isCloudMCP())
+            {
+                requires.append("\trequires transitive com.guicedee.mcp.server;\n");
             }
         }
 
@@ -1834,6 +2011,9 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         } else if (moduleData.isDatabaseMongoDB()) {
             persistenceUnit = "mongodb";
             dbType = "MongoDB";
+        } else if (moduleData.isDatabaseRedis()) {
+            persistenceUnit = "redis";
+            dbType = "Redis";
         } else if (moduleData.isDatabaseJDBC()) {
             persistenceUnit = "jdbc";
             dbType = "JDBC";
@@ -2059,7 +2239,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <properties>\n" +
                 "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.0.2</guicedee.version>\n" +
+                "        <guicedee.version>2.1.0</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 "    <dependencyManagement>\n" +
@@ -2144,7 +2324,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        System.setProperty(\"HTTPS_ENABLED\", \"false\");\n" +
                 "\n" +
                 "        //System.setProperty(\"HTTPS_KEYSTORE\", \"\");\n" +
-                "        //System.setProperty(\"HTTPS_KEYSTORE_PASSWORD\", \"\");\n" +
+                //System.setProperty(\"HTTPS_KEYSTORE_PASSWORD\", \"\");\n" +
                 "\n" +
                 "        IGuiceContext.registerModule(\"${MODULE_NAME}\");\n" +
                 "        IGuiceContext.instance().inject();\n" +
@@ -2710,6 +2890,67 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             }
         }
 
+        // Cloud dependencies
+        if (moduleData.isCloud())
+        {
+            if (moduleData.isCloudServiceDiscovery())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>service-discovery</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudRuntimeAutoconfigure())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>runtime-autoconfigure</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudServiceRegistry())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>service-registry</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudConsul())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>consul</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudConsulServiceResolver())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>consul-service-resolver</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudFaultTolerance())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>fault-tolerance</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudGraphQL())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>graphql</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+            if (moduleData.isCloudMCP())
+            {
+                dependencies.append("        <dependency>\n");
+                dependencies.append("            <groupId>com.guicedee</groupId>\n");
+                dependencies.append("            <artifactId>mcp</artifactId>\n");
+                dependencies.append("        </dependency>\n");
+            }
+        }
+
         // Auth dependencies
         if (moduleData.isAuthProvider())
         {
@@ -2983,7 +3224,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        <maven.compiler.source>24</maven.compiler.source>\n" +
                 "        <maven.compiler.target>24</maven.compiler.target>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.0.2</guicedee.version>\n" +
+                "        <guicedee.version>2.1.0</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 modules.toString() +
@@ -3318,6 +3559,17 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isMicroProfileJwt()) deps.append("    implementation(\"com.guicedee.microprofile:jwt\")\n");
         }
 
+        if (moduleData.isCloud()) {
+            if (moduleData.isCloudServiceDiscovery()) deps.append("    implementation(\"com.guicedee:service-discovery\")\n");
+            if (moduleData.isCloudRuntimeAutoconfigure()) deps.append("    implementation(\"com.guicedee:runtime-autoconfigure\")\n");
+            if (moduleData.isCloudServiceRegistry()) deps.append("    implementation(\"com.guicedee:service-registry\")\n");
+            if (moduleData.isCloudConsul()) deps.append("    implementation(\"com.guicedee:consul\")\n");
+            if (moduleData.isCloudConsulServiceResolver()) deps.append("    implementation(\"com.guicedee:consul-service-resolver\")\n");
+            if (moduleData.isCloudFaultTolerance()) deps.append("    implementation(\"com.guicedee:fault-tolerance\")\n");
+            if (moduleData.isCloudGraphQL()) deps.append("    implementation(\"com.guicedee:graphql\")\n");
+            if (moduleData.isCloudMCP()) deps.append("    implementation(\"com.guicedee:mcp\")\n");
+        }
+
         if (moduleData.isAuthProvider()) {
             if (moduleData.isAuthOAuth2()) deps.append("    implementation(\"com.guicedee:oauth2\")\n");
             if (moduleData.isAuthJwt()) deps.append("    implementation(\"com.guicedee.microprofile:jwt\")\n");
@@ -3356,8 +3608,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    mavenCentral()\n" +
                 "}\n\n" +
                 "dependencies {\n" +
-                "    implementation(platform(\"com.guicedee:guicedee-bom:2.0.2\"))\n" +
-                "    implementation(platform(\"com.guicedee:tests-bom:2.0.2\"))\n" +
+                "    implementation(platform(\"com.guicedee:guicedee-bom:2.1.0\"))\n" +
+                "    implementation(platform(\"com.guicedee:tests-bom:2.1.0\"))\n" +
                 deps +
                 "}\n\n" +
                 "tasks.withType<JavaCompile> {\n" +
@@ -3393,8 +3645,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        mavenCentral()\n" +
                 "    }\n\n" +
                 "    dependencies {\n" +
-                "        \"implementation\"(platform(\"com.guicedee:guicedee-bom:2.0.2\"))\n" +
-                "        \"implementation\"(platform(\"com.guicedee:tests-bom:2.0.2\"))\n" +
+                "        \"implementation\"(platform(\"com.guicedee:guicedee-bom:2.1.0\"))\n" +
+                "        \"implementation\"(platform(\"com.guicedee:tests-bom:2.1.0\"))\n" +
                 "    }\n\n" +
                 "    tasks.withType<JavaCompile> {\n" +
                 "        options.encoding = \"UTF-8\"\n" +

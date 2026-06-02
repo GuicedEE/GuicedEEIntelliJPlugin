@@ -1,0 +1,9 @@
+@com.guicedee.vertx.auth.otp.OtpAuthOptions(
+    otpType = com.guicedee.vertx.auth.otp.OtpAuthOptions.OtpType.TOTP,
+    issuer = "${OTP_ISSUER}",
+    codeDigits = 6,
+    period = 30
+)
+package ${PACKAGE_NAME};
+
+

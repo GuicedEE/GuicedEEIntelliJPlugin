@@ -1,0 +1,8 @@
+@com.guicedee.vertx.auth.ldap.LdapAuthOptions(
+    url = "${LDAP_URL}",
+    baseDn = "${LDAP_BASE_DN}",
+    authenticationMechanism = "simple"
+)
+package ${PACKAGE_NAME};
+
+

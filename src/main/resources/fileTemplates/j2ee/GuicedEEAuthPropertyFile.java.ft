@@ -1,0 +1,6 @@
+@com.guicedee.vertx.auth.properties.PropertyFileAuthOptions(
+    path = "${PROPERTY_FILE_PATH}"
+)
+package ${PACKAGE_NAME};
+
+

@@ -96,6 +96,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JCheckBox myModuleDatabaseSqlServerCheckBox;
     private JCheckBox myModuleDatabaseCassandraCheckBox;
     private JCheckBox myModuleDatabaseMongoDBCheckBox;
+    private JCheckBox myModuleDatabaseRedisCheckBox;
     private JCheckBox myModuleDatabaseJDBCCheckBox;
 
     // Messaging sub-options
@@ -119,6 +120,18 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JCheckBox myModuleMicroProfileTelemetryCheckBox;
     private JCheckBox myModuleMicroProfileOpenAPICheckBox;
     private JCheckBox myModuleMicroProfileJwtCheckBox;
+
+    // Cloud sub-options
+    private JCheckBox myModuleCloudCheckBox;
+    private JPanel myModuleCloudOptionsPanel;
+    private JCheckBox myModuleCloudServiceDiscoveryCheckBox;
+    private JCheckBox myModuleCloudRuntimeAutoconfigureCheckBox;
+    private JCheckBox myModuleCloudServiceRegistryCheckBox;
+    private JCheckBox myModuleCloudConsulCheckBox;
+    private JCheckBox myModuleCloudConsulServiceResolverCheckBox;
+    private JCheckBox myModuleCloudFaultToleranceCheckBox;
+    private JCheckBox myModuleCloudGraphQLCheckBox;
+    private JCheckBox myModuleCloudMCPCheckBox;
 
     // Tests sub-options
     private JCheckBox myModuleTestsCheckBox;
@@ -602,6 +615,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleDatabaseSqlServerCheckBox = new JCheckBox("SQL Server");
         myModuleDatabaseCassandraCheckBox = new JCheckBox("Cassandra");
         myModuleDatabaseMongoDBCheckBox = new JCheckBox("MongoDB");
+        myModuleDatabaseRedisCheckBox = new JCheckBox("Redis");
         myModuleDatabaseJDBCCheckBox = new JCheckBox("JDBC");
         myModuleDatabaseOptionsPanel.add(myModuleDatabasePersistenceCheckBox);
         myModuleDatabaseOptionsPanel.add(myModuleDatabasePostgreSQLCheckBox);
@@ -611,7 +625,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleDatabaseOptionsPanel.add(myModuleDatabaseSqlServerCheckBox);
         myModuleDatabaseOptionsPanel.add(myModuleDatabaseCassandraCheckBox);
         myModuleDatabaseOptionsPanel.add(myModuleDatabaseMongoDBCheckBox);
-        myModuleDatabaseOptionsPanel.add(myModuleDatabaseJDBCCheckBox);
+        myModuleDatabaseOptionsPanel.add(myModuleDatabaseRedisCheckBox);
+        // JDBC checkbox hidden - not exposed in the UI
         myModuleDatabaseOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleDatabaseOptionsPanel.setVisible(false);
 
@@ -655,6 +670,28 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMicroProfileOptionsPanel.add(myModuleMicroProfileJwtCheckBox);
         myModuleMicroProfileOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleMicroProfileOptionsPanel.setVisible(false);
+
+        // Initialize Cloud sub-options
+        myModuleCloudCheckBox = new JCheckBox("Cloud");
+        myModuleCloudOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        myModuleCloudServiceDiscoveryCheckBox = new JCheckBox("Service Discovery");
+        myModuleCloudRuntimeAutoconfigureCheckBox = new JCheckBox("Runtime Autoconfigure");
+        myModuleCloudServiceRegistryCheckBox = new JCheckBox("Service Registry");
+        myModuleCloudConsulCheckBox = new JCheckBox("Consul");
+        myModuleCloudConsulServiceResolverCheckBox = new JCheckBox("Consul Service Resolver");
+        myModuleCloudFaultToleranceCheckBox = new JCheckBox("Fault Tolerance");
+        myModuleCloudGraphQLCheckBox = new JCheckBox("GraphQL");
+        myModuleCloudMCPCheckBox = new JCheckBox("MCP Server");
+        myModuleCloudOptionsPanel.add(myModuleCloudServiceDiscoveryCheckBox);
+        myModuleCloudOptionsPanel.add(myModuleCloudRuntimeAutoconfigureCheckBox);
+        myModuleCloudOptionsPanel.add(myModuleCloudServiceRegistryCheckBox);
+        myModuleCloudOptionsPanel.add(myModuleCloudConsulCheckBox);
+        myModuleCloudOptionsPanel.add(myModuleCloudConsulServiceResolverCheckBox);
+        myModuleCloudOptionsPanel.add(myModuleCloudFaultToleranceCheckBox);
+        myModuleCloudOptionsPanel.add(myModuleCloudGraphQLCheckBox);
+        myModuleCloudOptionsPanel.add(myModuleCloudMCPCheckBox);
+        myModuleCloudOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+        myModuleCloudOptionsPanel.setVisible(false);
 
         // Initialize Tests as a main feature group
         myModuleTestsCheckBox = new JCheckBox("Tests");
@@ -721,7 +758,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         // Add action listeners for main feature groups
         myModuleWebReactiveCheckBox.addActionListener(e -> {
             myModuleWebReactiveOptionsPanel.setVisible(myModuleWebReactiveCheckBox.isSelected());
+            if (!myModuleWebReactiveCheckBox.isSelected()) {
+                myModuleAuthOptionsPanel.setVisible(false);
+            }
             updateSelectedModule();
+            revalidateFeaturePanel();
         });
 
         myModuleDatabaseCheckBox.addActionListener(e -> {
@@ -737,21 +778,25 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             }
 
             updateSelectedModule();
+            revalidateFeaturePanel();
         });
 
         myModuleMessagingCheckBox.addActionListener(e -> {
             myModuleMessagingOptionsPanel.setVisible(myModuleMessagingCheckBox.isSelected());
             updateSelectedModule();
+            revalidateFeaturePanel();
         });
 
         myModuleCachingCheckBox.addActionListener(e -> {
             myModuleCachingOptionsPanel.setVisible(myModuleCachingCheckBox.isSelected());
             updateSelectedModule();
+            revalidateFeaturePanel();
         });
 
         myModuleMicroProfileCheckBox.addActionListener(e -> {
             myModuleMicroProfileOptionsPanel.setVisible(myModuleMicroProfileCheckBox.isSelected());
             updateSelectedModule();
+            revalidateFeaturePanel();
         });
 
         // Add action listeners for sub-options
@@ -763,6 +808,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleWebReactiveAuthCheckBox.addActionListener(e -> {
             myModuleAuthOptionsPanel.setVisible(myModuleWebReactiveAuthCheckBox.isSelected());
             updateSelectedModule();
+            revalidateFeaturePanel();
         });
 
         // Auth sub-options listeners
@@ -783,6 +829,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleDatabaseSqlServerCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleDatabaseCassandraCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleDatabaseMongoDBCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleDatabaseRedisCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleDatabaseJDBCCheckBox.addActionListener(e -> {
             if (myModuleDatabaseJDBCCheckBox.isSelected()) {
                 // If JDBC is selected, deselect all other database options
@@ -813,10 +860,26 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMicroProfileOpenAPICheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMicroProfileJwtCheckBox.addActionListener(e -> updateSelectedModule());
 
+        // Cloud action listeners
+        myModuleCloudCheckBox.addActionListener(e -> {
+            myModuleCloudOptionsPanel.setVisible(myModuleCloudCheckBox.isSelected());
+            updateSelectedModule();
+            revalidateFeaturePanel();
+        });
+        myModuleCloudServiceDiscoveryCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCloudRuntimeAutoconfigureCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCloudServiceRegistryCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCloudConsulCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCloudConsulServiceResolverCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCloudFaultToleranceCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCloudGraphQLCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCloudMCPCheckBox.addActionListener(e -> updateSelectedModule());
+
         // Add action listener for Tests
         myModuleTestsCheckBox.addActionListener(e -> {
             myModuleTestsOptionsPanel.setVisible(myModuleTestsCheckBox.isSelected());
             updateSelectedModule();
+            revalidateFeaturePanel();
         });
 
         // Add action listener for Test Containers
@@ -842,6 +905,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
                 .addComponent(myModuleCachingOptionsPanel)
                 .addComponent(myModuleMicroProfileCheckBox)
                 .addComponent(myModuleMicroProfileOptionsPanel)
+                .addComponent(myModuleCloudCheckBox)
+                .addComponent(myModuleCloudOptionsPanel)
                 .addComponent(myModuleTestsCheckBox)
                 .addComponent(myModuleTestsOptionsPanel);
 
@@ -921,6 +986,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleDatabaseSqlServerCheckBox.setSelected(selectedModule.isDatabaseSqlServer());
             myModuleDatabaseCassandraCheckBox.setSelected(selectedModule.isDatabaseCassandra());
             myModuleDatabaseMongoDBCheckBox.setSelected(selectedModule.isDatabaseMongoDB());
+            myModuleDatabaseRedisCheckBox.setSelected(selectedModule.isDatabaseRedis());
             myModuleDatabaseJDBCCheckBox.setSelected(selectedModule.isDatabaseJDBC());
             myModuleDatabaseOptionsPanel.setVisible(selectedModule.isDatabase());
 
@@ -948,6 +1014,18 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleMicroProfileOpenAPICheckBox.setSelected(selectedModule.isMicroProfileOpenAPI());
             myModuleMicroProfileJwtCheckBox.setSelected(selectedModule.isMicroProfileJwt());
             myModuleMicroProfileOptionsPanel.setVisible(selectedModule.isMicroProfile());
+
+            // Set Cloud sub-options
+            myModuleCloudCheckBox.setSelected(selectedModule.isCloud());
+            myModuleCloudServiceDiscoveryCheckBox.setSelected(selectedModule.isCloudServiceDiscovery());
+            myModuleCloudRuntimeAutoconfigureCheckBox.setSelected(selectedModule.isCloudRuntimeAutoconfigure());
+            myModuleCloudServiceRegistryCheckBox.setSelected(selectedModule.isCloudServiceRegistry());
+            myModuleCloudConsulCheckBox.setSelected(selectedModule.isCloudConsul());
+            myModuleCloudConsulServiceResolverCheckBox.setSelected(selectedModule.isCloudConsulServiceResolver());
+            myModuleCloudFaultToleranceCheckBox.setSelected(selectedModule.isCloudFaultTolerance());
+            myModuleCloudGraphQLCheckBox.setSelected(selectedModule.isCloudGraphQL());
+            myModuleCloudMCPCheckBox.setSelected(selectedModule.isCloudMCP());
+            myModuleCloudOptionsPanel.setVisible(selectedModule.isCloud());
 
             // Set Tests sub-options
             myModuleTestsCheckBox.setSelected(selectedModule.isTests());
@@ -999,6 +1077,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleDatabaseSqlServerCheckBox.setSelected(false);
             myModuleDatabaseCassandraCheckBox.setSelected(false);
             myModuleDatabaseMongoDBCheckBox.setSelected(false);
+            myModuleDatabaseRedisCheckBox.setSelected(false);
             myModuleDatabaseJDBCCheckBox.setSelected(false);
             myModuleDatabaseOptionsPanel.setVisible(false);
 
@@ -1026,6 +1105,18 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleMicroProfileOpenAPICheckBox.setSelected(false);
             myModuleMicroProfileJwtCheckBox.setSelected(false);
             myModuleMicroProfileOptionsPanel.setVisible(false);
+
+            // Clear Cloud sub-options
+            myModuleCloudCheckBox.setSelected(false);
+            myModuleCloudServiceDiscoveryCheckBox.setSelected(false);
+            myModuleCloudRuntimeAutoconfigureCheckBox.setSelected(false);
+            myModuleCloudServiceRegistryCheckBox.setSelected(false);
+            myModuleCloudConsulCheckBox.setSelected(false);
+            myModuleCloudConsulServiceResolverCheckBox.setSelected(false);
+            myModuleCloudFaultToleranceCheckBox.setSelected(false);
+            myModuleCloudGraphQLCheckBox.setSelected(false);
+            myModuleCloudMCPCheckBox.setSelected(false);
+            myModuleCloudOptionsPanel.setVisible(false);
 
             // Clear Tests sub-options
             myModuleTestsCheckBox.setSelected(false);
@@ -1079,6 +1170,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             selectedModule.setDatabaseSqlServer(myModuleDatabaseSqlServerCheckBox.isSelected());
             selectedModule.setDatabaseCassandra(myModuleDatabaseCassandraCheckBox.isSelected());
             selectedModule.setDatabaseMongoDB(myModuleDatabaseMongoDBCheckBox.isSelected());
+            selectedModule.setDatabaseRedis(myModuleDatabaseRedisCheckBox.isSelected());
             selectedModule.setDatabaseJDBC(myModuleDatabaseJDBCCheckBox.isSelected());
 
             // Update Messaging sub-options
@@ -1099,6 +1191,17 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             selectedModule.setMicroProfileTelemetry(myModuleMicroProfileTelemetryCheckBox.isSelected());
             selectedModule.setMicroProfileOpenAPI(myModuleMicroProfileOpenAPICheckBox.isSelected());
             selectedModule.setMicroProfileJwt(myModuleMicroProfileJwtCheckBox.isSelected());
+
+            // Update Cloud sub-options
+            selectedModule.setCloud(myModuleCloudCheckBox.isSelected());
+            selectedModule.setCloudServiceDiscovery(myModuleCloudServiceDiscoveryCheckBox.isSelected());
+            selectedModule.setCloudRuntimeAutoconfigure(myModuleCloudRuntimeAutoconfigureCheckBox.isSelected());
+            selectedModule.setCloudServiceRegistry(myModuleCloudServiceRegistryCheckBox.isSelected());
+            selectedModule.setCloudConsul(myModuleCloudConsulCheckBox.isSelected());
+            selectedModule.setCloudConsulServiceResolver(myModuleCloudConsulServiceResolverCheckBox.isSelected());
+            selectedModule.setCloudFaultTolerance(myModuleCloudFaultToleranceCheckBox.isSelected());
+            selectedModule.setCloudGraphQL(myModuleCloudGraphQLCheckBox.isSelected());
+            selectedModule.setCloudMCP(myModuleCloudMCPCheckBox.isSelected());
 
             // Update Tests sub-options
             selectedModule.setTests(myModuleTestsCheckBox.isSelected());
@@ -1189,6 +1292,18 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         System.out.println("[DEBUG_LOG] Updated project-level flags: webApplication=" + webApplication + 
                            ", databaseApplication=" + databaseApplication + 
                            ", rabbitMQSupport=" + rabbitMQSupport);
+    }
+
+    /**
+     * Revalidates and repaints the module features panel and main panel after visibility changes.
+     */
+    private void revalidateFeaturePanel() {
+        myModuleFeaturesPanel.revalidate();
+        myModuleFeaturesPanel.repaint();
+        myModulesPanel.revalidate();
+        myModulesPanel.repaint();
+        myMainPanel.revalidate();
+        myMainPanel.repaint();
     }
 
     /**

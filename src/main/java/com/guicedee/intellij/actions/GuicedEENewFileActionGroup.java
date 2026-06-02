@@ -122,11 +122,24 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 GuicedEEFileTemplateProvider.AUTHENTICATION_PROVIDER_TEMPLATE));
         authGroup.add(new CreateGuicedEEFileAction("Authorization Provider", "Create a new Authorization Provider",
                 GuicedEEFileTemplateProvider.AUTHORIZATION_PROVIDER_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("OAuth2/OIDC Config", "Create an OAuth2/OIDC authentication package-info",
+                GuicedEEFileTemplateProvider.AUTH_OAUTH2_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("JWT Config", "Create a JWT authentication package-info",
+                GuicedEEFileTemplateProvider.AUTH_JWT_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("ABAC Config", "Create an ABAC (Attribute-Based Access Control) package-info",
+                GuicedEEFileTemplateProvider.AUTH_ABAC_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("OTP/TOTP Config", "Create a TOTP/HOTP authentication package-info",
+                GuicedEEFileTemplateProvider.AUTH_OTP_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("Property File Config", "Create a property file authentication package-info",
+                GuicedEEFileTemplateProvider.AUTH_PROPERTY_FILE_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("LDAP Config", "Create an LDAP authentication package-info",
+                GuicedEEFileTemplateProvider.AUTH_LDAP_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("htpasswd Config", "Create an htpasswd authentication package-info",
+                GuicedEEFileTemplateProvider.AUTH_HTPASSWD_TEMPLATE));
+        authGroup.add(new CreateGuicedEEFileAction("htdigest Config", "Create an htdigest authentication package-info",
+                GuicedEEFileTemplateProvider.AUTH_HTDIGEST_TEMPLATE));
 
-        // Flattened groups (Database, Mail, MicroProfile)
-        add(new CreateGuicedEEFileAction("Persistence Module", "Create a new Persistence Module",
-                GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
-
+        // Flattened groups (Mail, MicroProfile)
         add(new CreateGuicedEEFileAction("Mail Client", "Create a new Mail Client",
                 GuicedEEFileTemplateProvider.MAIL_CLIENT_TEMPLATE));
 
@@ -151,6 +164,41 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 GuicedEEFileTemplateProvider.HAZELCAST_SERVER_CONFIG_TEMPLATE));
         hazelcastGroup.add(new CreateGuicedEEFileAction("Client Config", "Create a new Hazelcast Client Configuration",
                 GuicedEEFileTemplateProvider.HAZELCAST_CLIENT_CONFIG_TEMPLATE));
+
+        // Add Cloud subgroup
+        DefaultActionGroup cloudGroup = new DefaultActionGroup("Cloud", true);
+        cloudGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(cloudGroup);
+
+        cloudGroup.add(new CreateGuicedEEFileAction("Runtime Environment Provider", "Create a new Runtime Environment Provider",
+                GuicedEEFileTemplateProvider.RUNTIME_ENVIRONMENT_PROVIDER_TEMPLATE));
+        cloudGroup.add(new CreateGuicedEEFileAction("Service Registry Provider", "Create a new Service Registry Provider",
+                GuicedEEFileTemplateProvider.SERVICE_REGISTRY_PROVIDER_TEMPLATE));
+        cloudGroup.add(new CreateGuicedEEFileAction("Service Status Change Listener", "Create a new Service Status Change Listener",
+                GuicedEEFileTemplateProvider.SERVICE_STATUS_CHANGE_LISTENER_TEMPLATE));
+
+        // Add Database subgroup
+        DefaultActionGroup databaseGroup = new DefaultActionGroup("Database", true);
+        databaseGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);
+        add(databaseGroup);
+
+        databaseGroup.add(new CreateGuicedEEFileAction("Persistence Module (PostgreSQL)", "Create a Persistence Module for PostgreSQL",
+                GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
+        databaseGroup.add(new CreateGuicedEEFileAction("Persistence Module (MySQL)", "Create a Persistence Module for MySQL",
+                GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
+        databaseGroup.add(new CreateGuicedEEFileAction("Persistence Module (Oracle)", "Create a Persistence Module for Oracle",
+                GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
+        databaseGroup.add(new CreateGuicedEEFileAction("Persistence Module (SQL Server)", "Create a Persistence Module for SQL Server",
+                GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
+        databaseGroup.add(new CreateGuicedEEFileAction("Persistence Module (DB2)", "Create a Persistence Module for DB2",
+                GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE));
+        databaseGroup.add(Separator.create());
+        databaseGroup.add(new CreateGuicedEEFileAction("MongoDB Module", "Create a new MongoDB Module",
+                GuicedEEFileTemplateProvider.MONGODB_MODULE_TEMPLATE));
+        databaseGroup.add(new CreateGuicedEEFileAction("Cassandra Module", "Create a new Cassandra Module",
+                GuicedEEFileTemplateProvider.CASSANDRA_MODULE_TEMPLATE));
+        databaseGroup.add(new CreateGuicedEEFileAction("Redis Module", "Create a new Redis Module",
+                GuicedEEFileTemplateProvider.REDIS_MODULE_TEMPLATE));
 
         // Add global Hooks group
         DefaultActionGroup globalHooksGroup = new DefaultActionGroup("Hooks", true);
@@ -599,9 +647,72 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                     }
                 }
 
-                // RabbitMQ Connection is a package-info.java — handle specially
+                // Auth template defaults
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_OAUTH2_TEMPLATE)) {
+                    defaultProperties.setProperty("OAUTH2_CLIENT_ID", "${OAUTH2_CLIENT_ID}");
+                    defaultProperties.setProperty("OAUTH2_CLIENT_SECRET", "${OAUTH2_CLIENT_SECRET}");
+                    defaultProperties.setProperty("OAUTH2_SITE", "https://accounts.google.com");
+                    defaultProperties.setProperty("OAUTH2_DISCOVERY_URL", "${OAUTH2_DISCOVERY_URL}");
+                }
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_JWT_TEMPLATE)) {
+                    defaultProperties.setProperty("JWT_KEYSTORE_PATH", "keystore.jceks");
+                    defaultProperties.setProperty("JWT_KEYSTORE_PASSWORD", "${JWT_KEYSTORE_PASSWORD}");
+                    defaultProperties.setProperty("JWT_ISSUER", "my-app.com");
+                }
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_ABAC_TEMPLATE)) {
+                    defaultProperties.setProperty("ABAC_POLICY_PATH", "policies/policy.json");
+                }
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_OTP_TEMPLATE)) {
+                    defaultProperties.setProperty("OTP_ISSUER", "MyApp");
+                }
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_PROPERTY_FILE_TEMPLATE)) {
+                    defaultProperties.setProperty("PROPERTY_FILE_PATH", "auth.properties");
+                }
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_LDAP_TEMPLATE)) {
+                    defaultProperties.setProperty("LDAP_URL", "ldap://localhost:389");
+                    defaultProperties.setProperty("LDAP_BASE_DN", "dc=example,dc=com");
+                }
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_HTPASSWD_TEMPLATE)) {
+                    defaultProperties.setProperty("HTPASSWD_FILE", ".htpasswd");
+                }
+                if (templateName.equals(GuicedEEFileTemplateProvider.AUTH_HTDIGEST_TEMPLATE)) {
+                    defaultProperties.setProperty("HTDIGEST_FILE", ".htdigest");
+                }
+
+                // Persistence Module database type defaults
+                if (templateName.equals(GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE)) {
+                    if (!defaultProperties.containsKey("PERSISTENCE_UNIT")) {
+                        defaultProperties.setProperty("PERSISTENCE_UNIT", name.toLowerCase().replace("module", "").replace("persistence", "").trim());
+                        if (defaultProperties.getProperty("PERSISTENCE_UNIT").isEmpty()) {
+                            defaultProperties.setProperty("PERSISTENCE_UNIT", "default-pu");
+                        }
+                    }
+                    // Determine database type from the action name
+                    String actionName = getActionName();
+                    String dbType = "postgresql"; // default
+                    if (actionName.contains("MySQL")) {
+                        dbType = "mysql";
+                    } else if (actionName.contains("Oracle")) {
+                        dbType = "oracle";
+                    } else if (actionName.contains("SQL Server")) {
+                        dbType = "sqlserver";
+                    } else if (actionName.contains("DB2")) {
+                        dbType = "db2";
+                    }
+                    defaultProperties.setProperty("DATABASE_TYPE", dbType);
+                }
+
+                // RabbitMQ Connection and Auth configs are package-info.java — handle specially
                 // since CreateFileFromTemplateAction expects a class/interface
-                if (templateName.equals(GuicedEEFileTemplateProvider.RABBITMQ_CONNECTION_TEMPLATE)) {
+                if (templateName.equals(GuicedEEFileTemplateProvider.RABBITMQ_CONNECTION_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_OAUTH2_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_JWT_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_ABAC_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_OTP_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_PROPERTY_FILE_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_LDAP_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_HTPASSWD_TEMPLATE)
+                    || templateName.equals(GuicedEEFileTemplateProvider.AUTH_HTDIGEST_TEMPLATE)) {
                     try {
                         FileTemplate template = fileTemplateManager.getJ2eeTemplate(templateName);
                         if (template == null) {
@@ -720,6 +831,31 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
 
                 // Ensure required Maven dependency is present for this template
                 ensureRequiredDependency(dir.getProject(), templateName, dir);
+
+                // For Persistence Module, also add the specific database driver dependency
+                if (templateName.equals(GuicedEEFileTemplateProvider.PERSISTENCE_MODULE_TEMPLATE)) {
+                    String actionName = getActionName();
+                    String driverGroupId = null;
+                    String driverArtifactId = null;
+                    if (actionName.contains("MySQL")) {
+                        driverGroupId = "io.vertx";
+                        driverArtifactId = "vertx-mysql-client";
+                    } else if (actionName.contains("Oracle")) {
+                        driverGroupId = "io.vertx";
+                        driverArtifactId = "vertx-oracle-client";
+                    } else if (actionName.contains("SQL Server")) {
+                        driverGroupId = "io.vertx";
+                        driverArtifactId = "vertx-mssql-client";
+                    } else if (actionName.contains("DB2")) {
+                        driverGroupId = "io.vertx";
+                        driverArtifactId = "vertx-db2-client";
+                    } else {
+                        // Default to PostgreSQL
+                        driverGroupId = "io.vertx";
+                        driverArtifactId = "vertx-pg-client";
+                    }
+                    ensureDriverDependency(dir.getProject(), driverGroupId, driverArtifactId, dir);
+                }
 
                 return file;
             } catch (Exception e) {
@@ -1106,6 +1242,47 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             String[][] redisDeps = {{"io.vertx", "vertx-redis-client", "io.vertx.redis.client"}};
             templateToDependencies.put(GuicedEEFileTemplateProvider.REDIS_MODULE_TEMPLATE, redisDeps);
 
+            // Cloud: Service Registry
+            String[][] serviceRegistryDeps = {{"com.guicedee", "service-registry", "com.guicedee.service.registry"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.SERVICE_REGISTRY_PROVIDER_TEMPLATE, serviceRegistryDeps);
+            templateToDependencies.put(GuicedEEFileTemplateProvider.SERVICE_STATUS_CHANGE_LISTENER_TEMPLATE, serviceRegistryDeps);
+
+            // Cloud: Runtime Autoconfigure
+            String[][] runtimeAutoconfDeps = {{"com.guicedee", "runtime-autoconfigure", "com.guicedee.runtime.autoconfigure"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.RUNTIME_ENVIRONMENT_PROVIDER_TEMPLATE, runtimeAutoconfDeps);
+
+            // Auth: OAuth2
+            String[][] authOAuth2Deps = {{"io.vertx", "vertx-auth-oauth2", "io.vertx.auth.oauth2"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_OAUTH2_TEMPLATE, authOAuth2Deps);
+
+            // Auth: JWT
+            String[][] authJwtDeps = {{"io.vertx", "vertx-auth-jwt", "io.vertx.auth.jwt"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_JWT_TEMPLATE, authJwtDeps);
+
+            // Auth: ABAC
+            String[][] authAbacDeps = {{"io.vertx", "vertx-auth-abac", "io.vertx.auth.abac"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_ABAC_TEMPLATE, authAbacDeps);
+
+            // Auth: OTP
+            String[][] authOtpDeps = {{"io.vertx", "vertx-auth-otp", "io.vertx.auth.otp"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_OTP_TEMPLATE, authOtpDeps);
+
+            // Auth: Property File
+            String[][] authPropDeps = {{"io.vertx", "vertx-auth-properties", "io.vertx.auth.properties"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_PROPERTY_FILE_TEMPLATE, authPropDeps);
+
+            // Auth: LDAP
+            String[][] authLdapDeps = {{"io.vertx", "vertx-auth-ldap", "io.vertx.auth.ldap"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_LDAP_TEMPLATE, authLdapDeps);
+
+            // Auth: htpasswd
+            String[][] authHtpasswdDeps = {{"io.vertx", "vertx-auth-htpasswd", "io.vertx.auth.htpasswd"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_HTPASSWD_TEMPLATE, authHtpasswdDeps);
+
+            // Auth: htdigest
+            String[][] authHtdigestDeps = {{"io.vertx", "vertx-auth-htdigest", "io.vertx.auth.htdigest"}};
+            templateToDependencies.put(GuicedEEFileTemplateProvider.AUTH_HTDIGEST_TEMPLATE, authHtdigestDeps);
+
             String[][] deps = templateToDependencies.get(templateName);
             if (deps == null) {
                 return; // No special dependency needed (core inject/vertx already present)
@@ -1254,6 +1431,44 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                     return; // Only update the first matching module-info.java
                 }
             } catch (Exception e) {
+                // Silently fail
+            }
+        }
+
+        /**
+         * Ensures a specific database driver dependency is present in the pom.xml.
+         */
+        private void ensureDriverDependency(Project project, String groupId, String artifactId, PsiDirectory dir) {
+            VirtualFile pomFile = findPomXml(dir);
+            if (pomFile == null) return;
+
+            try {
+                String pomContent = new String(pomFile.contentsToByteArray());
+                if (pomContent.contains("<artifactId>" + artifactId + "</artifactId>")) {
+                    return; // Already present
+                }
+
+                String depXml = "\n        <dependency>\n" +
+                        "            <groupId>" + groupId + "</groupId>\n" +
+                        "            <artifactId>" + artifactId + "</artifactId>\n" +
+                        "        </dependency>";
+
+                String insertionMarker = "</dependencies>";
+                int insertionIndex = pomContent.lastIndexOf(insertionMarker);
+                if (insertionIndex == -1) return;
+
+                String newPomContent = pomContent.substring(0, insertionIndex)
+                        + depXml + "\n    " + pomContent.substring(insertionIndex);
+
+                final String finalContent = newPomContent;
+                WriteCommandAction.runWriteCommandAction(project, () -> {
+                    try {
+                        pomFile.setBinaryContent(finalContent.getBytes());
+                    } catch (IOException e) {
+                        // Silently fail
+                    }
+                });
+            } catch (IOException e) {
                 // Silently fail
             }
         }

@@ -1,0 +1,6 @@
+@com.guicedee.vertx.auth.abac.AbacOptions(
+    policyPath = "${ABAC_POLICY_PATH}"
+)
+package ${PACKAGE_NAME};
+
+

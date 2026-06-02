@@ -39,6 +39,8 @@
           <li>IBM MQ Consumers</li>
           <li>Vert.x Startup and Configurators</li>
           <li>Classpath Scanner SPIs</li>
+          <li>Cloud: Runtime Environment Providers, Service Registry Providers, Status Change Listeners</li>
+          <li>Consul and Consul Service Resolver support</li>
         </ul>
       </li>
       <li>Application templates for different use cases</li>
@@ -99,18 +101,16 @@
   ]]></description>
 
   <change-notes><![CDATA[
-    <h3>2.0.1</h3>
+    <h3>2.1.0</h3>
     <ul>
-      <li><b>Gradle project generation</b> — Build tool selection (Maven / Gradle) in project wizard with Gradle 9.0+ and JDK 25 toolchain</li>
-      <li><b>Kafka support</b> — Kafka Consumer file template and wizard integration</li>
-      <li><b>IBM MQ support</b> — IBM MQ Consumer file template and wizard integration</li>
-      <li><b>Cassandra support</b> — New <code>CassandraModule</code> file template for Vert.x Cassandra client</li>
-      <li><b>MongoDB support</b> — New <code>MongoModule</code> file template for Vert.x Mongo client</li>
-      <li><b>Redis support</b> — New <code>RedisModule</code> file template for Vert.x Redis integration</li>
-      <li><b>HTTP Proxy support</b> — New <code>ProxyModule</code> file template for Vert.x HttpProxy reverse proxy</li>
-      <li><b>Persistence template updated</b> — Uses <code>ConnectionBaseInfoFactory.createConnectionBaseInfo()</code>
-          instead of deprecated DB-specific builders</li>
-      <li><b>Brand colour</b> — Updated GuicedEE SVG icons to use correct brand colour</li>
+      <li><b>Cloud support</b> — Service Registry, Consul, Consul Service Resolver, and Azure Container Apps options in project wizard</li>
+      <li><b>Cloud intentions</b> — Quick-add <code>@ServiceRegistryOptions</code>, <code>@RegisteredService</code>, and <code>@AzureContainerApps</code> annotations to package-info</li>
+      <li><b>IBM MQ intention</b> — Quick-add <code>@IBMMQConnectionOptions</code> annotation</li>
+      <li><b>Verticle intention</b> — Quick-add verticle scaffolding to classes</li>
+      <li><b>Queue Publisher intention</b> — Inject <code>QueuePublisher</code> fields via quick assist</li>
+      <li><b>Annotation dialog</b> — Unified "Add Annotation" dialog for all package-info annotations</li>
+      <li><b>Platform update</b> — IntelliJ Platform 2025.2.6.1 baseline (sinceBuild 252)</li>
+      <li><b>Gradle Plugin</b> — IntelliJ Platform Gradle Plugin updated to 2.5.0</li>
     </ul>
   ]]></change-notes>
 
@@ -178,6 +178,18 @@
     <intentionAction>
       <className>com.guicedee.intellij.intentions.AddIBMMQConnectionOptionsIntention</className>
       <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddServiceRegistryOptionsIntention</className>
+      <category>GuicedEE/Cloud</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddRegisteredServiceIntention</className>
+      <category>GuicedEE/Cloud</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddAzureContainerAppsIntention</className>
+      <category>GuicedEE/Cloud</category>
     </intentionAction>
 
     <!-- ========== Guice Extensions ========== -->

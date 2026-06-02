@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.0.1"
+version = "2.1.0"
 
 repositories {
   mavenCentral()
@@ -35,6 +35,17 @@ intellijPlatform {
     }
 
     changeNotes = """
+      <h3>2.1.0</h3>
+      <ul>
+        <li>Cloud support — Service Registry, Consul, Consul Service Resolver, and Azure Container Apps wizard options</li>
+        <li>Cloud intention actions — quick-add @ServiceRegistryOptions, @RegisteredService, and @AzureContainerApps annotations to package-info</li>
+        <li>IBM MQ intention action — quick-add @IBMMQConnectionOptions annotation</li>
+        <li>Verticle intention action — quick-add verticle scaffolding</li>
+        <li>Queue Publisher intention action — inject QueuePublisher fields</li>
+        <li>Annotation dialog — unified "Add Annotation" dialog for all package-info annotations</li>
+        <li>IntelliJ Platform 2025.2.6.1 baseline (sinceBuild 252)</li>
+        <li>Platform Gradle Plugin updated to 2.5.0</li>
+      </ul>
       <h3>2.0.1</h3>
       <ul>
         <li>Added Gradle project generation support (Gradle 9.0+ with JDK 25 toolchain)</li>

@@ -1,0 +1,34 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+
+import com.guicedee.service.registry.IServiceStatusChangeListener;
+import com.guicedee.service.registry.ServiceEntry;
+import com.guicedee.service.registry.ServiceStatus;
+import lombok.extern.log4j.Log4j2;
+
+/**
+ * Listens for service status changes in the registry.
+ * <p>
+ * Invoked whenever a service transitions between UP, DOWN, DEGRADED, or UNKNOWN states.
+ */
+@Log4j2
+public class ${NAME} implements IServiceStatusChangeListener<${NAME}> {
+
+    @Override
+    public void onStatusChange(String serviceName, ServiceStatus previousStatus, ServiceStatus newStatus, ServiceEntry entry) {
+        log.info("Service '{}' status changed: {} → {}", serviceName, previousStatus, newStatus);
+
+        if (newStatus == ServiceStatus.DOWN) {
+            // Handle service going down — invalidate caches, trigger alerts, etc.
+        }
+
+        if (previousStatus == ServiceStatus.DOWN && newStatus == ServiceStatus.UP) {
+            // Handle service recovery — refresh connections, re-enable routing, etc.
+        }
+    }
+
+    @Override
+    public Integer sortOrder() {
+        return 0;
+    }
+}
+

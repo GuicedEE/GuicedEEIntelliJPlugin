@@ -1,0 +1,11 @@
+@com.guicedee.vertx.auth.oauth2.OAuth2Options(
+    flow = com.guicedee.vertx.auth.oauth2.OAuth2Options.FlowType.AUTH_CODE,
+    clientId = "${OAUTH2_CLIENT_ID}",
+    clientSecret = "${OAUTH2_CLIENT_SECRET}",
+    site = "${OAUTH2_SITE}",
+    discoveryUrl = "${OAUTH2_DISCOVERY_URL}",
+    callbackPath = "/callback"
+)
+package ${PACKAGE_NAME};
+
+

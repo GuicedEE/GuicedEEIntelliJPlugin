@@ -58,6 +58,17 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
     public static final String GRPC_MODULE_TEMPLATE = "GuicedEEGrpcModule.java";
     public static final String GRAPHQL_SCHEMA_PROVIDER_TEMPLATE = "GuicedEEGraphQLSchemaProvider.java";
     public static final String GRAPHQL_DATALOADER_PROVIDER_TEMPLATE = "GuicedEEGraphQLDataLoaderProvider.java";
+    public static final String RUNTIME_ENVIRONMENT_PROVIDER_TEMPLATE = "GuicedEERuntimeEnvironmentProvider.java";
+    public static final String SERVICE_REGISTRY_PROVIDER_TEMPLATE = "GuicedEEServiceRegistryProvider.java";
+    public static final String SERVICE_STATUS_CHANGE_LISTENER_TEMPLATE = "GuicedEEServiceStatusChangeListener.java";
+    public static final String AUTH_OAUTH2_TEMPLATE = "GuicedEEAuthOAuth2.java";
+    public static final String AUTH_JWT_TEMPLATE = "GuicedEEAuthJwt.java";
+    public static final String AUTH_ABAC_TEMPLATE = "GuicedEEAuthAbac.java";
+    public static final String AUTH_OTP_TEMPLATE = "GuicedEEAuthOtp.java";
+    public static final String AUTH_PROPERTY_FILE_TEMPLATE = "GuicedEEAuthPropertyFile.java";
+    public static final String AUTH_LDAP_TEMPLATE = "GuicedEEAuthLdap.java";
+    public static final String AUTH_HTPASSWD_TEMPLATE = "GuicedEEAuthHtpasswd.java";
+    public static final String AUTH_HTDIGEST_TEMPLATE = "GuicedEEAuthHtdigest.java";
 
     private static final Icon GUICEDEE_ICON = GuicedIcons.Logo;
 
@@ -126,6 +137,14 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
 
         authGroup.addTemplate(new FileTemplateDescriptor(AUTHENTICATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
         authGroup.addTemplate(new FileTemplateDescriptor(AUTHORIZATION_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_OAUTH2_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_JWT_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_ABAC_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_OTP_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_PROPERTY_FILE_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_LDAP_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_HTPASSWD_TEMPLATE, GUICEDEE_ICON));
+        authGroup.addTemplate(new FileTemplateDescriptor(AUTH_HTDIGEST_TEMPLATE, GUICEDEE_ICON));
 
         // Create Database subgroup (3rd feature)
         FileTemplateGroupDescriptor databaseGroup = new FileTemplateGroupDescriptor("Database", GUICEDEE_ICON);
@@ -156,6 +175,14 @@ public class GuicedEEFileTemplateProvider implements FileTemplateGroupDescriptor
 
         hazelcastGroup.addTemplate(new FileTemplateDescriptor(HAZELCAST_SERVER_CONFIG_TEMPLATE, GUICEDEE_ICON));
         hazelcastGroup.addTemplate(new FileTemplateDescriptor(HAZELCAST_CLIENT_CONFIG_TEMPLATE, GUICEDEE_ICON));
+
+        // Create Cloud subgroup
+        FileTemplateGroupDescriptor cloudGroup = new FileTemplateGroupDescriptor("Cloud", GUICEDEE_ICON);
+        group.addTemplate(cloudGroup);
+
+        cloudGroup.addTemplate(new FileTemplateDescriptor(RUNTIME_ENVIRONMENT_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        cloudGroup.addTemplate(new FileTemplateDescriptor(SERVICE_REGISTRY_PROVIDER_TEMPLATE, GUICEDEE_ICON));
+        cloudGroup.addTemplate(new FileTemplateDescriptor(SERVICE_STATUS_CHANGE_LISTENER_TEMPLATE, GUICEDEE_ICON));
 
         // Add separator
         group.addTemplate(new FileTemplateDescriptor("", null));
