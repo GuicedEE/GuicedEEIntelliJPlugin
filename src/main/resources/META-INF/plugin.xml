@@ -101,6 +101,15 @@
   ]]></description>
 
   <change-notes><![CDATA[
+    <h3>2.1.1</h3>
+    <ul>
+      <li><b>GraphQL instrumentation fix</b> — the GraphQL module now combines the Vert.x future and
+          JSON object adapters through a single <code>ChainedInstrumentation</code>, so both
+          instrumentations apply instead of the second silently replacing the first</li>
+      <li><b>GraphQL dependency hygiene</b> — GraphQL-Java's embedded (shaded) Guava copy is stripped
+          and rewired to the canonical <code>com.google.common</code> module, removing duplicate Guava,
+          tracking central Guava CVE fixes, and producing a clean JPMS graph</li>
+    </ul>
     <h3>2.1.0</h3>
     <ul>
       <li><b>Cloud support</b> — Service Registry, Consul, Consul Service Resolver, and Azure Container Apps options in project wizard</li>
