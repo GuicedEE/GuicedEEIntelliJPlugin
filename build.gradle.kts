@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.1.0"
+version = "2.1.1"
 
 repositories {
   mavenCentral()
@@ -35,6 +35,13 @@ intellijPlatform {
     }
 
     changeNotes = """
+      <h3>2.1.1</h3>
+      <ul>
+        <li>GuicedEE 2.1.1 baseline — generated projects now reference com.guicedee BOMs 2.1.1 (Vert.x 5.1.1)</li>
+        <li>GraphQL instrumentation fix — Vert.x future and JSON object adapters now combine through a single ChainedInstrumentation</li>
+        <li>GraphQL dependency hygiene — GraphQL-Java's shaded Guava copy stripped and rewired to canonical com.google.common (clean JPMS graph, tracks Guava CVE fixes)</li>
+        <li>Telemetry — module now supports 3 new endpoints, with its underlying dependency upgraded to the latest version</li>
+      </ul>
       <h3>2.1.0</h3>
       <ul>
         <li>Cloud support — Service Registry, Consul, Consul Service Resolver, and Azure Container Apps wizard options</li>

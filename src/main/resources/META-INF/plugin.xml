@@ -103,12 +103,16 @@
   <change-notes><![CDATA[
     <h3>2.1.1</h3>
     <ul>
+      <li><b>GuicedEE 2.1.1 baseline</b> — generated projects now reference <code>com.guicedee</code> BOMs
+          <code>2.1.1</code> (Vert.x 5.1.1)</li>
       <li><b>GraphQL instrumentation fix</b> — the GraphQL module now combines the Vert.x future and
           JSON object adapters through a single <code>ChainedInstrumentation</code>, so both
           instrumentations apply instead of the second silently replacing the first</li>
       <li><b>GraphQL dependency hygiene</b> — GraphQL-Java's embedded (shaded) Guava copy is stripped
           and rewired to the canonical <code>com.google.common</code> module, removing duplicate Guava,
           tracking central Guava CVE fixes, and producing a clean JPMS graph</li>
+      <li><b>Telemetry — 3 new endpoints</b> — the telemetry module now supports 3 new endpoints,
+          with its underlying dependency upgraded to the latest version</li>
     </ul>
     <h3>2.1.0</h3>
     <ul>
