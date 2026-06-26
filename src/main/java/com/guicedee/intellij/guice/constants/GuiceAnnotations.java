@@ -27,6 +27,14 @@ public final class GuiceAnnotations {
   public static final String ENDPOINT = "com.guicedee.rest.client.annotations.Endpoint";
   public static final String CONFIG_PROPERTY = "org.eclipse.microprofile.config.inject.ConfigProperty";
 
+  // GuicedEE Vert.x event-bus consumer annotation. Methods (and classes) annotated with it are
+  // invoked reflectively by the event bus, so they are framework entry points.
+  public static final String VERTX_EVENT_DEFINITION = "com.guicedee.vertx.VertxEventDefinition";
+
+  // GuicedEE Vert.x event-bus publisher. Injected via @Named("address") VertxEventPublisher<T>.
+  // Matched by simple class name so the FQN package does not have to be exact.
+  public static final String VERTX_EVENT_PUBLISHER_SIMPLE_NAME = "VertxEventPublisher";
+
   // Scope annotations
   public static final String SINGLETON = "com.google.inject.Singleton";
   public static final String SESSION_SCOPED = "com.google.inject.servlet.SessionScoped";
@@ -39,5 +47,14 @@ public final class GuiceAnnotations {
    */
   public static final Collection<String> INJECTS = List.of(
     INJECT, JAVAX_INJECT, JAKARTA_INJECT, ENDPOINT, CONFIG_PROPERTY
+  );
+
+  /**
+   * Framework entry-point annotations. Methods or classes annotated with these are invoked
+   * reflectively by the GuicedEE runtime (e.g. the Vert.x event bus), so they must not be
+   * reported as unused.
+   */
+  public static final Collection<String> ENTRY_POINTS = List.of(
+    VERTX_EVENT_DEFINITION
   );
 }

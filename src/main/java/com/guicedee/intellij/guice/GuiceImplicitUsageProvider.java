@@ -13,10 +13,16 @@ import java.util.Collection;
 
 public final class GuiceImplicitUsageProvider implements ImplicitUsageProvider {
   private static final Collection<String> GUICE_INJECTION_POINT = GuiceAnnotations.INJECTS;
+  private static final Collection<String> ENTRY_POINTS = GuiceAnnotations.ENTRY_POINTS;
 
   @Override
   public boolean isImplicitUsage(@NotNull PsiElement element) {
     if (element instanceof PsiModifierListOwner && AnnotationUtil.isAnnotated((PsiModifierListOwner)element, GUICE_INJECTION_POINT, 0)) {
+      return true;
+    }
+    // Methods (and classes) annotated as framework entry points — e.g. @VertxEventDefinition
+    // event-bus consumers — are invoked reflectively by the runtime, so treat them as used.
+    if (element instanceof PsiModifierListOwner && AnnotationUtil.isAnnotated((PsiModifierListOwner)element, ENTRY_POINTS, 0)) {
       return true;
     }
     return isImplicitRead(element);

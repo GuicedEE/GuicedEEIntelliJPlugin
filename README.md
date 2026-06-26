@@ -27,8 +27,9 @@ Full **Google Guice** and **GuicedEE** framework support for IntelliJ IDEA 2024.
   - `@AuthOptions`, `@OAuth2Options`, `@JwtAuthOptions`, `@AbacOptions`
   - `@OtpAuthOptions`, `@PropertyFileAuthOptions`, `@LdapAuthOptions`
   - `@HtpasswdAuthOptions`, `@HtdigestAuthOptions`
-  - `@KafkaConnectionOptions`
-  - `@Verticle` and `package-info.java` annotations
+    - `@KafkaConnectionOptions`
+    - `@Verticle` and `package-info.java` annotations
+- **Entry-point recognition** — methods (and classes) annotated with `@VertxEventDefinition` are treated as framework entry points, so event-bus consumers invoked reflectively by the runtime are never reported as unused
 - **Run configurations** — detect and run GuicedEE applications directly from the gutter
 
 ### Google Guice Support

@@ -45,6 +45,7 @@
       </li>
       <li>Application templates for different use cases</li>
       <li>Identify GuicedEE applications in the Services window</li>
+      <li>Recognise <code>@VertxEventDefinition</code> methods and classes as framework entry points so event-bus consumers are not flagged as unused</li>
     </ul>
 
     <h3>GuicedEE guice-core — Enhanced Google Guice</h3>
@@ -113,6 +114,9 @@
           tracking central Guava CVE fixes, and producing a clean JPMS graph</li>
       <li><b>Telemetry — 3 new endpoints</b> — the telemetry module now supports 3 new endpoints,
           with its underlying dependency upgraded to the latest version</li>
+      <li><b>Vert.x entry-point recognition</b> — methods (and classes) annotated with
+          <code>@VertxEventDefinition</code> are now treated as framework entry points, so event-bus
+          consumers are no longer reported as unused code</li>
     </ul>
     <h3>2.1.0</h3>
     <ul>
@@ -216,6 +220,7 @@
     <!-- Guice Line Markers -->
     <codeInsight.lineMarkerProvider language="JAVA" order="last" implementationClass="com.guicedee.intellij.guice.model.GuiceBindingClassAnnotator"/>
     <codeInsight.lineMarkerProvider language="JAVA" order="last" implementationClass="com.guicedee.intellij.guice.model.GuiceInjectionsClassAnnotator"/>
+    <codeInsight.lineMarkerProvider language="JAVA" order="last" implementationClass="com.guicedee.intellij.guice.model.VertxEventBusAnnotator"/>
 
     <!-- Guice Inspections -->
     <localInspection language="JAVA" shortName="SessionScopedInjectsRequestScoped" bundle="messages.GuiceBundle"
