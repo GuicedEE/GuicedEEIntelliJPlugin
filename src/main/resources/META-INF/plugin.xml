@@ -102,10 +102,10 @@
   ]]></description>
 
   <change-notes><![CDATA[
-    <h3>2.1.1</h3>
+    <h3>2.2.0</h3>
     <ul>
-      <li><b>GuicedEE 2.1.1 baseline</b> — generated projects now reference <code>com.guicedee</code> BOMs
-          <code>2.1.1</code> (Vert.x 5.1.1)</li>
+      <li><b>GuicedEE 2.2.0 baseline</b> — generated projects now reference <code>com.guicedee</code> BOMs
+          <code>2.2.0</code> (Vert.x 5.1.1)</li>
       <li><b>GraphQL instrumentation fix</b> — the GraphQL module now combines the Vert.x future and
           JSON object adapters through a single <code>ChainedInstrumentation</code>, so both
           instrumentations apply instead of the second silently replacing the first</li>
