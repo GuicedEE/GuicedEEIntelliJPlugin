@@ -48,6 +48,9 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         add(new CreateGuicedEEFileAction("Module", "Create a new Module", 
                 GuicedEEFileTemplateProvider.GUICE_MODULE_TEMPLATE));
 
+        // Add Provider (custom dialog: provided type, generics, persistence, target module)
+        add(new CreateProviderAction());
+
         // Add Messaging subgroup
         DefaultActionGroup messagingGroup = new DefaultActionGroup("Messaging", true);
         messagingGroup.getTemplatePresentation().setIcon(GUICEDEE_ICON);

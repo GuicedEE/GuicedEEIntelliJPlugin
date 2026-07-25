@@ -640,8 +640,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
              if (moduleData.isMicroProfileOpenAPI())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>openapi</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
+                dependencies.append("            <artifactId>swagger</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
             if (moduleData.isMicroProfileJwt())
@@ -2877,8 +2877,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
              if (moduleData.isMicroProfileOpenAPI())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>com.guicedee</groupId>\n");
-                dependencies.append("            <artifactId>openapi</artifactId>\n");
+                dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
+                dependencies.append("            <artifactId>swagger</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
             if (moduleData.isMicroProfileJwt())
