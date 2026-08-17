@@ -37,10 +37,13 @@ intellijPlatform {
     changeNotes = """
       <h3>2.2.0</h3>
       <ul>
-        <li>GuicedEE 2.2.0 baseline — generated projects now reference com.guicedee BOMs 2.2.0 (Vert.x 5.1.1)</li>
+        <li>GuicedEE 2.2.0 baseline — generated projects now reference com.guicedee BOMs 2.2.0 (Vert.x 5.1.5, Jackson 3.2.1, Hibernate ORM 7.4.3)</li>
         <li>GraphQL instrumentation fix — Vert.x future and JSON object adapters now combine through a single ChainedInstrumentation</li>
         <li>GraphQL dependency hygiene — GraphQL-Java's shaded Guava copy stripped and rewired to canonical com.google.common (clean JPMS graph, tracks Guava CVE fixes)</li>
         <li>Telemetry — module now supports 3 new endpoints, with its underlying dependency upgraded to the latest version</li>
+        <li>Hibernate ORM 7.4.3 + Hibernate Reactive 4.5.1 — version-locked pair; hibernate-maven-plugin and hibernate-processor pinned to the same ORM build</li>
+        <li>Security updates — pgJDBC 42.7.13, SCRAM 3.4, Jackson 3.2.1 and Spring 6.2.19 close four advisories; Bouncy Castle 1.85</li>
+        <li>Deterministic BOM resolution — GuicedEE BOMs no longer emit Maven 4 "Ignored POM import" model problems</li>
       </ul>
       <h3>2.1.0</h3>
       <ul>

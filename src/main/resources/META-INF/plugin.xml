@@ -105,7 +105,7 @@
     <h3>2.2.0</h3>
     <ul>
       <li><b>GuicedEE 2.2.0 baseline</b> — generated projects now reference <code>com.guicedee</code> BOMs
-          <code>2.2.0</code> (Vert.x 5.1.1)</li>
+          <code>2.2.0</code> (Vert.x 5.1.5, Jackson 3.2.1, Hibernate ORM 7.4.3)</li>
       <li><b>GraphQL instrumentation fix</b> — the GraphQL module now combines the Vert.x future and
           JSON object adapters through a single <code>ChainedInstrumentation</code>, so both
           instrumentations apply instead of the second silently replacing the first</li>
@@ -117,6 +117,15 @@
       <li><b>Vert.x entry-point recognition</b> — methods (and classes) annotated with
           <code>@VertxEventDefinition</code> are now treated as framework entry points, so event-bus
           consumers are no longer reported as unused code</li>
+      <li><b>Hibernate ORM 7.4.3 + Hibernate Reactive 4.5.1</b> — the two are version-locked to each
+          other; the BOM now pins <code>hibernate-maven-plugin</code> and
+          <code>hibernate-processor</code> to the same ORM build so enhanced bytecode and generated
+          static metamodels always match the runtime</li>
+      <li><b>Security updates</b> — pgJDBC 42.7.13 and SCRAM 3.4 (CVE-2026-54291 / CVE-2026-53712),
+          Jackson 3.2.1 (CVE-2026-59889) and Spring 6.2.19 (CVE-2024-22233); Bouncy Castle 1.85</li>
+      <li><b>Deterministic BOM resolution</b> — the GuicedEE BOMs no longer emit Maven 4
+          "Ignored POM import" model problems, which previously made dependency versions depend on
+          import order and could break Maven project import in the IDE</li>
     </ul>
     <h3>2.1.0</h3>
     <ul>
