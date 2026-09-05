@@ -207,8 +207,8 @@ public final class GuiceInjectionUtil {
 
     if (annotatedWith != null && bindingAnnotations.size() == 1) {
       final PsiAnnotation bindingAnno = bindingAnnotations.iterator().next();
-      if (GuiceAnnotations.NAMED.equals(annotatedWith.getQualifiedName())) {
-        if (GuiceAnnotations.NAMED.equals(bindingAnno.getQualifiedName())) {
+      if (GuiceAnnotations.NAMED_ANNOTATIONS.contains(annotatedWith.getQualifiedName())) {
+        if (GuiceAnnotations.NAMED_ANNOTATIONS.contains(bindingAnno.getQualifiedName())) {
           final PsiExpression annotatedWithExpression = GuiceUtils.getArgumentOfCallInChain(expression, "annotatedWith");
           if (annotatedWithExpression != null) {
             final String nameValue = getNameValue(annotatedWithExpression);

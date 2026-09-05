@@ -12,7 +12,6 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.search.searches.AnnotatedElementsSearch;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -113,11 +112,12 @@ public final class VertxEventBusAnnotator extends RelatedItemLineMarkerProvider 
 
   /**
    * Finds all consumers ({@code @VertxEventDefinition}) declared for the given address within the
-   * module (and its dependencies).
+   * project. Publishers and consumers commonly live in sibling application modules that have no
+   * compile-time dependency on each other.
    */
   private static @NotNull List<PsiElement> findConsumers(@NotNull Module module, @NotNull String address) {
     final List<PsiElement> targets = new ArrayList<>();
-    final GlobalSearchScope scope = GlobalSearchScope.moduleWithDependenciesScope(module);
+    final GlobalSearchScope scope = GlobalSearchScope.projectScope(module.getProject());
     final PsiClass annotationClass = JavaPsiFacade.getInstance(module.getProject())
       .findClass(GuiceAnnotations.VERTX_EVENT_DEFINITION, GlobalSearchScope.allScope(module.getProject()));
     if (annotationClass == null) {
@@ -138,26 +138,28 @@ public final class VertxEventBusAnnotator extends RelatedItemLineMarkerProvider 
 
   /**
    * Finds all publisher injection points ({@code @Named("address") VertxEventPublisher}) for the
-   * given address within the module (and its dependencies).
+   * given address within the project. Event-bus addresses deliberately cross module dependency
+   * boundaries.
    */
   private static @NotNull List<PsiElement> findPublishers(@NotNull Module module, @NotNull String address) {
     final List<PsiElement> targets = new ArrayList<>();
-    final GlobalSearchScope scope = GlobalSearchScope.moduleWithDependenciesScope(module);
-    final PsiClass[] publisherClasses = PsiShortNamesCache.getInstance(module.getProject())
-      .getClassesByName(GuiceAnnotations.VERTX_EVENT_PUBLISHER_SIMPLE_NAME, GlobalSearchScope.allScope(module.getProject()));
+    final GlobalSearchScope scope = GlobalSearchScope.projectScope(module.getProject());
+    final PsiClass publisherClass = JavaPsiFacade.getInstance(module.getProject())
+      .findClass(GuiceAnnotations.VERTX_EVENT_PUBLISHER, GlobalSearchScope.allScope(module.getProject()));
+    if (publisherClass == null) {
+      return targets;
+    }
 
-    for (PsiClass publisherClass : publisherClasses) {
-      for (PsiReference reference : ReferencesSearch.search(publisherClass, scope)) {
-        final PsiVariable variable = PsiTreeUtil.getParentOfType(reference.getElement(), PsiVariable.class);
-        if (variable == null || !isPublisherVariable(variable)) {
-          continue;
-        }
-        if (address.equals(getAnnotationStringValue(variable, GuiceAnnotations.NAMED))) {
-          final PsiElement identifier = getNameIdentifier(variable);
-          final PsiElement target = identifier != null ? identifier : variable;
-          if (!targets.contains(target)) {
-            targets.add(target);
-          }
+    for (PsiReference reference : ReferencesSearch.search(publisherClass, scope)) {
+      final PsiVariable variable = PsiTreeUtil.getParentOfType(reference.getElement(), PsiVariable.class);
+      if (variable == null || !isPublisherVariable(variable)) {
+        continue;
+      }
+      if (address.equals(getAnnotationStringValue(variable, GuiceAnnotations.NAMED))) {
+        final PsiElement identifier = getNameIdentifier(variable);
+        final PsiElement target = identifier != null ? identifier : variable;
+        if (!targets.contains(target)) {
+          targets.add(target);
         }
       }
     }
@@ -169,7 +171,9 @@ public final class VertxEventBusAnnotator extends RelatedItemLineMarkerProvider 
     if (!(type instanceof PsiClassType)) {
       return false;
     }
-    return GuiceAnnotations.VERTX_EVENT_PUBLISHER_SIMPLE_NAME.equals(((PsiClassType) type).getClassName())
+    final PsiClass publisherClass = ((PsiClassType) type).resolve();
+    return publisherClass != null
+           && GuiceAnnotations.VERTX_EVENT_PUBLISHER.equals(publisherClass.getQualifiedName())
            && AnnotationUtil.isAnnotated(variable, GuiceAnnotations.NAMED, 0);
   }
 

@@ -16,9 +16,12 @@ repositories {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
+  testImplementation("junit:junit:4.13.2")
+
   intellijPlatform {
     create("IC", "2025.2.6.1")
     testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
+    testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Plugin.Java)
 
     // Add necessary plugin dependencies for compilation here
     bundledPlugin("com.intellij.java")
@@ -98,4 +101,3 @@ tasks {
     targetCompatibility = "21"
   }
 }
-

@@ -182,21 +182,35 @@ public final class GuiceInjectorManager {
   }
 
   public static @NotNull Collection<PsiClass> getBindingAnnotations(@Nullable Module module) {
-    return module == null
-           ? Collections.emptySet()
-           : MetaAnnotationUtil.getAnnotationTypesWithChildren(module, GuiceAnnotations.BINDING_ANNOTATION, false);
+    if (module == null) return Collections.emptySet();
+
+    Set<PsiClass> annotations = new LinkedHashSet<>();
+    for (String metaAnnotation : GuiceAnnotations.BINDING_META_ANNOTATIONS) {
+      annotations.addAll(MetaAnnotationUtil.getAnnotationTypesWithChildren(module, metaAnnotation, false));
+    }
+    return annotations;
   }
 
   public static @NotNull Set<PsiAnnotation> getBindingAnnotations(@NotNull PsiModifierListOwner owner) {
     Set<PsiAnnotation> annotations = ConcurrentCollectionFactory.createConcurrentSet();
 
-    for (PsiClass psiClass : getBindingAnnotations(ModuleUtilCore.findModuleForPsiElement(owner))) {
-      final String fqn = psiClass.getQualifiedName();
-      if (fqn != null) {
-        final PsiAnnotation annotation = AnnotationUtil.findAnnotation(owner, fqn);
-        if (annotation != null) {
-          annotations.add(annotation);
-        }
+    final PsiModifierList modifierList = owner.getModifierList();
+    if (modifierList == null) return annotations;
+
+    for (PsiAnnotation annotation : modifierList.getAnnotations()) {
+      final String qualifiedName = annotation.getQualifiedName();
+      if (qualifiedName == null) continue;
+
+      if (GuiceAnnotations.NAMED_ANNOTATIONS.contains(qualifiedName)) {
+        annotations.add(annotation);
+        continue;
+      }
+
+      final PsiClass annotationType = annotation.resolveAnnotationType();
+      if (annotationType != null &&
+          AnnotationUtil.isAnnotated(annotationType, GuiceAnnotations.BINDING_META_ANNOTATIONS,
+                                     AnnotationUtil.CHECK_HIERARCHY)) {
+        annotations.add(annotation);
       }
     }
     return annotations;
