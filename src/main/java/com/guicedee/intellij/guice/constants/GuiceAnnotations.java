@@ -39,9 +39,17 @@ public final class GuiceAnnotations {
   public static final String VERTX_EVENT_PUBLISHER = "com.guicedee.vertx.VertxEventPublisher";
 
   // Scope annotations
+  public static final String SCOPE_ANNOTATION = "com.google.inject.ScopeAnnotation";
+  public static final Collection<String> SCOPE_META_ANNOTATIONS = List.of(
+    SCOPE_ANNOTATION, "javax.inject.Scope", "jakarta.inject.Scope"
+  );
+  public static final String BIND_SCOPE_PROVIDER = "com.google.inject.gee.BindScopeProvider";
   public static final String SINGLETON = "com.google.inject.Singleton";
   public static final String SESSION_SCOPED = "com.google.inject.servlet.SessionScoped";
   public static final String REQUEST_SCOPED = "com.google.inject.servlet.RequestScoped";
+  public static final Collection<String> STANDARD_SCOPES = List.of(
+    SINGLETON, SESSION_SCOPED, REQUEST_SCOPED
+  );
   public static final String REQUEST_PARAMETERS = "com.google.inject.servlet.RequestParameters";
 
   /**

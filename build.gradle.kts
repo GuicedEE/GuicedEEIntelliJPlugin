@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.2.0"
+version = "2.3.0"
 
 repositories {
   mavenCentral()
@@ -38,6 +38,14 @@ intellijPlatform {
     }
 
     changeNotes = """
+      <h3>2.3.0</h3>
+      <ul>
+        <li>Generated Maven and Gradle projects use GuicedEE and test BOMs 2.3.0</li>
+        <li>Local dependency scope support for injected constructor parameters and fields</li>
+        <li>Scope conflict inspections recognise custom scope annotations; lifetime inspections include local request and session scopes</li>
+        <li>Scope annotation templates include type, method, parameter, and field targets</li>
+        <li>Guice documentation explains consumer-local caching, wrapped binding scopes, and scope SPI registration</li>
+      </ul>
       <h3>2.2.0</h3>
       <ul>
         <li>GuicedEE 2.2.0 baseline — generated projects now reference com.guicedee BOMs 2.2.0 (Vert.x 5.1.5, Jackson 3.2.1, Hibernate ORM 7.4.3)</li>

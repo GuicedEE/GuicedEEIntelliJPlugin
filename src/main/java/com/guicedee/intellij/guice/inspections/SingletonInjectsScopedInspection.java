@@ -10,6 +10,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 import static com.intellij.codeInsight.AnnotationUtil.CHECK_HIERARCHY;
 
 public final class SingletonInjectsScopedInspection extends BaseInspection {
@@ -40,18 +42,23 @@ public final class SingletonInjectsScopedInspection extends BaseInspection {
       }
       final PsiElement owner = annotation.getParent().getParent();
       if (owner instanceof PsiField field) {
-        checkForScopedInjection(field.getTypeElement());
+        checkForScopedInjection(field, field.getTypeElement());
       }
       else if (owner instanceof PsiMethod method) {
         final PsiParameter[] parameters = method.getParameterList().getParameters();
         for (PsiParameter parameter : parameters) {
-          checkForScopedInjection(parameter.getTypeElement());
+          checkForScopedInjection(parameter, parameter.getTypeElement());
         }
       }
     }
 
-    private void checkForScopedInjection(@Nullable PsiTypeElement typeElement) {
+    private void checkForScopedInjection(PsiModifierListOwner owner, @Nullable PsiTypeElement typeElement) {
       if (typeElement == null) return;
+      if (AnnotationUtils.hasLocalScope(owner,
+          List.of(GuiceAnnotations.SESSION_SCOPED, GuiceAnnotations.REQUEST_SCOPED))) {
+        registerError(typeElement);
+        return;
+      }
       final PsiType type = typeElement.getType();
       if (!(type instanceof PsiClassType classType)) {
         return;

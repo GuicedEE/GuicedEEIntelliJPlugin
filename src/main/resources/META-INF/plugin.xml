@@ -13,7 +13,7 @@
   <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    <p><b>Guiced </b> is an IntelliJ IDEA plugin based on the JetBrains Guice plugin, providing full Google Guice and GuicedEE framework support for IntelliJ 2026+.</p>
+    <p><b>Guiced </b> is an IntelliJ IDEA plugin based on the JetBrains Guice plugin, providing full Google Guice and GuicedEE 2.3.0 framework support for IntelliJ IDEA 2025.2+.</p>
 
     <p>☕ <b>Support this plugin:</b> <a href="https://patreon.com/GedMarc">Buy me a coffee on Patreon</a></p>
 
@@ -49,7 +49,7 @@
     </ul>
 
     <h3>GuicedEE guice-core — Enhanced Google Guice</h3>
-    <p><b>Upstream policy:</b> this module tracks Google Guice releases. Changes are limited to modular descriptors, access-level fixes required by the module system, and the <code>com.google.inject.gee</code> SPI package. No behavioural changes are made to core Guice logic.</p>
+    <p><b>Upstream policy:</b> this module tracks Google Guice releases and carries documented GuicedEE extensions for JPMS, annotation SPIs, and local dependency scoping. Local scoping follows the proposal in <a href="https://github.com/google/guice/pull/1949">google/guice#1949</a>.</p>
     <ul>
       <li><b>Full JPMS module</b> — ships a real <code>module-info.java</code> (<code>module com.google.guice</code>) with explicit <code>exports</code>, <code>requires</code>, and <code>uses</code> directives</li>
       <li><b>JDK 25 compatibility</b> — access-level and reflection fixes so Guice runs cleanly on the module path without <code>--add-opens</code> hacks</li>
@@ -71,10 +71,17 @@
       <tr><td><code>InjectionPointProvider</code></td><td>Register custom annotations that mark injection points (beyond <code>@Inject</code>)</td></tr>
       <tr><td><code>InjectorAnnotationsProvider</code></td><td>Declare additional annotations that Guice should treat as injector annotations</td></tr>
       <tr><td><code>BindScopeProvider</code></td><td>Programmatically bind custom scope annotations during module configuration</td></tr>
-      <tr><td><code>ScopeAnnotationProvider</code></td><td>Supply annotation classes to be recognised as scope annotations (like <code>@Singleton</code>)</td></tr>
+      <tr><td><code>ScopeAnnotationProvider</code></td><td>Supply scope meta-annotations used to recognise concrete scope annotations (for example, <code>jakarta.inject.Scope</code>)</td></tr>
       <tr><td><code>BindingAnnotationProvider</code></td><td>Supply annotation classes to be recognised as binding annotations (like <code>@Named</code>)</td></tr>
       <tr><td><code>NamedAnnotationProvider</code></td><td>Map custom naming annotations to Guice's <code>@Named</code>, enabling alternative naming strategies</td></tr>
     </table>
+
+    <h4>Local scopes on injected dependencies</h4>
+    <p>GuicedEE allows a scope annotation on an injected constructor parameter or field. Locally scoped providers are shared by the consuming constructor or field group, scope annotation, and dependency key. Other consumers remain isolated, and any existing binding scope stays underneath the local wrapper. Method-injection and provider-method parameters retain their existing behavior.</p>
+    <pre>@Inject Handler(@RequestScoped RequestState state) { ... }
+@Inject @RequestScoped RequestState fieldState;</pre>
+    <p>Define custom scopes with runtime retention and <code>@ScopeAnnotation</code>, including <code>PARAMETER</code> and <code>FIELD</code> targets. Bind the concrete annotation to a <code>Scope</code> with <code>Binder.bindScope()</code> or a <code>BindScopeProvider</code>. Register that provider through JPMS <code>provides</code> or <code>META-INF/services</code> on the classpath. An unregistered scope fails injector creation.</p>
+    <p>For an alternative scope meta-annotation, register its marker type through <code>ScopeAnnotationProvider</code>; the concrete scope still needs a binding. The application owns request entry, exit, and asynchronous context propagation.</p>
 
     <h4>What Changed from Upstream</h4>
     <table>
@@ -85,6 +92,7 @@
       <tr><td><b><code>com.google.inject.gee</code></b></td><td>New package with 6 SPI interfaces for pluggable annotation handling</td></tr>
       <tr><td><b>Multibindings</b></td><td>Bundled into the core module instead of a separate artifact</td></tr>
       <tr><td><b>Guice internals</b></td><td><code>com.google.inject.internal</code> exported for framework-level consumers</td></tr>
+      <tr><td><b>Local dependency scoping</b></td><td>Constructor parameters and injected fields can apply scope annotations around an existing binding</td></tr>
     </table>
 
     <h3>Full Google Guice Support</h3>
@@ -102,6 +110,14 @@
   ]]></description>
 
   <change-notes><![CDATA[
+    <h3>2.3.0</h3>
+    <ul>
+      <li>Generated Maven and Gradle projects use GuicedEE and test BOMs 2.3.0</li>
+      <li>Local dependency scope support for injected constructor parameters and fields</li>
+      <li>Scope conflict inspections recognise custom scope annotations; lifetime inspections include local request and session scopes</li>
+      <li>Scope annotation templates include type, method, parameter, and field targets</li>
+      <li>Guice documentation explains consumer-local caching, wrapped binding scopes, and scope SPI registration</li>
+    </ul>
     <h3>2.2.0</h3>
     <ul>
       <li><b>GuicedEE 2.2.0 baseline</b> — generated projects now reference <code>com.guicedee</code> BOMs
