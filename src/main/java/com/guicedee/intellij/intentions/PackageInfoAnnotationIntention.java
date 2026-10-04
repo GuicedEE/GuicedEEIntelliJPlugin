@@ -38,6 +38,7 @@ public class PackageInfoAnnotationIntention extends PsiElementBaseIntentionActio
     private void addAnnotationIfMissing(Project project, PsiJavaFile file, PsiPackageStatement packageStatement, String annotationName) {
         PsiModifierList modifierList = packageStatement.getAnnotationList();
         if (modifierList == null) {
+            GuicedEEAnnotationDefaults.addAnnotation(project, packageStatement, annotationName);
             return;
         }
 
@@ -49,9 +50,7 @@ public class PackageInfoAnnotationIntention extends PsiElementBaseIntentionActio
         }
 
         // Add the annotation
-        PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
-        PsiAnnotation annotation = factory.createAnnotationFromText("@" + annotationName, packageStatement);
-        modifierList.add(annotation);
+        GuicedEEAnnotationDefaults.addAnnotation(project, packageStatement, annotationName);
     }
 
     @Override

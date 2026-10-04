@@ -19,6 +19,9 @@ public class AddAnnotationDialog extends DialogWrapper {
             "com.guicedee.rabbit.RabbitConnectionOptions",
             "com.guicedee.rabbit.QueueExchange",
             "com.guicedee.vertx.spi.Verticle",
+            "com.guicedee.vertx.spi.EventBusOptions",
+            "com.guicedee.guicedhazelcast.HazelcastServerOptions",
+            "com.guicedee.guicedhazelcast.HazelcastClientOptions",
             "com.guicedee.service.registry.ServiceRegistryOptions",
             "com.guicedee.service.registry.RegisteredService",
             "com.guicedee.runtime.autoconfigure.AzureContainerApps"

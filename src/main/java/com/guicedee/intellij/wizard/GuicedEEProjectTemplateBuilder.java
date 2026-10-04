@@ -1325,6 +1325,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 .replace("${PROVIDES}", provides.toString());
 
         FileUtil.writeToFile(new File(srcDir, "module-info.java"), moduleInfo);
+        HazelcastProjectSupport.write(srcDir.toPath(), myWizardData.getGroupId(), moduleData);
     }
 
     // Keep the old method for backward compatibility

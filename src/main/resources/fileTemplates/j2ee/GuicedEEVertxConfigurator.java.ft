@@ -2,6 +2,7 @@ package ${PACKAGE_NAME};
 
 import com.guicedee.vertx.spi.VertxConfigurator;
 import io.vertx.core.VertxBuilder;
+import io.vertx.core.VertxOptions;
 
 /**
  * A Vertx configurator that configures Vertx options before initialization.
@@ -9,11 +10,15 @@ import io.vertx.core.VertxBuilder;
 public class ${NAME} implements VertxConfigurator {
 
     @Override
+    public VertxOptions options(VertxOptions options) {
+        // Customize shared options; preserve metrics, event-bus endpoints and pool sizes.
+        return options;
+    }
+
+    @Override
     public VertxBuilder builder(VertxBuilder builder) {
-        /*builder.withMetrics()
-                .withTracer()
-                .withTransport()
-                .withClusterManager()*/
+        // Compose builder extensions without replacing shared VertxOptions.
+        // GuicedEE's Hazelcast module supplies its own enabled cluster manager.
         return builder;
     }
 }

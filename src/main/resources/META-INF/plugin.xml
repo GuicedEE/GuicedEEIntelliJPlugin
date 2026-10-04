@@ -44,6 +44,8 @@
         </ul>
       </li>
       <li>Application templates for different use cases</li>
+      <li>Explicit Vert.x clustering wizard option with Hazelcast TCP and advertised event-bus node examples</li>
+      <li>Cache-only Hazelcast defaults, EventBusOptions intention, shared-options and shutdown-order templates</li>
       <li>Identify GuicedEE applications in the Services window</li>
       <li>Recognise <code>@VertxEventDefinition</code> methods and classes as framework entry points so event-bus consumers are not flagged as unused</li>
     </ul>
@@ -195,6 +197,10 @@
     </intentionAction>
     <intentionAction>
       <className>com.guicedee.intellij.intentions.AddHazelcastServerOptionsIntention</className>
+      <category>GuicedEE</category>
+    </intentionAction>
+    <intentionAction>
+      <className>com.guicedee.intellij.intentions.AddEventBusOptionsIntention</className>
       <category>GuicedEE</category>
     </intentionAction>
     <intentionAction>

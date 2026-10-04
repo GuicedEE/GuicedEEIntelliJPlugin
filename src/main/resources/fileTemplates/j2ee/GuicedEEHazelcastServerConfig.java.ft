@@ -6,6 +6,9 @@ import com.hazelcast.config.Config;
 /**
  * Configures the embedded Hazelcast server instance.
  * Implement buildConfig to customize the Hazelcast server Config.
+ * This SPI intentionally configures a cluster unless VERTX_CLUSTER_ENABLED=false
+ * or HazelcastServerOptions sets clustered=false. Preparation precedes Vert.x;
+ * do not create another member here.
  */
 public class ${NAME} implements IGuicedHazelcastServerConfig<${NAME}> {
 

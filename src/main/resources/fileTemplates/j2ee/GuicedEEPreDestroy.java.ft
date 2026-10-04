@@ -13,7 +13,7 @@ public class ${NAME} implements IGuicePreDestroy<${NAME}> {
     }
     
     @Override
-    public Integer sortOrder() {
+    public Integer shutdownSortOrder() {
         return 100; // Lower numbers run first
     }
 }

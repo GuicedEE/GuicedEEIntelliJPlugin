@@ -2,6 +2,7 @@
 <body>
 <p>Creates a new Hazelcast Server Configuration class.</p>
 <p>Implements IGuicedHazelcastServerConfig to customize the embedded Hazelcast member configuration.</p>
+<p>Configuration is prepared before Vert.x. This SPI intentionally enables clustering unless VERTX_CLUSTER_ENABLED=false or HazelcastServerOptions specifies clustered=false. Reuse lifecycle-owned instances; do not create an extra member here.</p>
 </body>
 </html>
 

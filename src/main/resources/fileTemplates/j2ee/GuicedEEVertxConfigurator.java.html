@@ -5,7 +5,7 @@
         <td><font face="verdana" size="-1">
             This is a built-in template for a GuicedEE Vertx Configurator.
             <br>
-            A Vertx Configurator is a class that implements VertxConfigurator and configures Vertx options before initialization.
+            A Vertx Configurator composes options(VertxOptions) on the shared options before builder(VertxBuilder). Preserve metrics, event-bus endpoints and pool sizes; do not replace them with a new options object or create another cluster manager.
             <br>
             This class will be automatically registered as a service loader implementation.
         </font></td>

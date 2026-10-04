@@ -55,6 +55,7 @@ public class GuicedEEProjectWizardData {
 
         // Caching sub-options
         private boolean cachingHazelcast;
+        private boolean vertxClustering;
         private boolean cachingEhCache;
 
         // Mail
@@ -522,6 +523,13 @@ public class GuicedEEProjectWizardData {
         public void setCachingHazelcast(boolean v) {
             this.cachingHazelcast = v;
             if (v) this.caching = true;
+            else this.vertxClustering = false;
+        }
+
+        public boolean isVertxClustering() { return vertxClustering; }
+        public void setVertxClustering(boolean enabled) {
+            this.vertxClustering = enabled;
+            if (enabled) setCachingHazelcast(true);
         }
 
         public boolean isCachingEhCache() { return cachingEhCache; }

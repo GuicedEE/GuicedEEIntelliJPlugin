@@ -7,6 +7,7 @@ Full **Google Guice** and **GuicedEE 2.3.0** framework support for IntelliJ IDEA
 ### GuicedEE Framework Support
 
 - **Project creation** — scaffold new GuicedEE projects with Maven or Gradle BOMs at 2.3.0 and `module-info.java`
+- **Explicit clustering** — separate Hazelcast cache-only and Vert.x cluster choices; generate TCP membership, advertised event-bus endpoints and local node examples
 - **File templates** for common GuicedEE components:
   - Guice Modules
   - Lifecycle Hooks (Pre-Startup, Post-Startup, Pre-Destroy)
@@ -31,6 +32,27 @@ Full **Google Guice** and **GuicedEE 2.3.0** framework support for IntelliJ IDEA
     - `@Verticle` and `package-info.java` annotations
 - **Entry-point recognition** — methods (and classes) annotated with `@VertxEventDefinition` are treated as framework entry points, so event-bus consumers invoked reflectively by the runtime are never reported as unused
 - **Run configurations** — detect and run GuicedEE applications directly from the gutter
+
+### Clustering and WebSocket continuity
+
+Selecting Hazelcast creates an owned embedded cache member with `clustered=false` and `joinType=NONE`.
+Selecting **Vert.x clustering (Hazelcast)** adds intentional TCP configuration in a dedicated `cluster/package-info.java`,
+along with `cluster-a.env.example`, `cluster-b.env.example`, `single-instance.env.example`, and `CLUSTERING.md`.
+Maven and Gradle use `com.guicedee:hazelcast` and JPMS requires `com.guicedee.guicedhazelcast`.
+Example environment files must be loaded into separate processes explicitly; they are not automatically read.
+The single-instance example disables both cluster and client activation. Configure only one server annotation per assembled application.
+
+The Hazelcast server annotation intention starts with cache-only defaults. The annotation picker and dedicated
+`@EventBusOptions` intention also support transport configuration. `VertxConfigurator` templates customize shared
+`VertxOptions` before builder hooks, and destroy-hook templates use `shutdownSortOrder()`.
+Server configuration SPIs are intentional configuration; do not create extra members or replace the built-in cluster manager.
+
+Public broadcasts retain cluster fan-out; socket commands and private replies/storage remain owner-local.
+Protected destinations require verified identity and atomic single-use session-bound capability handling.
+On reconnect, acquire fresh capabilities, restore subscriptions and fetch authoritative state. Raw/STOMP sockets
+bound slow peers and release consumers, groups and connection state. See the website's
+[continuity guide](https://guicedee.com/capabilities#clustering-websocket-continuity) and
+[activation reference](https://guicedee.com/environment-variables#hazelcast-clustering).
 
 ### Google Guice Support
 

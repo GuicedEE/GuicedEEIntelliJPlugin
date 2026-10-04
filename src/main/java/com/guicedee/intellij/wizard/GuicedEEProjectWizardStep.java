@@ -111,6 +111,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     // Caching sub-options
     private JPanel myModuleCachingOptionsPanel;
     private JCheckBox myModuleCachingHazelcastCheckBox;
+    private JCheckBox myModuleVertxClusteringCheckBox;
     private JCheckBox myModuleCachingEhCacheCheckBox;
 
     // MicroProfile sub-options
@@ -650,8 +651,12 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         // Initialize Caching sub-options
         myModuleCachingOptionsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         myModuleCachingHazelcastCheckBox = new JCheckBox("Hazelcast");
+        myModuleVertxClusteringCheckBox = new JCheckBox("Vert.x clustering (Hazelcast)");
+        myModuleVertxClusteringCheckBox.setToolTipText("Generate explicit TCP membership and event-bus configuration with local node examples.");
+        myModuleCachingHazelcastCheckBox.setToolTipText("Generate an owned cache member; event-bus clustering is a separate option.");
         myModuleCachingEhCacheCheckBox = new JCheckBox("EhCache");
         myModuleCachingOptionsPanel.add(myModuleCachingHazelcastCheckBox);
+        myModuleCachingOptionsPanel.add(myModuleVertxClusteringCheckBox);
         myModuleCachingOptionsPanel.add(myModuleCachingEhCacheCheckBox);
         myModuleCachingOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleCachingOptionsPanel.setVisible(false);
@@ -788,6 +793,11 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         });
 
         myModuleCachingCheckBox.addActionListener(e -> {
+            if (!myModuleCachingCheckBox.isSelected()) {
+                myModuleCachingHazelcastCheckBox.setSelected(false);
+                myModuleVertxClusteringCheckBox.setSelected(false);
+                myModuleCachingEhCacheCheckBox.setSelected(false);
+            }
             myModuleCachingOptionsPanel.setVisible(myModuleCachingCheckBox.isSelected());
             updateSelectedModule();
             revalidateFeaturePanel();
@@ -851,7 +861,14 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleMessagingMQTTCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleMessagingMailClientCheckBox.addActionListener(e -> updateSelectedModule());
 
-        myModuleCachingHazelcastCheckBox.addActionListener(e -> updateSelectedModule());
+        myModuleCachingHazelcastCheckBox.addActionListener(e -> {
+            if (!myModuleCachingHazelcastCheckBox.isSelected()) myModuleVertxClusteringCheckBox.setSelected(false);
+            updateSelectedModule();
+        });
+        myModuleVertxClusteringCheckBox.addActionListener(e -> {
+            if (myModuleVertxClusteringCheckBox.isSelected()) myModuleCachingHazelcastCheckBox.setSelected(true);
+            updateSelectedModule();
+        });
         myModuleCachingEhCacheCheckBox.addActionListener(e -> updateSelectedModule());
 
         myModuleMicroProfileHealthCheckBox.addActionListener(e -> updateSelectedModule());
@@ -1004,6 +1021,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Set Caching sub-options
             myModuleCachingHazelcastCheckBox.setSelected(selectedModule.isCachingHazelcast());
+            myModuleVertxClusteringCheckBox.setSelected(selectedModule.isVertxClustering());
             myModuleCachingEhCacheCheckBox.setSelected(selectedModule.isCachingEhCache());
             myModuleCachingOptionsPanel.setVisible(selectedModule.isCaching());
 
@@ -1095,6 +1113,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Clear Caching sub-options
             myModuleCachingHazelcastCheckBox.setSelected(false);
+            myModuleVertxClusteringCheckBox.setSelected(false);
             myModuleCachingEhCacheCheckBox.setSelected(false);
             myModuleCachingOptionsPanel.setVisible(false);
 
@@ -1183,6 +1202,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
             // Update Caching sub-options
             selectedModule.setCachingHazelcast(myModuleCachingHazelcastCheckBox.isSelected());
+            selectedModule.setVertxClustering(myModuleVertxClusteringCheckBox.isSelected());
             selectedModule.setCachingEhCache(myModuleCachingEhCacheCheckBox.isSelected());
 
             // Update MicroProfile sub-options
