@@ -6,7 +6,7 @@ Full **Google Guice** and **GuicedEE 2.3.0** framework support for IntelliJ IDEA
 
 ### GuicedEE Framework Support
 
-- **Project creation** — scaffold new GuicedEE projects with Maven or Gradle BOMs at 2.3.0 and `module-info.java`
+- **Project creation** — scaffold Java 25 projects with Maven or Gradle BOMs at 2.3.0 and `module-info.java`; the GuicedEE BOM manages Vert.x 5.2.1 and Netty 4.2.19.Final
 - **Explicit clustering** — separate Hazelcast cache-only and Vert.x cluster choices; generate TCP membership, advertised event-bus endpoints and local node examples
 - **File templates** for common GuicedEE components:
   - Guice Modules

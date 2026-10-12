@@ -43,7 +43,8 @@ intellijPlatform {
         <li>Explicit Vert.x clustering wizard option with TCP membership, advertised event-bus endpoints and isolated node examples</li>
         <li>Hazelcast cache-only scaffolding and annotation intentions remain unclustered; event-bus options have a dedicated intention</li>
         <li>Vert.x configurator templates compose shared options; destroy hooks use shutdownSortOrder</li>
-        <li>Generated Maven and Gradle projects use GuicedEE and test BOMs 2.3.0</li>
+        <li>Generated Maven and Gradle projects use GuicedEE and test BOMs 2.3.0, with Vert.x 5.2.1 and Netty 4.2.19.Final managed by the GuicedEE BOM</li>
+        <li>Single-module and multi-module Maven projects use the Java 25 baseline</li>
         <li>Local dependency scope support for injected constructor parameters and fields</li>
         <li>Scope conflict inspections recognise custom scope annotations; lifetime inspections include local request and session scopes</li>
         <li>Scope annotation templates include type, method, parameter, and field targets</li>

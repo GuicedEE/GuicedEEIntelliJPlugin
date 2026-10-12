@@ -114,7 +114,8 @@
   <change-notes><![CDATA[
     <h3>2.3.0</h3>
     <ul>
-      <li>Generated Maven and Gradle projects use GuicedEE and test BOMs 2.3.0</li>
+      <li>Generated Maven and Gradle projects use GuicedEE and test BOMs 2.3.0, with Vert.x 5.2.1 and Netty 4.2.19.Final managed by the GuicedEE BOM</li>
+      <li>Single-module and multi-module Maven projects use the Java 25 baseline</li>
       <li>Local dependency scope support for injected constructor parameters and fields</li>
       <li>Scope conflict inspections recognise custom scope annotations; lifetime inspections include local request and session scopes</li>
       <li>Scope annotation templates include type, method, parameter, and field targets</li>
