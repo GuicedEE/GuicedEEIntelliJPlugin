@@ -1058,6 +1058,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     {
         StringBuilder requires = new StringBuilder();
         requires.append("requires transitive com.guicedee.client;\n");
+        requires.append("\trequires transitive com.guicedee.guicedinjection;\n");
 
         // Web Reactive requirements
         if (moduleData.isWebReactive())
@@ -2265,6 +2266,15 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <dependencies>\n" +
                 "${DEPENDENCIES}" +
                 "    </dependencies>\n" +
+                "    <build>\n" +
+                "        <plugins>\n" +
+                "            <plugin>\n" +
+                "                <groupId>org.apache.maven.plugins</groupId>\n" +
+                "                <artifactId>maven-compiler-plugin</artifactId>\n" +
+                "                <version>3.15.0</version>\n" +
+                "            </plugin>\n" +
+                "        </plugins>\n" +
+                "    </build>\n" +
                 "</project>";
     }
 
@@ -2294,6 +2304,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         return "package ${PACKAGE};\n" +
                 "\n" +
                 "import com.guicedee.client.IGuiceContext;\n" +
+                "import com.guicedee.guicedinjection.GuiceApplication;\n" +
                 "import com.guicedee.vertx.spi.VertX;\n" +
                 "import com.guicedee.vertx.spi.Verticle;\n" +
                 "\n" +
@@ -2302,8 +2313,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "public class Application {\n" +
                 "\n" +
                 "    public static void main(String[] args) {\n" +
-                "        IGuiceContext.registerModule(\"${MODULE_NAME}\");\n" +
-                "        IGuiceContext.instance().inject();\n" +
+                "        GuiceApplication.run(() -> {\n" +
+                "            IGuiceContext.registerModule(\"${MODULE_NAME}\");\n" +
+                "            IGuiceContext.getContext().getConfig().setServiceLoadWithClassPath(true);\n" +
+                "        });\n" +
                 "    }\n" +
                 "}";
     }
@@ -2313,6 +2326,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         return "package ${PACKAGE};\n" +
                 "\n" +
                 "import com.guicedee.client.IGuiceContext;\n" +
+                "import com.guicedee.guicedinjection.GuiceApplication;\n" +
                 "import com.guicedee.vertx.spi.VertX;\n" +
                 "import com.guicedee.vertx.spi.Verticle;\n" +
                 "\n" +
@@ -2327,8 +2341,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        //System.setProperty(\"HTTPS_KEYSTORE\", \"\");\n" +
                 //System.setProperty(\"HTTPS_KEYSTORE_PASSWORD\", \"\");\n" +
                 "\n" +
-                "        IGuiceContext.registerModule(\"${MODULE_NAME}\");\n" +
-                "        IGuiceContext.instance().inject();\n" +
+                "        GuiceApplication.run(() -> {\n" +
+                "            IGuiceContext.registerModule(\"${MODULE_NAME}\");\n" +
+                "            IGuiceContext.getContext().getConfig().setServiceLoadWithClassPath(true);\n" +
+                "        });\n" +
                 "    }\n" +
                 "}";
     }

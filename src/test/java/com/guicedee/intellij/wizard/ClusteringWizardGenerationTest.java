@@ -18,14 +18,27 @@ public class ClusteringWizardGenerationTest extends LightJavaCodeInsightFixtureT
         Path source = Files.createDirectories(root.resolve("src/main/java"));
         invoke(builder, "createModuleInfo", source, module);
         assertTrue(Files.readString(source.resolve("module-info.java")).contains("requires transitive com.guicedee.guicedhazelcast"));
+        assertTrue(Files.readString(source.resolve("module-info.java")).contains("requires transitive com.guicedee.guicedinjection"));
         assertTrue(Files.exists(source.resolve("example/orders/cluster/package-info.java")));
         assertTrue(Files.exists(root.resolve("cluster-a.env.example")));
         invoke(builder, "createPomXml", root, module);
         String pom = Files.readString(root.resolve("pom.xml"));
         assertTrue(pom.contains("<groupId>com.guicedee</groupId>"));
         assertTrue(pom.contains("<artifactId>hazelcast</artifactId>"));
+        assertTrue(pom.contains("<artifactId>maven-compiler-plugin</artifactId>"));
+        assertTrue(pom.contains("<version>3.15.0</version>"));
         invoke(builder, "createGradleBuildFile", root, module);
         assertTrue(Files.readString(root.resolve("build.gradle.kts")).contains("implementation(\"com.guicedee:hazelcast\")"));
+        invoke(builder, "createBasicApplication", source, module);
+        invoke(builder, "createWebApplication", source, module);
+        for (String name : new String[]{"Application.java", "WebApplication.java"}) {
+            String application = Files.readString(source.resolve("example/orders/" + name));
+            assertTrue(application.contains("import com.guicedee.guicedinjection.GuiceApplication;"));
+            assertTrue(application.contains("GuiceApplication.run(() -> {"));
+            assertTrue(application.contains("IGuiceContext.registerModule(\"orders\");"));
+            assertTrue(application.contains("setServiceLoadWithClassPath(true)"));
+            assertFalse(application.contains("IGuiceContext.instance().inject()"));
+        }
     }
 
     private void invoke(GuicedEEProjectTemplateBuilder builder, String name, Path directory,

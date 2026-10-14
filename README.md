@@ -7,6 +7,8 @@ Full **Google Guice** and **GuicedEE 2.3.0** framework support for IntelliJ IDEA
 ### GuicedEE Framework Support
 
 - **Project creation** — scaffold Java 25 projects with Maven or Gradle BOMs at 2.3.0 and `module-info.java`; the GuicedEE BOM manages Vert.x 5.2.1 and Netty 4.2.19.Final
+- **Application startup** — basic and web entry points use `GuiceApplication.run(Runnable)`, register their JPMS module and enable scanning before injection. The runner awaits asynchronous startup and cleans up failed startup before an unsuccessful process exit.
+- **Java 25 compilation** — generated Maven module POMs pin Compiler Plugin 3.15.0; JPMS descriptors require `com.guicedee.guicedinjection` for the application runner.
 - **Explicit clustering** — separate Hazelcast cache-only and Vert.x cluster choices; generate TCP membership, advertised event-bus endpoints and local node examples
 - **File templates** for common GuicedEE components:
   - Guice Modules

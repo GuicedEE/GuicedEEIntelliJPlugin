@@ -45,6 +45,7 @@
       </li>
       <li>Application templates for different use cases</li>
       <li>Explicit Vert.x clustering wizard option with Hazelcast TCP and advertised event-bus node examples</li>
+      <li>Basic and web entry points use GuiceApplication.run with explicit scanning and await asynchronous startup</li>
       <li>Cache-only Hazelcast defaults, EventBusOptions intention, shared-options and shutdown-order templates</li>
       <li>Identify GuicedEE applications in the Services window</li>
       <li>Recognise <code>@VertxEventDefinition</code> methods and classes as framework entry points so event-bus consumers are not flagged as unused</li>

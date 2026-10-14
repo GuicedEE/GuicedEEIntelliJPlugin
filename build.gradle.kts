@@ -41,6 +41,7 @@ intellijPlatform {
       <h3>2.3.0</h3>
       <ul>
         <li>Explicit Vert.x clustering wizard option with TCP membership, advertised event-bus endpoints and isolated node examples</li>
+        <li>Basic and web entry points use GuiceApplication.run with explicit scanning and await asynchronous startup</li>
         <li>Hazelcast cache-only scaffolding and annotation intentions remain unclustered; event-bus options have a dedicated intention</li>
         <li>Vert.x configurator templates compose shared options; destroy hooks use shutdownSortOrder</li>
         <li>Generated Maven and Gradle projects use GuicedEE and test BOMs 2.3.0, with Vert.x 5.2.1 and Netty 4.2.19.Final managed by the GuicedEE BOM</li>
