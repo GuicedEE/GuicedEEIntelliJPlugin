@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.3.0"
+version = "2.4.1"
 
 repositories {
   mavenCentral()
@@ -32,12 +32,39 @@ dependencies {
 }
 
 intellijPlatform {
+  pluginVerification {
+    failureLevel = listOf(
+      org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS,
+      org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel.DEPRECATED_API_USAGES,
+      org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES
+    )
+    ides {
+      ide(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity, "2025.2.6.1")
+      ide(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaUltimate, "263.6800.24")
+    }
+  }
   pluginConfiguration {
     ideaVersion {
       sinceBuild = "252"
     }
 
     changeNotes = """
+      <h3>2.4.1</h3>
+      <ul>
+        <li>IntelliJ IDEA 2026.3 compatibility: replace removed StdModuleTypes with JavaModuleType</li>
+        <li>Use public PSI APIs for package lookup and annotation values</li>
+        <li>Avoid the scheduled-for-removal Query.iterator API in event-bus publisher navigation</li>
+        <li>Use OpenFileDescriptor navigation for newly created providers</li>
+        <li>Generated applications continue to use GuicedEE 2.4.0</li>
+      </ul>
+      <h3>2.4.0</h3>
+      <ul>
+        <li>Generated single-module and multi-module Maven and Gradle projects use GuicedEE and test BOMs 2.4.0</li>
+        <li>Java 25 baseline with ClassGraph 6.0.0 managed by the GuicedEE BOM</li>
+        <li>Separate cache-only and clustered Hazelcast options with explicit TCP membership and advertised event-bus endpoints</li>
+        <li>Application entry points await asynchronous startup through GuiceApplication.run</li>
+        <li>Shared Vert.x options and shutdownSortOrder lifecycle templates</li>
+      </ul>
       <h3>2.3.0</h3>
       <ul>
         <li>Explicit Vert.x clustering wizard option with TCP membership, advertised event-bus endpoints and isolated node examples</li>

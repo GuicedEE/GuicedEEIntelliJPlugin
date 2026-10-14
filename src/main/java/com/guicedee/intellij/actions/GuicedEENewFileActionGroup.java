@@ -17,7 +17,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiUtil;
-import com.intellij.psi.impl.file.JavaDirectoryServiceImpl;
 import com.guicedee.intellij.GuicedIcons;
 import com.guicedee.intellij.template.GuicedEEFileTemplateProvider;
 import com.guicedee.intellij.wizard.GuicedEEProjectWizardData;
@@ -1500,7 +1499,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
          */
         private String getPackageNameFromDirectory(Project project, PsiDirectory directory) {
             // Try to get the package name from the directory
-            PsiPackage psiPackage = JavaDirectoryServiceImpl.getInstance().getPackage(directory);
+            PsiPackage psiPackage = JavaDirectoryService.getInstance().getPackage(directory);
             if (psiPackage != null && !psiPackage.getQualifiedName().isEmpty()) {
                 return psiPackage.getQualifiedName();
             }

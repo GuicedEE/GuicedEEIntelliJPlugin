@@ -4,14 +4,13 @@ package com.guicedee.intellij.guice.utils;
 import com.guicedee.intellij.guice.constants.GuiceAnnotations;
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.PsiImplUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
 public final class AnnotationUtils {
   public static @Nullable PsiElement findDefaultValue(PsiAnnotation annotation) {
-    return PsiImplUtil.findDeclaredAttributeValue(annotation, PsiAnnotation.DEFAULT_REFERENCED_METHOD_NAME);
+    return annotation.findDeclaredAttributeValue(PsiAnnotation.DEFAULT_REFERENCED_METHOD_NAME);
   }
 
   public static boolean isScopeAnnotation(PsiAnnotation annotation) {

@@ -382,8 +382,8 @@ public class CreateProviderAction extends AnAction implements DumbAware {
             file = PsiTreeUtil.getParentOfType(element, PsiFile.class);
         }
         if (file != null && file.getVirtualFile() != null) {
-            com.intellij.openapi.fileEditor.FileEditorManager.getInstance(project)
-                    .openFile(file.getVirtualFile(), true);
+            new com.intellij.openapi.fileEditor.OpenFileDescriptor(project, file.getVirtualFile())
+                    .navigate(true);
         }
     }
 }

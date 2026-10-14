@@ -150,7 +150,7 @@ public final class VertxEventBusAnnotator extends RelatedItemLineMarkerProvider 
       return targets;
     }
 
-    for (PsiReference reference : ReferencesSearch.search(publisherClass, scope)) {
+    for (PsiReference reference : ReferencesSearch.search(publisherClass, scope).findAll()) {
       final PsiVariable variable = PsiTreeUtil.getParentOfType(reference.getElement(), PsiVariable.class);
       if (variable == null || !isPublisherVariable(variable)) {
         continue;

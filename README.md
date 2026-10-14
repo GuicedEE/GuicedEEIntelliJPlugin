@@ -1,12 +1,12 @@
 # Guiced — IntelliJ IDEA Plugin
 
-Full **Google Guice** and **GuicedEE 2.3.0** framework support for IntelliJ IDEA 2025.2+.
+Full **Google Guice** and **GuicedEE 2.4.0** framework support for IntelliJ IDEA 2025.2+.
 
 ## Features
 
 ### GuicedEE Framework Support
 
-- **Project creation** — scaffold Java 25 projects with Maven or Gradle BOMs at 2.3.0 and `module-info.java`; the GuicedEE BOM manages Vert.x 5.2.1 and Netty 4.2.19.Final
+- **Project creation** — scaffold Java 25 projects with Maven or Gradle BOMs at 2.4.0 and `module-info.java`; the GuicedEE BOM manages Vert.x 5.2.1 and Netty 4.2.19.Final
 - **Application startup** — basic and web entry points use `GuiceApplication.run(Runnable)`, register their JPMS module and enable scanning before injection. The runner awaits asynchronous startup and cleans up failed startup before an unsuccessful process exit.
 - **Java 25 compilation** — generated Maven module POMs pin Compiler Plugin 3.15.0; JPMS descriptors require `com.guicedee.guicedinjection` for the application runner.
 - **Explicit clustering** — separate Hazelcast cache-only and Vert.x cluster choices; generate TCP membership, advertised event-bus endpoints and local node examples
@@ -113,6 +113,28 @@ context propagation.
 The plugin detects conflicting standard and custom scopes marked with `@ScopeAnnotation`,
 `javax.inject.Scope`, or `jakarta.inject.Scope`. In GuicedEE projects, the existing lifetime
 inspections also check local request/session scopes on injected fields and constructor parameters.
+
+## Compatibility verification
+
+Plugin 2.4.1 replaces the `StdModuleTypes` class removed in IntelliJ IDEA 2026.3,
+uses public PSI APIs, and avoids the scheduled-for-removal `Query.iterator()` API.
+Generated projects still use GuicedEE 2.4.0.
+
+Run the tests, build the ZIP and verify against the 2025.2 baseline and
+2026.3 EAP build 263.6800.24 with JDK 21:
+
+```powershell
+$env:JAVA_HOME = 'C:/Software/jdk/21'
+./gradlew.bat test buildPlugin verifyPlugin --console=plain
+```
+
+Compatibility problems, deprecated API usage and scheduled-for-removal API usage
+fail verification. Reports are in `build/reports/pluginVerifier`; the upload ZIP
+is `build/distributions/GEEIntelliJPlugin-2.4.1.zip`.
+
+Verified on 14 October 2026 with Plugin Verifier 1.410: both IC-252.28539.33 and
+IU-263.6800.24 report `Compatible`, with no deprecated or scheduled-for-removal
+API usages. All 20 tests passed.
 
 ## Requirements
 
