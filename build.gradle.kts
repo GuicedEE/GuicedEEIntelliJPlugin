@@ -55,7 +55,7 @@ intellijPlatform {
         <li>Use public PSI APIs for package lookup and annotation values</li>
         <li>Avoid the scheduled-for-removal Query.iterator API in event-bus publisher navigation</li>
         <li>Use OpenFileDescriptor navigation for newly created providers</li>
-        <li>Generated applications continue to use GuicedEE 2.4.0</li>
+        <li>Generated applications use GuicedEE 2.4.1 with Jackson 3 cloud logging and Hazelcast packaging fixes</li>
       </ul>
       <h3>2.4.0</h3>
       <ul>

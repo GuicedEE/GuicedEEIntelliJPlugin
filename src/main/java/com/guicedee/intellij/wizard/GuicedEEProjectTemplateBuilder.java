@@ -2241,7 +2241,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <properties>\n" +
                 "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.4.0</guicedee.version>\n" +
+                "        <guicedee.version>2.4.1</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 "    <dependencyManagement>\n" +
@@ -3240,7 +3240,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <properties>\n" +
                 "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.4.0</guicedee.version>\n" +
+                "        <guicedee.version>2.4.1</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 modules.toString() +
@@ -3624,8 +3624,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    mavenCentral()\n" +
                 "}\n\n" +
                 "dependencies {\n" +
-                "    implementation(platform(\"com.guicedee:guicedee-bom:2.4.0\"))\n" +
-                "    implementation(platform(\"com.guicedee:tests-bom:2.4.0\"))\n" +
+                "    implementation(platform(\"com.guicedee:guicedee-bom:2.4.1\"))\n" +
+                "    implementation(platform(\"com.guicedee:tests-bom:2.4.1\"))\n" +
                 deps +
                 "}\n\n" +
                 "tasks.withType<JavaCompile> {\n" +
@@ -3661,8 +3661,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        mavenCentral()\n" +
                 "    }\n\n" +
                 "    dependencies {\n" +
-                "        \"implementation\"(platform(\"com.guicedee:guicedee-bom:2.4.0\"))\n" +
-                "        \"implementation\"(platform(\"com.guicedee:tests-bom:2.4.0\"))\n" +
+                "        \"implementation\"(platform(\"com.guicedee:guicedee-bom:2.4.1\"))\n" +
+                "        \"implementation\"(platform(\"com.guicedee:tests-bom:2.4.1\"))\n" +
                 "    }\n\n" +
                 "    tasks.withType<JavaCompile> {\n" +
                 "        options.encoding = \"UTF-8\"\n" +
