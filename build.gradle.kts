@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.4.1"
+version = "2.5.0"
 
 repositories {
   mavenCentral()
@@ -49,6 +49,10 @@ intellijPlatform {
     }
 
     changeNotes = """
+      <h3>2.5.0</h3>
+      <ul>
+        <li>Generated Maven and Gradle projects target GuicedEE and test BOMs 2.5.0</li>
+      </ul>
       <h3>2.4.1</h3>
       <ul>
         <li>IntelliJ IDEA 2026.3 compatibility: replace removed StdModuleTypes with JavaModuleType</li>

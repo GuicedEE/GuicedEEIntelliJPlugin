@@ -13,7 +13,7 @@
   <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    <p><b>Guiced </b> is an IntelliJ IDEA plugin based on the JetBrains Guice plugin, providing full Google Guice and GuicedEE 2.4.1 framework support for IntelliJ IDEA 2025.2+.</p>
+    <p><b>Guiced </b> is an IntelliJ IDEA plugin based on the JetBrains Guice plugin, providing full Google Guice and GuicedEE 2.5.0 framework support for IntelliJ IDEA 2025.2+.</p>
 
     <p>☕ <b>Support this plugin:</b> <a href="https://patreon.com/GedMarc">Buy me a coffee on Patreon</a></p>
 
@@ -113,6 +113,10 @@
   ]]></description>
 
   <change-notes><![CDATA[
+    <h3>2.5.0</h3>
+    <ul>
+      <li>Generated Maven and Gradle projects target GuicedEE and test BOMs 2.5.0</li>
+    </ul>
     <h3>2.4.1</h3>
     <ul>
       <li>Generated single-module and multi-module Maven and Gradle projects use GuicedEE and test BOMs 2.4.1</li>
