@@ -2241,7 +2241,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <properties>\n" +
                 "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.5.0</guicedee.version>\n" +
+                "        <guicedee.version>2.5.1</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 "    <dependencyManagement>\n" +
@@ -3240,7 +3240,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <properties>\n" +
                 "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.5.0</guicedee.version>\n" +
+                "        <guicedee.version>2.5.1</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 modules.toString() +
