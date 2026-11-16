@@ -309,8 +309,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             createAuthSupportFiles(srcDir, resourcesDir, moduleData);
         }
 
-        // Don't create scan module inclusions file during app creation
-        // createScanModuleInclusions(srcDir);
+        if (myWizardData.isNativeImagePackaging()) {
+            NativeProjectSupport.write(baseDir.toPath(), myWizardData.getGroupId(), moduleData.getArtifactId(),
+                    myWizardData.getVersion(), moduleData.isWebReactive() ? "WebApplication" : "Application");
+        }
     }
 
     private void createMultiModuleProject(File baseDir) throws IOException
@@ -401,8 +403,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 createAuthSupportFiles(moduleSrcDir, moduleResourcesDir, moduleData);
             }
 
-            // Don't create scan module inclusions file during app creation
-            // createScanModuleInclusions(moduleSrcDir, moduleData);
+            if (myWizardData.isNativeImagePackaging()) {
+                NativeProjectSupport.write(moduleDir.toPath(), myWizardData.getGroupId(), moduleData.getArtifactId(),
+                        myWizardData.getVersion(), moduleData.isWebReactive() ? "WebApplication" : "Application");
+            }
         }
 
         // Create JLink module if needed
@@ -410,6 +414,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         {
             createJLinkModule(baseDir);
         }
+    }
+
+    private static String sdkDependency(String artifact) {
+        return "        <dependency><groupId>com.guicedee.modules.services</groupId><artifactId>" + artifact + "</artifactId></dependency>\n";
     }
 
     private void createPomXml(File baseDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
@@ -809,6 +817,12 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             }
         }
 
+        if (moduleData.isCloud() && moduleData.isFirebaseAdmin()) dependencies.append(sdkDependency("firebase-admin"));
+        if (moduleData.isCloud() && moduleData.isCommercetools()) dependencies.append(sdkDependency("commercetools"));
+        if (myWizardData.isNativeImagePackaging()) dependencies.append("""
+                    <dependency><groupId>com.guicedee</groupId><artifactId>native-image</artifactId><version>2.6.0</version></dependency>
+                    <dependency><groupId>org.graalvm.sdk</groupId><artifactId>nativeimage</artifactId><version>25.0.4.1</version><scope>provided</scope></dependency>
+                """);
         variables.put("DEPENDENCIES", dependencies.toString());
 
 
@@ -1057,6 +1071,9 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     private void createModuleInfo(File srcDir, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         StringBuilder requires = new StringBuilder();
+        if (moduleData.isCloud() && moduleData.isFirebaseAdmin()) requires.append("requires firebase.admin;\n");
+        if (moduleData.isCloud() && moduleData.isCommercetools()) requires.append("requires commercetools.sdk.java.api;\n");
+        if (myWizardData.isNativeImagePackaging()) requires.append("requires com.guicedee.nativeimage;\n");
         requires.append("requires transitive com.guicedee.client;\n");
         requires.append("\trequires transitive com.guicedee.guicedinjection;\n");
 
@@ -1283,6 +1300,10 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
         // Create provides statements for service loaders
         StringBuilder provides = new StringBuilder();
+        if (myWizardData.isNativeImagePackaging()) {
+            provides.append("    provides com.guicedee.client.services.IGuiceDiscovery with " + myWizardData.getGroupId() + ".ApplicationDiscovery;\n");
+            provides.append("    provides com.guicedee.nativeimage.GuiceNativeConfiguration with " + myWizardData.getGroupId() + ".NativeConfiguration;\n");
+        }
 
         // Add provides statement for IGuiceModule if database module is created
         if (moduleData.isDatabase()) {
@@ -1350,6 +1371,9 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
     private void createTestModuleInfo(File testSrcDir, String moduleName, GuicedEEProjectWizardData.ModuleData moduleData) throws IOException
     {
         StringBuilder requires = new StringBuilder();
+        if (moduleData.isCloud() && moduleData.isFirebaseAdmin()) requires.append("requires firebase.admin;\n");
+        if (moduleData.isCloud() && moduleData.isCommercetools()) requires.append("requires commercetools.sdk.java.api;\n");
+        if (myWizardData.isNativeImagePackaging()) requires.append("requires com.guicedee.nativeimage;\n");
 
         // Add TestContainers requirement if selected
         if (moduleData.isTestsTestContainers())
@@ -2241,7 +2265,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <properties>\n" +
                 "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.5.1</guicedee.version>\n" +
+                "        <guicedee.version>2.6.0</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 "    <dependencyManagement>\n" +
@@ -2650,6 +2674,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
         variables.put("ARTIFACT_ID", moduleData.getArtifactId());
         variables.put("VERSION", myWizardData.getVersion());
         variables.put("PARENT_ARTIFACT_ID", myWizardData.getArtifactId() + "-parent");
+        variables.put("PACKAGING", "jar");
 
         StringBuilder dependencies = new StringBuilder();
         dependencies.append("        <dependency>\n" +
@@ -3063,6 +3088,12 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             }
         }
 
+        if (moduleData.isCloud() && moduleData.isFirebaseAdmin()) dependencies.append(sdkDependency("firebase-admin"));
+        if (moduleData.isCloud() && moduleData.isCommercetools()) dependencies.append(sdkDependency("commercetools"));
+        if (myWizardData.isNativeImagePackaging()) dependencies.append("""
+                    <dependency><groupId>com.guicedee</groupId><artifactId>native-image</artifactId><version>2.6.0</version></dependency>
+                    <dependency><groupId>org.graalvm.sdk</groupId><artifactId>nativeimage</artifactId><version>25.0.4.1</version><scope>provided</scope></dependency>
+                """);
         variables.put("DEPENDENCIES", dependencies.toString());
 
 
@@ -3240,7 +3271,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    <properties>\n" +
                 "        <maven.compiler.release>25</maven.compiler.release>\n" +
                 "        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
-                "        <guicedee.version>2.5.1</guicedee.version>\n" +
+                "        <guicedee.version>2.6.0</guicedee.version>\n" +
                 "    </properties>\n" +
                 "\n" +
                 modules.toString() +
@@ -3521,6 +3552,12 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
      */
     private String buildGradleDependencies(GuicedEEProjectWizardData.ModuleData moduleData) {
         StringBuilder deps = new StringBuilder();
+        if (moduleData.isCloud() && moduleData.isFirebaseAdmin()) deps.append("    implementation(\"com.guicedee.modules.services:firebase-admin\")\n");
+        if (moduleData.isCloud() && moduleData.isCommercetools()) deps.append("    implementation(\"com.guicedee.modules.services:commercetools\")\n");
+        if (myWizardData.isNativeImagePackaging()) {
+            deps.append("    implementation(\"com.guicedee:native-image:2.6.0\")\n");
+            deps.append("    compileOnly(\"org.graalvm.sdk:nativeimage:25.0.4.1\")\n");
+        }
         deps.append("    implementation(\"com.guicedee:inject\")\n");
         deps.append("    implementation(\"com.guicedee:vertx\")\n");
         deps.append("    compileOnly(\"org.projectlombok:lombok\")\n");
@@ -3624,8 +3661,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "    mavenCentral()\n" +
                 "}\n\n" +
                 "dependencies {\n" +
-                "    implementation(platform(\"com.guicedee:guicedee-bom:2.5.0\"))\n" +
-                "    implementation(platform(\"com.guicedee:tests-bom:2.5.0\"))\n" +
+                "    implementation(platform(\"com.guicedee:guicedee-bom:2.6.0\"))\n" +
+                "    implementation(platform(\"com.guicedee:tests-bom:2.6.0\"))\n" +
                 deps +
                 "}\n\n" +
                 "tasks.withType<JavaCompile> {\n" +
@@ -3661,8 +3698,8 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 "        mavenCentral()\n" +
                 "    }\n\n" +
                 "    dependencies {\n" +
-                "        \"implementation\"(platform(\"com.guicedee:guicedee-bom:2.5.0\"))\n" +
-                "        \"implementation\"(platform(\"com.guicedee:tests-bom:2.5.0\"))\n" +
+                "        \"implementation\"(platform(\"com.guicedee:guicedee-bom:2.6.0\"))\n" +
+                "        \"implementation\"(platform(\"com.guicedee:tests-bom:2.6.0\"))\n" +
                 "    }\n\n" +
                 "    tasks.withType<JavaCompile> {\n" +
                 "        options.encoding = \"UTF-8\"\n" +

@@ -41,6 +41,9 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JBTextField myDeveloperOrganizationUrlField;
     private JCheckBox myMultiModuleCheckBox;
     private JCheckBox myJlinkPackagingCheckBox;
+    private JCheckBox myNativeImageCheckBox;
+    private JCheckBox myFirebaseAdminCheckBox;
+    private JCheckBox myCommercetoolsCheckBox;
     private JRadioButton myModitectRadioButton;
     private JRadioButton myJlinkPluginRadioButton;
     private ButtonGroup myRuntimeImageToolGroup;
@@ -152,7 +155,15 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myGroupIdField = new JBTextField("com.example");
         myVersionField = new JBTextField("1.0-SNAPSHOT");
         myMultiModuleCheckBox = new JCheckBox("Multi-Module Project");
-        myJlinkPackagingCheckBox = new JCheckBox("Runtime Image Packaging");
+        myJlinkPackagingCheckBox = new JCheckBox("jlink runtime image");
+        myNativeImageCheckBox = new JCheckBox("Native image starter (SPI)");
+        myNativeImageCheckBox.setToolTipText("Generate SPI discovery, reflection registration and GraalVM build instructions. Integration metadata may need customization.");
+        myNativeImageCheckBox.addActionListener(e -> {
+            if (myNativeImageCheckBox.isSelected()) {
+                myJlinkPackagingCheckBox.setSelected(false);
+                myRuntimeImageToolPanel.setVisible(false);
+            }
+        });
 
         myMavenRadioButton = new JRadioButton("Maven", true);
         myGradleRadioButton = new JRadioButton("Gradle");
@@ -187,6 +198,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
 
         myJlinkPackagingCheckBox.addActionListener(e -> {
             myRuntimeImageToolPanel.setVisible(myJlinkPackagingCheckBox.isSelected());
+            if (myJlinkPackagingCheckBox.isSelected()) myNativeImageCheckBox.setSelected(false);
         });
 
         // Add document listener to group ID field to update module names when group ID changes
@@ -315,6 +327,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
                 .addComponent(myBuildToolPanel)
                 .addComponent(myMultiModuleCheckBox)
                 .addComponent(myJlinkPackagingCheckBox)
+                .addComponent(myNativeImageCheckBox)
                 .addComponent(myRuntimeImageToolPanel)
                 .addVerticalGap(10)
                 .addComponent(new JBLabel("Project Configuration:"))
@@ -347,6 +360,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myWizardData.setUseGradle(myGradleRadioButton.isSelected());
         myWizardData.setJmodPackaging(false);
         myWizardData.setJlinkPackaging(myJlinkPackagingCheckBox.isSelected());
+        myWizardData.setNativeImagePackaging(myNativeImageCheckBox.isSelected());
         myWizardData.setUseModitect(myModitectRadioButton.isSelected());
 
         // Get artifact ID from the selected module or module-specific field
@@ -687,6 +701,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleCloudFaultToleranceCheckBox = new JCheckBox("Fault Tolerance");
         myModuleCloudGraphQLCheckBox = new JCheckBox("GraphQL");
         myModuleCloudMCPCheckBox = new JCheckBox("MCP Server");
+        myFirebaseAdminCheckBox = new JCheckBox("Firebase Admin (Auth, Messaging, Firestore)");
+        myCommercetoolsCheckBox = new JCheckBox("Commercetools SDK (API + GraphQL client)");
         myModuleCloudOptionsPanel.add(myModuleCloudServiceDiscoveryCheckBox);
         myModuleCloudOptionsPanel.add(myModuleCloudRuntimeAutoconfigureCheckBox);
         myModuleCloudOptionsPanel.add(myModuleCloudServiceRegistryCheckBox);
@@ -695,6 +711,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleCloudOptionsPanel.add(myModuleCloudFaultToleranceCheckBox);
         myModuleCloudOptionsPanel.add(myModuleCloudGraphQLCheckBox);
         myModuleCloudOptionsPanel.add(myModuleCloudMCPCheckBox);
+        myModuleCloudOptionsPanel.add(myFirebaseAdminCheckBox);
+        myModuleCloudOptionsPanel.add(myCommercetoolsCheckBox);
         myModuleCloudOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         myModuleCloudOptionsPanel.setVisible(false);
 
@@ -891,6 +909,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myModuleCloudFaultToleranceCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleCloudGraphQLCheckBox.addActionListener(e -> updateSelectedModule());
         myModuleCloudMCPCheckBox.addActionListener(e -> updateSelectedModule());
+        myFirebaseAdminCheckBox.addActionListener(e -> updateSelectedModule());
+        myCommercetoolsCheckBox.addActionListener(e -> updateSelectedModule());
 
         // Add action listener for Tests
         myModuleTestsCheckBox.addActionListener(e -> {
@@ -1043,6 +1063,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleCloudFaultToleranceCheckBox.setSelected(selectedModule.isCloudFaultTolerance());
             myModuleCloudGraphQLCheckBox.setSelected(selectedModule.isCloudGraphQL());
             myModuleCloudMCPCheckBox.setSelected(selectedModule.isCloudMCP());
+            myFirebaseAdminCheckBox.setSelected(selectedModule.isFirebaseAdmin());
+            myCommercetoolsCheckBox.setSelected(selectedModule.isCommercetools());
             myModuleCloudOptionsPanel.setVisible(selectedModule.isCloud());
 
             // Set Tests sub-options
@@ -1135,6 +1157,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             myModuleCloudFaultToleranceCheckBox.setSelected(false);
             myModuleCloudGraphQLCheckBox.setSelected(false);
             myModuleCloudMCPCheckBox.setSelected(false);
+            myFirebaseAdminCheckBox.setSelected(false);
+            myCommercetoolsCheckBox.setSelected(false);
             myModuleCloudOptionsPanel.setVisible(false);
 
             // Clear Tests sub-options
@@ -1222,6 +1246,8 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
             selectedModule.setCloudFaultTolerance(myModuleCloudFaultToleranceCheckBox.isSelected());
             selectedModule.setCloudGraphQL(myModuleCloudGraphQLCheckBox.isSelected());
             selectedModule.setCloudMCP(myModuleCloudMCPCheckBox.isSelected());
+            selectedModule.setFirebaseAdmin(myFirebaseAdminCheckBox.isSelected());
+            selectedModule.setCommercetools(myCommercetoolsCheckBox.isSelected());
 
             // Update Tests sub-options
             selectedModule.setTests(myModuleTestsCheckBox.isSelected());

@@ -1,12 +1,14 @@
 # Guiced — IntelliJ IDEA Plugin
 
-Full **Google Guice** and **GuicedEE 2.5.0** framework support for IntelliJ IDEA 2025.2+.
+Full **Google Guice** and **GuicedEE 2.6.0** framework support for IntelliJ IDEA 2025.2+.
 
 ## Features
 
 ### GuicedEE Framework Support
 
-- **Project creation** — scaffold Java 25 projects with Maven or Gradle BOMs at 2.5.0 and `module-info.java`.
+- **Project creation** — scaffold Java 25 projects with Maven or Gradle BOMs at 2.6.0 and `module-info.java`.
+- **Cloud SDKs** — independently select Firebase Admin (Auth, Messaging, Firestore) and Commercetools (commerce API and GraphQL client). Maven and Gradle use the BOM-managed `com.guicedee.modules.services` wrappers and preserve `firebase.admin` and `commercetools.sdk.java.api` in JPMS descriptors.
+- **Native image starter** — an opt-in choice beside jlink, for single-module and multi-module Maven/Gradle projects. Generates explicit discovery, reflection metadata providers, dual JPMS/service-file registration, a modular argument-file helper and `NATIVE.md`. The entry point uses SPI discovery; add workload-specific resource/proxy/interceptor metadata and validate the selected integrations with GraalVM for JDK 25.
 - **Application startup** — basic and web entry points use `GuiceApplication.run(Runnable)`, register their JPMS module and enable scanning before injection. The runner awaits asynchronous startup and cleans up failed startup before an unsuccessful process exit.
 - **Java 25 compilation** — generated Maven module POMs pin Compiler Plugin 3.15.0; JPMS descriptors require `com.guicedee.guicedinjection` for the application runner.
 - **Explicit clustering** — separate Hazelcast cache-only and Vert.x cluster choices; generate TCP membership, advertised event-bus endpoints and local node examples

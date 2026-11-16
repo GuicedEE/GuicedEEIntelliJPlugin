@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.guicedee.intellij"
-version = "2.5.0"
+version = "2.6.0"
 
 repositories {
   mavenCentral()
@@ -49,6 +49,13 @@ intellijPlatform {
     }
 
     changeNotes = """
+      <h3>2.6.0</h3>
+      <ul>
+        <li>Align generated Maven and Gradle projects with GuicedEE and test BOMs 2.6.0.</li>
+        <li>GuicedEE 2.6.0 adds modular Firebase Admin and Commercetools SDKs with shared modular support libraries.</li>
+        <li>Select Firebase Admin and Commercetools independently in the project wizard, with matching Maven/Gradle dependencies and JPMS module names.</li>
+        <li>Opt-in native-image starter beside jlink: SPI discovery, reflection registration and a modular GraalVM build guide.</li>
+      </ul>
       <h3>2.5.0</h3>
       <ul>
         <li>Generated Maven and Gradle projects target GuicedEE and test BOMs 2.5.0</li>

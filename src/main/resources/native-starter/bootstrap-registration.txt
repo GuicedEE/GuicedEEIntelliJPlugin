@@ -1,0 +1,18 @@
+// Guice's built-in converters resolve parse methods by reflection.
+registration.reflect(Boolean.class, Byte.class, Short.class, Integer.class,
+        Long.class, Float.class, Double.class);
+try {
+    var loader = getClass().getClassLoader();
+    // Baseline injection targets used by the generated SPI application.
+    for (String type : new String[]{
+            "com.guicedee.client.scopes.CallScopeProperties",
+            "com.guicedee.client.scopes.CallScoper",
+            "com.guicedee.client.utils.GlobalProperties",
+            "com.guicedee.client.implementations.GuicedEEClientPostStartup",
+            "com.guicedee.vertx.spi.VertxVerticlePostStartup"}) {
+        registration.reflect(Class.forName(type, false, loader));
+    }
+    registration.inspectMemberInjection(Class.forName("io.vertx.core.impl.VertxImpl", false, loader));
+} catch (ClassNotFoundException e) {
+    throw new IllegalStateException("GuicedEE bootstrap dependencies are missing from the native module path", e);
+}

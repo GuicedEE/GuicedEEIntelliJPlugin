@@ -1,0 +1,59 @@
+import java.io.File;
+import java.lang.module.ModuleFinder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.util.*;
+import java.util.jar.JarFile;
+
+/** Prepare a modular Native Image argument file using the application's complete dependency path. */
+class NativeBuild {
+    public static void main(String[] args) throws Exception {
+        if (args.length != 3) throw new IllegalArgumentException(
+                "Usage: java NativeBuild.java <application.jar> <dependency-directory> <module/main-class>");
+        Path application = Path.of(args[0]).toAbsolutePath();
+        if (!Files.isRegularFile(application)) throw new IllegalArgumentException("Build the application JAR first: " + application);
+        var jars = new ArrayList<Path>();
+        jars.add(application);
+        try (var files = Files.list(Path.of(args[1]))) {
+            jars.addAll(files.filter(p -> p.toString().endsWith(".jar")).sorted().map(Path::toAbsolutePath).toList());
+        }
+        var access = new TreeSet<String>();
+        for (Path path : jars) {
+            var descriptor = ModuleFinder.of(path).findAll().iterator().next().descriptor();
+            if (descriptor.isAutomatic()) throw new IllegalArgumentException("An explicit JPMS descriptor is required: " + path);
+            try (var jar = new JarFile(path.toFile())) {
+                var entries = jar.entries();
+                while (entries.hasMoreElements()) {
+                    var entry = entries.nextElement();
+                    if (!entry.getName().endsWith(".class")) continue;
+                    String bytes;
+                    try (var input = jar.getInputStream(entry)) {
+                        bytes = new String(input.readAllBytes(), StandardCharsets.ISO_8859_1);
+                    }
+                    if (!bytes.contains("com/oracle/svm/core/annotate/TargetClass")
+                            && !bytes.contains("org/graalvm/nativeimage/hosted/Feature")) continue;
+                    String name = entry.getName().replaceFirst("^META-INF/versions/[0-9]+/", "");
+                    int separator = name.lastIndexOf('/');
+                    if (separator < 0) continue;
+                    String pkg = name.substring(0, separator).replace('/', '.');
+                    access.add("--add-opens=" + descriptor.name() + "/" + pkg + "=org.graalvm.nativeimage.builder");
+                    access.add("--add-reads=" + descriptor.name() + "=org.graalvm.nativeimage");
+                }
+            }
+        }
+        var options = new ArrayList<>(List.of("--no-fallback",
+                "--features=com.guicedee.nativeimage.GuiceNativeFeature",
+                "--initialize-at-run-time=io.netty"));
+        options.addAll(access);
+        options.add("--module-path");
+        options.add(jars.stream().map(Path::toString).collect(java.util.stream.Collectors.joining(File.pathSeparator)));
+        options.add("-m");
+        options.add(args[2]);
+        options.add("-o");
+        options.add("target/native/application");
+        Files.createDirectories(Path.of("target/native"));
+        Files.write(Path.of("target/native-image.args"), options.stream()
+                .map(value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"").toList());
+        System.out.println("Prepared target/native-image.args. Run: native-image @target/native-image.args");
+    }
+}

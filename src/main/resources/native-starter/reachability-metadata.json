@@ -1,0 +1,12 @@
+{
+  "reflection": [
+    {
+      "type": {
+        "lambda": {
+          "declaringClass": "com.guicedee.guicedinjection.injections.ContextBinderGuice",
+          "interfaces": ["com.google.inject.Provider"]
+        }
+      }
+    }
+  ]
+}

@@ -12,6 +12,13 @@ public class GuicedEEProjectWizardData {
      * Data class to store module-specific settings.
      */
     public static class ModuleData {
+        private boolean firebaseAdmin;
+        private boolean commercetools;
+
+        public boolean isFirebaseAdmin() { return firebaseAdmin; }
+        public void setFirebaseAdmin(boolean value) { firebaseAdmin = value; }
+        public boolean isCommercetools() { return commercetools; }
+        public void setCommercetools(boolean value) { commercetools = value; }
         private String name;
         private String artifactId;
 
@@ -700,6 +707,10 @@ public class GuicedEEProjectWizardData {
     private boolean multiModuleProject;
     private boolean jmodPackaging;
     private boolean jlinkPackaging;
+    private boolean nativeImagePackaging;
+
+    public boolean isNativeImagePackaging() { return nativeImagePackaging; }
+    public void setNativeImagePackaging(boolean value) { nativeImagePackaging = value; }
     private boolean useModitect = true; // true = Moditect, false = maven-jlink-plugin
     private boolean useGradle = false; // true = Gradle, false = Maven
 
