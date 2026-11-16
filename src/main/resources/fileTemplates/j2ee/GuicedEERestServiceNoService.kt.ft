@@ -1,0 +1,26 @@
+package ${PACKAGE_NAME}
+
+import jakarta.ws.rs.*
+import jakarta.ws.rs.core.MediaType
+import jakarta.ws.rs.core.Response
+
+@Path("/${PATH}")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+open class ${NAME} {
+    @GET
+    open fun get(): Response =
+        Response.ok("Hello from ${NAME}").build()
+    @GET @Path("/{id}")
+    open fun getById(@PathParam("id") id: String): Response =
+        Response.ok(id).build()
+    @POST
+    open fun create(data: Any): Response =
+        Response.status(Response.Status.CREATED).entity("Created").build()
+    @PUT @Path("/{id}")
+    open fun update(@PathParam("id") id: String, data: Any): Response =
+        Response.ok(id).build()
+    @DELETE @Path("/{id}")
+    open fun delete(@PathParam("id") id: String): Response =
+        Response.ok(id).build()
+}

@@ -52,6 +52,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
     private JRadioButton myGradleRadioButton;
     private ButtonGroup myBuildToolGroup;
     private JPanel myBuildToolPanel;
+    private JComboBox<String> myLanguageChoice;
     private JPanel myOptionalPanel;
 
     // Module-specific UI components
@@ -174,6 +175,10 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         myBuildToolPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         myBuildToolPanel.add(myMavenRadioButton);
         myBuildToolPanel.add(myGradleRadioButton);
+        myLanguageChoice = new JComboBox<>(new String[]{"Java", "Kotlin"});
+        myLanguageChoice.setSelectedIndex(myWizardData.isKotlin() ? 1 : 0);
+        myBuildToolPanel.add(new JBLabel("Language:"));
+        myBuildToolPanel.add(myLanguageChoice);
 
         // Hide Maven-specific jlink tool options when Gradle is selected
         myGradleRadioButton.addActionListener(e -> {
@@ -358,6 +363,7 @@ public class GuicedEEProjectWizardStep extends ModuleWizardStep {
         // Application features are set at the module level in updateSelectedModule()
         myWizardData.setMultiModuleProject(myMultiModuleCheckBox.isSelected());
         myWizardData.setUseGradle(myGradleRadioButton.isSelected());
+        myWizardData.setKotlin(myLanguageChoice.getSelectedIndex() == 1);
         myWizardData.setJmodPackaging(false);
         myWizardData.setJlinkPackaging(myJlinkPackagingCheckBox.isSelected());
         myWizardData.setNativeImagePackaging(myNativeImageCheckBox.isSelected());

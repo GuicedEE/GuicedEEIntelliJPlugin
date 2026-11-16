@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.websocket.IWebSocketPreConfiguration
+
+open class ${NAME} : IWebSocketPreConfiguration<${NAME}> {
+    override fun enabled(): Boolean = true
+    override fun configure() {}
+}

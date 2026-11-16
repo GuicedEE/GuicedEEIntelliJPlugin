@@ -1,0 +1,12 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.graphql.services.IGraphQLSchemaProvider
+import graphql.schema.idl.RuntimeWiring
+import graphql.schema.idl.SchemaParser
+import graphql.schema.idl.TypeDefinitionRegistry
+
+open class ${NAME} : IGraphQLSchemaProvider<${NAME}> {
+    override fun getTypeDefinitions(): TypeDefinitionRegistry = SchemaParser().parse("type Query { hello: String }")
+    override fun configureWiring(builder: RuntimeWiring.Builder): RuntimeWiring.Builder =
+        builder.type("Query") { wiring -> wiring.dataFetcher("hello") { "Hello, GraphQL!" } }
+}

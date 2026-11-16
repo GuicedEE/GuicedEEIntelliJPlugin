@@ -1,0 +1,13 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.config.IFileContentsPatternScanner
+import io.github.classgraph.ResourceList
+import java.util.regex.Pattern
+
+open class ${NAME} : IFileContentsPatternScanner<${NAME}> {
+    override fun onMatch(): Map<Pattern, ResourceList.ByteArrayConsumer> = mapOf(
+        Pattern.compile("example.*") to ResourceList.ByteArrayConsumer { resource, bytes ->
+            // Handle matching resources here.
+        }
+    )
+}

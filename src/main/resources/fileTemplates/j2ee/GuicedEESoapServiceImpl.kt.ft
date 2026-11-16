@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import jakarta.jws.WebService
+
+@WebService(endpointInterface = "${PACKAGE_NAME}.${INTERFACE_NAME}", serviceName = "${INTERFACE_NAME}", portName = "${INTERFACE_NAME}Port", targetNamespace = "http://${PACKAGE_NAME}/${INTERFACE_NAME}")
+open class ${NAME} : ${INTERFACE_NAME} {
+    override fun hello(name: String): String = "Hello " + name
+}

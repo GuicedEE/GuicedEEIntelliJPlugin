@@ -6,7 +6,7 @@ Full **Google Guice** and **GuicedEE 2.6.0** framework support for IntelliJ IDEA
 
 ### GuicedEE Framework Support
 
-- **Project creation** — scaffold Java 25 projects with Maven or Gradle BOMs at 2.6.0 and `module-info.java`.
+- **Project creation** — scaffold Java or Kotlin projects targeting JDK 25 with Maven or Gradle BOMs at 2.6.0 and `module-info.java`.
 - **Cloud SDKs** — independently select Firebase Admin (Auth, Messaging, Firestore) and Commercetools (commerce API and GraphQL client). Maven and Gradle use the BOM-managed `com.guicedee.modules.services` wrappers and preserve `firebase.admin` and `commercetools.sdk.java.api` in JPMS descriptors.
 - **Native image starter** — an opt-in choice beside jlink, for single-module and multi-module Maven/Gradle projects. Generates explicit discovery, reflection metadata providers, dual JPMS/service-file registration, a modular argument-file helper and `NATIVE.md`. The entry point uses SPI discovery; add workload-specific resource/proxy/interceptor metadata and validate the selected integrations with GraalVM for JDK 25.
 - **Application startup** — basic and web entry points use `GuiceApplication.run(Runnable)`, register their JPMS module and enable scanning before injection. The runner awaits asynchronous startup and cleans up failed startup before an unsuccessful process exit.
@@ -146,3 +146,19 @@ API usages. All 20 tests passed.
 ## License
 
 See [LICENSE](LICENSE).
+
+## Kotlin project and file templates
+
+Choose **Kotlin** beside Maven/Gradle in the project wizard. Single-module and multi-module projects include
+Kotlin 2.4.21, `com.guicedee:kotlin:2.6.0`, Kotlin source/test roots, compiler configuration, and JUnit tests.
+The New GuicedEE File dialog offers Kotlin variants for all 56 class/interface/annotation templates.
+The nine package-annotation templates remain Java `package-info.java` files; JPMS descriptors and native
+registration/build helpers also remain Java. Kotlin and Java compile into the same named application module.
+Classes and service methods are open where Guice interception may be used.
+
+Generated Gradle tests assemble Java descriptors and Kotlin classes into a test module JAR before execution.
+Maven tests use separate application/test module descriptors. Keep Kotlin sources under `src/main/kotlin`,
+tests under `src/test/kotlin`, and descriptors under the corresponding Java roots.
+For suspending work, inject `GuicedCoroutines` and return `coroutines.future { ... }` from ordinary REST methods.
+
+Validation commands and coverage: [Kotlin generator validation](docs/kotlin-generation.md).

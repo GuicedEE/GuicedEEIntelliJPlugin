@@ -1,0 +1,11 @@
+package ${PACKAGE_NAME}.services
+
+import io.smallrye.mutiny.Uni
+
+open class ${SERVICE_NAME} {
+    open fun getSampleData(): Uni<String> = Uni.createFrom().item("Sample data from ${SERVICE_NAME}")
+    open fun getDataById(id: String): Uni<String> = Uni.createFrom().item("Data for ID: " + id)
+    open fun createData(data: Any): Uni<String> = Uni.createFrom().item("Created new data")
+    open fun updateData(id: String, data: Any): Uni<String> = Uni.createFrom().item("Updated data with ID: " + id)
+    open fun deleteData(id: String): Uni<String> = Uni.createFrom().item("Deleted data with ID: " + id)
+}

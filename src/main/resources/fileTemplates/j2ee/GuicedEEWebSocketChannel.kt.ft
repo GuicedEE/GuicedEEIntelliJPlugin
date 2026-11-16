@@ -1,0 +1,15 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.scopes.CallScope
+import com.guicedee.client.services.websocket.IGuicedWebSocket
+import io.vertx.core.Vertx
+import com.google.inject.Inject
+
+@CallScope
+open class ${NAME} @Inject constructor(private val vertx: Vertx) : IGuicedWebSocket {
+    override fun addToGroup(groupName: String) {}
+    override fun removeFromGroup(groupName: String) {}
+    override fun broadcastMessage(groupName: String, message: String) { vertx.eventBus().publish(groupName, message) }
+    override fun broadcastMessage(message: String) {}
+    override fun broadcastMessageSync(groupName: String, message: String) { vertx.eventBus().publish(groupName, message) }
+}

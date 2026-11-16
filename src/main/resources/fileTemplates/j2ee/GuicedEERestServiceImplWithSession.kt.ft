@@ -1,0 +1,13 @@
+package ${PACKAGE_NAME}.services
+
+import io.smallrye.mutiny.Uni
+import com.google.inject.Inject
+import org.hibernate.reactive.mutiny.Mutiny
+
+open class ${SERVICE_NAME} @Inject constructor(private val sessionFactory: Mutiny.SessionFactory) {
+    open fun getSampleData(): Uni<String> = sessionFactory.withTransaction { session -> Uni.createFrom().item("Sample data from ${SERVICE_NAME}") }
+    open fun getDataById(id: String): Uni<String> = sessionFactory.withTransaction { session -> Uni.createFrom().item("Data for ID: " + id) }
+    open fun createData(data: Any): Uni<String> = sessionFactory.withTransaction { session -> Uni.createFrom().item("Created new data") }
+    open fun updateData(id: String, data: Any): Uni<String> = sessionFactory.withTransaction { session -> Uni.createFrom().item("Updated data with ID: " + id) }
+    open fun deleteData(id: String): Uni<String> = sessionFactory.withTransaction { session -> Uni.createFrom().item("Deleted data with ID: " + id) }
+}

@@ -1,0 +1,7 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.lifecycle.IOnCallScopeExit
+
+open class ${NAME} : IOnCallScopeExit<${NAME}> {
+    override fun onScopeExit() {}
+}

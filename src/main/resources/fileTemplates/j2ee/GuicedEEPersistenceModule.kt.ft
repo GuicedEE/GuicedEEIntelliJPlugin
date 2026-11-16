@@ -1,0 +1,13 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.persistence.DatabaseModule
+import com.guicedee.persistence.ConnectionBaseInfo
+import com.guicedee.persistence.ConnectionBaseInfoFactory
+import org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor
+import java.util.Properties
+
+open class ${NAME} : DatabaseModule<${NAME}>() {
+    override fun getPersistenceUnitName(): String = "${PERSISTENCE_UNIT}"
+    override fun getConnectionBaseInfo(unit: PersistenceUnitDescriptor, properties: Properties): ConnectionBaseInfo =
+        ConnectionBaseInfoFactory.createConnectionBaseInfo("${DATABASE_TYPE}")
+}

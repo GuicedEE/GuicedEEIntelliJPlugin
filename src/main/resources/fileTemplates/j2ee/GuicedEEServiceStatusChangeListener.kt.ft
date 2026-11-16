@@ -1,0 +1,12 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.service.registry.IServiceStatusChangeListener
+import com.guicedee.service.registry.ServiceStatus
+import com.guicedee.service.registry.ServiceEntry
+import org.apache.logging.log4j.LogManager
+
+open class ${NAME} : IServiceStatusChangeListener<${NAME}> {
+    override fun onStatusChange(serviceName: String, previousStatus: ServiceStatus, newStatus: ServiceStatus, entry: ServiceEntry) {
+        LogManager.getLogger(javaClass).info("Service '{}' status changed: {} -> {}", serviceName, previousStatus, newStatus)
+    }
+}

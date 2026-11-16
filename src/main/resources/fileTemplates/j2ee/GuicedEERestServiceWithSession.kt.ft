@@ -1,0 +1,30 @@
+package ${PACKAGE_NAME}
+
+import jakarta.ws.rs.*
+import jakarta.ws.rs.core.MediaType
+import jakarta.ws.rs.core.Response
+import com.google.inject.Inject
+import io.smallrye.mutiny.Uni
+import ${PACKAGE_NAME}.services.${NAME}Service
+import org.hibernate.reactive.mutiny.Mutiny
+
+@Path("/${PATH}")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+open class ${NAME} @Inject constructor(private val service: ${NAME}Service, private val sessionFactory: Mutiny.SessionFactory) {
+    @GET
+    open fun get(): Uni<Response> =
+        sessionFactory.withTransaction { session -> service.getSampleData(session).map { result -> Response.ok(result).build() } }
+    @GET @Path("/{id}")
+    open fun getById(@PathParam("id") id: String): Uni<Response> =
+        sessionFactory.withTransaction { session -> service.getDataById(session, id).map { result -> Response.ok(result).build() } }
+    @POST
+    open fun create(data: Any): Uni<Response> =
+        sessionFactory.withTransaction { session -> service.createData(session, data).map { result -> Response.ok(result).build() } }
+    @PUT @Path("/{id}")
+    open fun update(@PathParam("id") id: String, data: Any): Uni<Response> =
+        sessionFactory.withTransaction { session -> service.updateData(session, id, data).map { result -> Response.ok(result).build() } }
+    @DELETE @Path("/{id}")
+    open fun delete(@PathParam("id") id: String): Uni<Response> =
+        sessionFactory.withTransaction { session -> service.deleteData(session, id).map { result -> Response.ok(result).build() } }
+}

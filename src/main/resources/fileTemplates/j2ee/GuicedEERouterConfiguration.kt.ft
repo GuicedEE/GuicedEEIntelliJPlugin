@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.web.spi.VertxRouterConfigurator
+import io.vertx.ext.web.Router
+
+open class ${NAME} : VertxRouterConfigurator<${NAME}> {
+    override fun builder(router: Router): Router = router
+}

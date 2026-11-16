@@ -1,0 +1,27 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.proxy.ProxyConnectionInfo
+import com.guicedee.vertx.proxy.ProxyModule
+
+open class ${NAME} : ProxyModule<${NAME}>() {
+    override fun getProxyConnectionInfo(): ProxyConnectionInfo {
+        val proxyHost = System.getProperty("PROXY_HOST",
+                System.getenv().getOrDefault("PROXY_HOST", "0.0.0.0"))
+        val proxyPort = Integer.parseInt(System.getProperty("PROXY_PORT",
+                System.getenv().getOrDefault("PROXY_PORT", "${PROXY_PORT}")))
+        val originHost = System.getProperty("PROXY_ORIGIN_HOST",
+                System.getenv().getOrDefault("PROXY_ORIGIN_HOST", "${ORIGIN_HOST}"))
+        val originPort = Integer.parseInt(System.getProperty("PROXY_ORIGIN_PORT",
+                System.getenv().getOrDefault("PROXY_ORIGIN_PORT", "${ORIGIN_PORT}")))
+
+        return ProxyConnectionInfo()
+                .setName("${PROXY_NAME}")
+                .setProxyHost(proxyHost)
+                .setProxyPort(proxyPort)
+                .setOriginHost(originHost)
+                .setOriginPort(originPort)
+                .setWebSocketEnabled(true)
+                .setCachingEnabled(false)
+                .setDefaultConnection(true)
+        }
+}

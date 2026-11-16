@@ -1,0 +1,15 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.rest.client.annotations.Endpoint
+import com.guicedee.rest.client.annotations.EndpointOptions
+import com.guicedee.rest.client.RestClient
+import io.smallrye.mutiny.Uni
+import jakarta.inject.Named
+
+open class ${NAME} {
+    @field:Endpoint(url = "/api/example", method = "GET", options = EndpointOptions(readTimeout = 5000))
+    @field:Named("get-example")
+    lateinit var exampleClient: RestClient<Void, String>
+    open fun fetchData(): Uni<String> = exampleClient.send()
+    open fun fetchById(id: String): Uni<String> = exampleClient.pathParam("id", id).send()
+}

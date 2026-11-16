@@ -1,0 +1,10 @@
+package ${PACKAGE_NAME}
+
+import org.eclipse.microprofile.health.HealthCheck
+import org.eclipse.microprofile.health.HealthCheckResponse
+import org.eclipse.microprofile.health.Startup
+
+@Startup
+open class ${NAME} : HealthCheck {
+    override fun call(): HealthCheckResponse = HealthCheckResponse.up("${NAME}")
+}

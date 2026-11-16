@@ -1,0 +1,34 @@
+kotlin {
+    jvmToolchain(25)
+    compilerOptions { javaParameters.set(true) }
+}
+
+// javac owns module-info.java; include Kotlin output in the application module.
+tasks.compileJava {
+    dependsOn(tasks.compileKotlin)
+    options.compilerArgs.addAll(listOf("--patch-module", "@MODULE@=${sourceSets.main.get().output.asPath}"))
+}
+
+tasks.test { useJUnitPlatform() }
+
+sourceSets.test {
+    compileClasspath = configurations.testCompileClasspath.get() + files(tasks.jar)
+    runtimeClasspath = output + compileClasspath + configurations.testRuntimeClasspath.get()
+}
+tasks.compileTestKotlin {
+    dependsOn(tasks.jar)
+    libraries.setFrom(sourceSets.test.get().compileClasspath)
+}
+tasks.compileTestJava {
+    dependsOn(tasks.compileTestKotlin)
+    options.compilerArgs.addAll(listOf("--patch-module", "@MODULE@.test=${sourceSets.test.get().output.asPath}"))
+}
+
+val testModuleJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("tests")
+    from(sourceSets.test.get().output)
+}
+tasks.test {
+    dependsOn(testModuleJar)
+    classpath = files(testModuleJar) + files(tasks.jar) + configurations.testRuntimeClasspath.get()
+}

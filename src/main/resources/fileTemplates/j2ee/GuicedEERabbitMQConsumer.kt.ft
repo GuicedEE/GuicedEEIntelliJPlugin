@@ -1,0 +1,12 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.rabbit.QueueConsumer
+import com.guicedee.rabbit.QueueDefinition
+import io.vertx.rabbitmq.RabbitMQMessage
+
+@QueueDefinition(value = "${QUEUE_NAME}")
+open class ${NAME} : QueueConsumer {
+    override fun consume(message: RabbitMQMessage) {
+        println("Consumed message: " + message.body())
+    }
+}

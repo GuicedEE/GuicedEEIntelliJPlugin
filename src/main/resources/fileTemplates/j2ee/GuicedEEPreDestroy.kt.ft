@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.lifecycle.IGuicePreDestroy
+
+open class ${NAME} : IGuicePreDestroy<${NAME}> {
+    override fun onDestroy() {}
+    override fun shutdownSortOrder(): Int = 100
+}

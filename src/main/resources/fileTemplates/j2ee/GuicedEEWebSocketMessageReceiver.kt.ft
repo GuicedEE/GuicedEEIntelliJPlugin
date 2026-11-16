@@ -1,0 +1,10 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.websocket.IWebSocketMessageReceiver
+import com.guicedee.client.services.websocket.WebSocketMessageReceiver
+import io.smallrye.mutiny.Uni
+
+open class ${NAME} : IWebSocketMessageReceiver<Void, ${NAME}> {
+    override fun receiveMessage(message: WebSocketMessageReceiver<*>): Uni<Void> = Uni.createFrom().voidItem()
+    override fun messageNames(): Set<String> = setOf("ActionType")
+}

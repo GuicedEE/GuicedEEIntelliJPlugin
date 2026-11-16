@@ -1,0 +1,24 @@
+package ${BASE_PACKAGE}.resources
+
+import ${BASE_PACKAGE}.db.entity.YourEntity
+import ${BASE_PACKAGE}.resources.services.RestResourceService
+import com.google.inject.Inject
+import io.smallrye.mutiny.Uni
+import jakarta.ws.rs.*
+import jakarta.ws.rs.core.MediaType
+
+@Path("/resources")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+open class RestResource @Inject constructor(private val service: RestResourceService) {
+    @GET
+    open fun get(): Uni<Int> = service.getSampleData()
+    @GET @Path("/{id}")
+    open fun getById(@PathParam("id") id: String): Uni<YourEntity> = service.getDataById(id)
+    @POST
+    open fun create(entity: YourEntity): Uni<YourEntity> = service.createData(entity)
+    @PUT @Path("/{id}")
+    open fun update(@PathParam("id") id: String, entity: YourEntity): Uni<YourEntity> = service.updateData(id, entity)
+    @DELETE @Path("/{id}")
+    open fun delete(@PathParam("id") id: String): Uni<Void> = service.deleteData(id)
+}

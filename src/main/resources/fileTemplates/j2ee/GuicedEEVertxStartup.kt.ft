@@ -1,0 +1,10 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.spi.VerticleStartup
+import io.vertx.core.Promise
+import io.vertx.core.Vertx
+import io.vertx.core.AbstractVerticle
+
+open class ${NAME} : VerticleStartup<${NAME}> {
+    override fun start(startPromise: Promise<Void>, vertx: Vertx, verticle: AbstractVerticle, assignedPackage: String) { startPromise.complete() }
+}

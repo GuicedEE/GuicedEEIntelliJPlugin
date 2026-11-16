@@ -185,11 +185,22 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                         {
                             contentEntry.addSourceFolder(javaDir, false);
                         }
+                        VirtualFile kotlinDir = mainDir.findChild("kotlin");
+                        if (kotlinDir != null) contentEntry.addSourceFolder(kotlinDir, false);
 
                         VirtualFile resourcesDir = mainDir.findChild("resources");
                         if (resourcesDir != null)
                         {
                             contentEntry.addSourceFolder(resourcesDir, true);
+                        }
+                    }
+                    if (myWizardData.isKotlin()) {
+                        VirtualFile testDir = srcDir.findChild("test");
+                        if (testDir != null) {
+                            for (String language : new String[]{"java", "kotlin"}) {
+                                VirtualFile testSource = testDir.findChild(language);
+                                if (testSource != null) contentEntry.addSourceFolder(testSource, true);
+                            }
                         }
                     }
                 }
@@ -313,6 +324,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             NativeProjectSupport.write(baseDir.toPath(), myWizardData.getGroupId(), moduleData.getArtifactId(),
                     myWizardData.getVersion(), moduleData.isWebReactive() ? "WebApplication" : "Application");
         }
+        if (myWizardData.isKotlin()) KotlinProjectSupport.write(baseDir.toPath(), myWizardData, moduleData);
     }
 
     private void createMultiModuleProject(File baseDir) throws IOException
@@ -325,6 +337,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             createGradleWrapperProperties(baseDir);
         } else {
             createParentPom(baseDir);
+            if (myWizardData.isKotlin()) KotlinProjectSupport.writeMavenWrapper(baseDir.toPath());
         }
 
         // Make sure we have at least one module
@@ -407,6 +420,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
                 NativeProjectSupport.write(moduleDir.toPath(), myWizardData.getGroupId(), moduleData.getArtifactId(),
                         myWizardData.getVersion(), moduleData.isWebReactive() ? "WebApplication" : "Application");
             }
+            if (myWizardData.isKotlin()) KotlinProjectSupport.write(moduleDir.toPath(), myWizardData, moduleData);
         }
 
         // Create JLink module if needed
@@ -487,7 +501,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isDatabasePostgreSQL())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>org.postgresql</groupId>\n");
+                dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
                 dependencies.append("            <artifactId>postgresql</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
@@ -2753,7 +2767,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             if (moduleData.isDatabasePostgreSQL())
             {
                 dependencies.append("        <dependency>\n");
-                dependencies.append("            <groupId>org.postgresql</groupId>\n");
+                dependencies.append("            <groupId>com.guicedee.modules.services</groupId>\n");
                 dependencies.append("            <artifactId>postgresql</artifactId>\n");
                 dependencies.append("        </dependency>\n");
             }
@@ -3577,7 +3591,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
             } else {
                 deps.append("    implementation(\"com.guicedee:persistence\")\n");
             }
-            if (moduleData.isDatabasePostgreSQL()) deps.append("    implementation(\"org.postgresql:postgresql\")\n");
+            if (moduleData.isDatabasePostgreSQL()) deps.append("    implementation(\"com.guicedee.modules.services:postgresql\")\n");
             if (moduleData.isDatabaseMySQL()) deps.append("    implementation(\"mysql:mysql-connector-java\")\n");
             if (moduleData.isDatabaseOracle()) deps.append("    implementation(\"com.oracle.database.jdbc:ojdbc8\")\n");
             if (moduleData.isDatabaseDB2()) deps.append("    implementation(\"com.ibm.db2:jcc\")\n");
@@ -3681,7 +3695,7 @@ public class GuicedEEProjectTemplateBuilder extends ModuleBuilder
 
     private void createGradleRootBuildFile(File baseDir) throws IOException {
         String buildGradle = "plugins {\n" +
-                "    java apply false\n" +
+                "    java\n" +
                 "}\n\n" +
                 "group = \"" + myWizardData.getGroupId() + "\"\n" +
                 "version = \"" + myWizardData.getVersion() + "\"\n\n" +

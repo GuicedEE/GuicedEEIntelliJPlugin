@@ -1,0 +1,14 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.ibmmq.IBMMQConsumer
+import com.guicedee.ibmmq.IBMMQQueueDefinition
+import com.guicedee.ibmmq.IBMMQQueueOptions
+import jakarta.jms.Message
+import jakarta.jms.TextMessage
+
+@IBMMQQueueDefinition(value = "${QUEUE_NAME}", options = IBMMQQueueOptions(worker = true))
+open class ${NAME} : IBMMQConsumer {
+    override fun consume(message: Message) {
+        if (message is TextMessage) println(message.text)
+    }
+}

@@ -1,0 +1,13 @@
+package ${PACKAGE_NAME}
+
+import jakarta.jws.WebService
+import jakarta.jws.WebMethod
+import jakarta.jws.WebResult
+import jakarta.jws.WebParam
+
+@WebService(targetNamespace = "http://${PACKAGE_NAME}/${NAME}", name = "${NAME}")
+interface ${NAME} {
+    @WebMethod(operationName = "hello")
+    @WebResult(name = "greeting")
+    fun hello(@WebParam(name = "name") name: String): String
+}

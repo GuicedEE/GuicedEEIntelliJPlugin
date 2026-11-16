@@ -21,6 +21,11 @@ public final class GuiceTemplatesFactory implements FileTemplateGroupDescriptorF
     group.addTemplate(new FileTemplateDescriptor("GuiceNewScopeAnnotation.java", icon));
     group.addTemplate(new FileTemplateDescriptor("GuiceNewMethodInterceptor.java", icon));
 
+    group.addTemplate(new FileTemplateDescriptor("GuiceNewBindingAnnotation.kt", icon));
+    group.addTemplate(new FileTemplateDescriptor("GuiceNewMethodInterceptor.kt", icon));
+    group.addTemplate(new FileTemplateDescriptor("GuiceNewModule.kt", icon));
+    group.addTemplate(new FileTemplateDescriptor("GuiceNewScopeAnnotation.kt", icon));
+
     return group;
   }
 }

@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.guicedhazelcast.services.IGuicedHazelcastServerConfig
+import com.hazelcast.config.Config
+
+open class ${NAME} : IGuicedHazelcastServerConfig<${NAME}> {
+    override fun buildConfig(serverConfig: Config): Config = serverConfig
+}

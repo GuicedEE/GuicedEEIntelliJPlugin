@@ -1,0 +1,11 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.mailclient.MailService
+import com.google.inject.Inject
+import com.google.inject.name.Named
+import io.vertx.core.Future
+import io.vertx.ext.mail.MailResult
+
+open class ${NAME} @Inject constructor(@Named("default") private val mail: MailService) {
+    open fun sendEmail(to: String, subject: String, body: String): Future<MailResult> = mail.sendText(to, subject, body)
+}

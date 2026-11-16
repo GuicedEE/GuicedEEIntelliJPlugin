@@ -1,0 +1,13 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.runtime.autoconfigure.RuntimeEnvironment
+import com.guicedee.runtime.autoconfigure.RuntimeEnvironmentProvider
+import com.guicedee.runtime.autoconfigure.providers.AbstractEnvironmentProvider
+
+open class ${NAME} : AbstractEnvironmentProvider(), RuntimeEnvironmentProvider {
+    override fun detected(): Boolean = has("MY_PLATFORM_INDICATOR_ENV_VAR")
+    override fun providerId(): String = "my-platform"
+    override fun runtimeEnvironment(): RuntimeEnvironment = RuntimeEnvironment(
+        providerId(), env("SERVICE_NAME"), env("SERVICE_ID"), env("HOSTNAME"), envInt("PORT", 8080),
+        env("REVISION"), env("REPLICA_NAME"), env("REGION"), "", emptyMap())
+}

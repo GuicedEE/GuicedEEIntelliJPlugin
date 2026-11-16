@@ -1,0 +1,26 @@
+package ${BASE_PACKAGE}.resources.services
+
+import ${BASE_PACKAGE}.db.entity.YourEntity
+import com.google.inject.Inject
+import io.smallrye.mutiny.Uni
+import org.hibernate.reactive.mutiny.Mutiny
+
+open class RestResourceService @Inject constructor(private val sessionFactory: Mutiny.SessionFactory) {
+    open fun getSampleData(): Uni<Int> = sessionFactory.withTransaction { session ->
+        session.createNativeQuery("SELECT 1", Int::class.javaObjectType).singleResult
+    }
+    open fun getDataById(id: String): Uni<YourEntity> = sessionFactory.withTransaction { session ->
+        session.find(YourEntity::class.java, id)
+    }
+    open fun createData(data: YourEntity): Uni<YourEntity> = sessionFactory.withTransaction { session ->
+        session.persist(data).replaceWith(data)
+    }
+    open fun updateData(id: String, data: YourEntity): Uni<YourEntity> = sessionFactory.withTransaction { session ->
+        session.merge(data)
+    }
+    open fun deleteData(id: String): Uni<Void> = sessionFactory.withTransaction { session ->
+        session.find(YourEntity::class.java, id).chain { entity ->
+            if (entity != null) session.remove(entity) else Uni.createFrom().voidItem()
+        }
+    }
+}

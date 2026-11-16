@@ -1,0 +1,11 @@
+package ${PACKAGE_NAME}
+
+import com.google.inject.AbstractModule
+import com.guicedee.client.services.lifecycle.IGuiceModule
+
+open class ${NAME} : AbstractModule(), IGuiceModule<${NAME}> {
+    override fun configure() {
+        // Bind your services here.
+    }
+    override fun sortOrder(): Int = 100
+}

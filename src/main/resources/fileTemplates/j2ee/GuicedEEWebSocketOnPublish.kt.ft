@@ -1,0 +1,7 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.websocket.GuicedWebSocketOnPublish
+
+open class ${NAME} : GuicedWebSocketOnPublish<${NAME}> {
+    override fun publish(groupName: String, message: String): Boolean = false
+}

@@ -1,0 +1,9 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.lifecycle.IGuiceConfigurator
+import com.guicedee.client.services.IGuiceConfig
+
+open class ${NAME} : IGuiceConfigurator<${NAME}> {
+    override fun configure(config: IGuiceConfig<*>): IGuiceConfig<*> = config
+    override fun sortOrder(): Int = 100
+}

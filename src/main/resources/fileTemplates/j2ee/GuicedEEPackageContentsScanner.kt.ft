@@ -1,0 +1,7 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.config.IPackageContentsScanner
+
+open class ${NAME} : IPackageContentsScanner<${NAME}> {
+    override fun searchFor(): Set<String> = setOf("${MODULE_NAME}")
+}

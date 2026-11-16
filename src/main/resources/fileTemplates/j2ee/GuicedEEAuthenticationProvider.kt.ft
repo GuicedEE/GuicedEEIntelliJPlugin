@@ -1,0 +1,9 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.auth.IGuicedAuthenticationProvider
+import io.vertx.ext.auth.authentication.AuthenticationProvider
+
+open class ${NAME} : IGuicedAuthenticationProvider {
+    override fun getAuthenticationProvider(): AuthenticationProvider =
+        throw UnsupportedOperationException("Implement your authentication provider")
+}

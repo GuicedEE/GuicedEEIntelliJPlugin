@@ -537,7 +537,10 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         @Override
         protected void buildDialog(Project project, PsiDirectory directory, CreateFileFromTemplateDialog.Builder builder) {
             builder.setTitle("Create New " + getActionName())
-                   .addKind(getActionName(), GUICEDEE_ICON, templateName);
+                   .addKind(getActionName() + " (Java)", GUICEDEE_ICON, templateName);
+            if (getClass().getClassLoader().getResource("fileTemplates/j2ee/" + templateName.replace(".java", ".kt") + ".ft") != null) {
+                builder.addKind(getActionName() + " (Kotlin)", GUICEDEE_ICON, templateName.replace(".java", ".kt"));
+            }
 
             // For REST Service, show options dialog before the name dialog
             if (templateName.equals(GuicedEEFileTemplateProvider.REST_SERVICE_TEMPLATE)) {
@@ -564,6 +567,8 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
 
         @Override
         protected PsiFile createFile(String name, String templateName, PsiDirectory dir) {
+            final boolean kotlin = templateName.endsWith(".kt");
+            templateName = templateName.replace(".kt", ".java");
             try {
                 // Get the package name from the directory before creating the file
                 String packageName = getPackageNameFromDirectory(dir.getProject(), dir);
@@ -741,7 +746,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 // Create the file with the default properties
                 PsiFile file;
                 try {
-                    file = super.createFile(name, actualRestTemplateName, dir);
+                    file = super.createFile(name, kotlin ? actualRestTemplateName.replace(".java", ".kt") : actualRestTemplateName, dir);
                     if (file == null) {
                         Messages.showErrorDialog(dir.getProject(),
                             "Failed to create file from template: " + actualRestTemplateName,
@@ -780,7 +785,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                         }
 
                         // Create the service implementation file
-                        FileTemplate template = fileTemplateManager.getJ2eeTemplate(serviceTemplateName);
+                        FileTemplate template = fileTemplateManager.getJ2eeTemplate(kotlin ? serviceTemplateName.replace(".java", ".kt") : serviceTemplateName);
                         if (template == null) {
                             Messages.showErrorDialog(dir.getProject(),
                                 "REST service implementation template not found: " + serviceTemplateName,
@@ -818,7 +823,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
                 if (templateName.equals(GuicedEEFileTemplateProvider.SOAP_SERVICE_INTERFACE_TEMPLATE)) {
                     try {
                         String implName = name + "Impl";
-                        FileTemplate implTemplate = fileTemplateManager.getJ2eeTemplate(GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE);
+                        FileTemplate implTemplate = fileTemplateManager.getJ2eeTemplate(kotlin ? GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE.replace(".java", ".kt") : GuicedEEFileTemplateProvider.SOAP_SERVICE_IMPL_TEMPLATE);
                         if (implTemplate != null) {
                             Properties implProps = new Properties(defaultProperties);
                             implProps.setProperty("INTERFACE_NAME", name);
@@ -994,7 +999,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
 
             // Walk up to find the "java" directory that is under src/main/
             while (current != null) {
-                if ("java".equals(current.getName())) {
+                if ("java".equals(current.getName()) || "kotlin".equals(current.getName())) {
                     VirtualFile mainDir = current.getParent();
                     if (mainDir != null && "main".equals(mainDir.getName())) {
                         // Found src/main/java — use src/main/resources
@@ -1140,7 +1145,7 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
         private VirtualFile findSourceRoot(VirtualFile file) {
             VirtualFile current = file;
             while (current != null) {
-                if ("java".equals(current.getName())) {
+                if ("java".equals(current.getName()) || "kotlin".equals(current.getName())) {
                     VirtualFile parent = current.getParent();
                     if (parent != null && ("main".equals(parent.getName()) || "test".equals(parent.getName()))) {
                         return current;
@@ -1502,6 +1507,12 @@ public class GuicedEENewFileActionGroup extends DefaultActionGroup implements Du
             PsiPackage psiPackage = JavaDirectoryService.getInstance().getPackage(directory);
             if (psiPackage != null && !psiPackage.getQualifiedName().isEmpty()) {
                 return psiPackage.getQualifiedName();
+            }
+
+            VirtualFile sourceRoot = findSourceRoot(directory.getVirtualFile());
+            if (sourceRoot != null) {
+                String relative = com.intellij.openapi.vfs.VfsUtilCore.getRelativePath(directory.getVirtualFile(), sourceRoot, '.');
+                if (relative != null && !relative.isEmpty()) return relative;
             }
 
             // If no package found, try to find a base package name from the project

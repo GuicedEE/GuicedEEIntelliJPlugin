@@ -1,0 +1,10 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.graphql.services.IGraphQLDataLoaderProvider
+import org.dataloader.DataLoaderRegistry
+
+open class ${NAME} : IGraphQLDataLoaderProvider<${NAME}> {
+    override fun configureDataLoaders(registry: DataLoaderRegistry) {
+        // Register batch loaders here.
+    }
+}

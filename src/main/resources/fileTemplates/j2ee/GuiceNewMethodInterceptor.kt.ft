@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import org.aopalliance.intercept.MethodInterceptor
+import org.aopalliance.intercept.MethodInvocation
+
+open class ${NAME} : MethodInterceptor {
+    override fun invoke(methodInvocation: MethodInvocation): Any? = methodInvocation.proceed()
+}

@@ -1,0 +1,9 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.rabbit.QueuePublisher
+import jakarta.inject.Inject
+import jakarta.inject.Named
+
+open class ${NAME} @Inject constructor(@Named("${QUEUE_NAME}") private val publisher: QueuePublisher) {
+    open fun publish(message: String) { publisher.publish(message) }
+}

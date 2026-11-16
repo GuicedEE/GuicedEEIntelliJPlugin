@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.lifecycle.IGuicePostStartup
+import io.smallrye.mutiny.Uni
+
+open class ${NAME} : IGuicePostStartup<${NAME}> {
+    override fun postLoad(): List<Uni<Boolean>> = listOf(Uni.createFrom().item(true))
+}

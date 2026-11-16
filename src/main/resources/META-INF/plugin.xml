@@ -116,6 +116,7 @@
     <h3>2.6.0</h3>
       <ul>
         <li>Align generated Maven and Gradle projects with GuicedEE and test BOMs 2.6.0.</li>
+        <li>Java/Kotlin project selection, 56 Kotlin file templates, mixed-source JPMS Maven/Gradle builds and generated Kotlin tests.</li>
         <li>GuicedEE 2.6.0 adds modular Firebase Admin and Commercetools SDKs with shared modular support libraries.</li>
         <li>Select Firebase Admin and Commercetools independently in the project wizard, with matching Maven/Gradle dependencies and JPMS module names.</li>
         <li>Opt-in native-image starter beside jlink: SPI discovery, reflection registration and a modular GraalVM build guide.</li>

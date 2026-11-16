@@ -1,0 +1,21 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.grpc.GrpcConnectionInfo
+import com.guicedee.vertx.grpc.GrpcModule
+
+open class ${NAME} : GrpcModule<${NAME}>() {
+    override fun getGrpcConnectionInfo(): GrpcConnectionInfo {
+        val host = System.getProperty("GRPC_HOST",
+                System.getenv().getOrDefault("GRPC_HOST", "${GRPC_HOST}"))
+        val port = Integer.parseInt(System.getProperty("GRPC_PORT",
+                System.getenv().getOrDefault("GRPC_PORT", "${GRPC_PORT}")))
+
+        return GrpcConnectionInfo()
+                .setName("${GRPC_NAME}")
+                .setHost(host)
+                .setPort(port)
+                .setGrpcWebEnabled(true)
+                .setTranscodingEnabled(true)
+                .setDefaultConnection(true)
+        }
+}

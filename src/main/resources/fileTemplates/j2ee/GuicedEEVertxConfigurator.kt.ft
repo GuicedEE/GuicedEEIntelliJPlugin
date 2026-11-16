@@ -1,0 +1,10 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.vertx.spi.VertxConfigurator
+import io.vertx.core.VertxOptions
+import io.vertx.core.VertxBuilder
+
+open class ${NAME} : VertxConfigurator {
+    override fun options(options: VertxOptions): VertxOptions = options
+    override fun builder(builder: VertxBuilder): VertxBuilder = builder
+}

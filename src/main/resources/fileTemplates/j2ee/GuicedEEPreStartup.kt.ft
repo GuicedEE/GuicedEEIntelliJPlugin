@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.lifecycle.IGuicePreStartup
+import io.vertx.core.Future
+
+open class ${NAME} : IGuicePreStartup<${NAME}> {
+    override fun onStartup(): List<Future<Boolean>> = listOf(Future.succeededFuture(true))
+}

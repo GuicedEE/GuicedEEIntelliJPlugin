@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.Log4JConfigurator
+import org.apache.logging.log4j.core.config.Configuration
+
+open class ${NAME} : Log4JConfigurator<${NAME}> {
+    override fun configure(config: Configuration) {}
+}

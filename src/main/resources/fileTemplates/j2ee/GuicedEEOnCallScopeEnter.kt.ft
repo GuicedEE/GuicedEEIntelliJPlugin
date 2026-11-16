@@ -1,0 +1,8 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.lifecycle.IOnCallScopeEnter
+import com.google.inject.Scope
+
+open class ${NAME} : IOnCallScopeEnter<${NAME}> {
+    override fun onScopeEnter(scope: Scope) {}
+}

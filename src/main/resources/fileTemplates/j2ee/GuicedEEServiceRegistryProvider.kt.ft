@@ -1,0 +1,10 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.service.registry.IServiceRegistryProvider
+import com.guicedee.service.registry.ServiceEntry
+
+open class ${NAME} : IServiceRegistryProvider<${NAME}> {
+    override fun discover(): List<ServiceEntry> = emptyList()
+    override fun providerId(): String = "${NAME}"
+    override fun sortOrder(): Int = 0
+}

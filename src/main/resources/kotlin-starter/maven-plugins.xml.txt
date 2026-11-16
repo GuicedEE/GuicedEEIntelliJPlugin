@@ -1,0 +1,18 @@
+<plugin>
+    <groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-maven-plugin</artifactId><version>2.4.21</version>
+    <configuration><jvmTarget>25</jvmTarget><javaParameters>true</javaParameters></configuration>
+    <executions>
+        <execution><id>kotlin-compile</id><phase>process-sources</phase><goals><goal>compile</goal></goals>
+            <configuration><sourceDirs><sourceDir>${project.basedir}/src/main/kotlin</sourceDir><sourceDir>${project.basedir}/src/main/java</sourceDir></sourceDirs></configuration>
+        </execution>
+        <execution><id>kotlin-test-compile</id><phase>process-test-sources</phase><goals><goal>test-compile</goal></goals>
+            <configuration><sourceDirs><sourceDir>${project.basedir}/src/test/kotlin</sourceDir></sourceDirs></configuration>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+    <groupId>org.codehaus.mojo</groupId><artifactId>build-helper-maven-plugin</artifactId><version>3.8.0</version>
+    <executions><execution><id>kotlin-source</id><phase>generate-sources</phase><goals><goal>add-source</goal></goals>
+        <configuration><sources><source>${project.basedir}/src/main/kotlin</source></sources></configuration>
+    </execution></executions>
+</plugin>

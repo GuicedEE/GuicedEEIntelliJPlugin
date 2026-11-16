@@ -1,0 +1,7 @@
+package ${PACKAGE_NAME}
+
+import com.guicedee.client.services.config.IGuiceScanModuleInclusions
+
+open class ${NAME} : IGuiceScanModuleInclusions<${NAME}> {
+    override fun includeModules(): Set<String> = setOf("${MODULE_NAME}")
+}

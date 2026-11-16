@@ -712,6 +712,11 @@ public class GuicedEEProjectWizardData {
     public boolean isNativeImagePackaging() { return nativeImagePackaging; }
     public void setNativeImagePackaging(boolean value) { nativeImagePackaging = value; }
     private boolean useModitect = true; // true = Moditect, false = maven-jlink-plugin
+    private boolean kotlin = false;
+
+    public boolean isKotlin() { return kotlin; }
+    public void setKotlin(boolean kotlin) { this.kotlin = kotlin; }
+
     private boolean useGradle = false; // true = Gradle, false = Maven
 
     // List of modules for multi-module projects
