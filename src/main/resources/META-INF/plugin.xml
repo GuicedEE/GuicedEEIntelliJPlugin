@@ -363,6 +363,9 @@
 
     <!-- Guice Implicit Usage Provider -->
     <implicitUsageProvider implementation="com.guicedee.intellij.guice.GuiceImplicitUsageProvider"/>
+    <!-- Keep the "N usages" hint on injected fields while suppressing their unused warning -->
+    <lang.inspectionSuppressor language="JAVA"
+                               implementationClass="com.guicedee.intellij.guice.GuiceUnusedDeclarationSuppressor"/>
   </extensions>
 
   <actions>

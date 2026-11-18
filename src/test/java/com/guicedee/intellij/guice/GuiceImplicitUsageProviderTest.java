@@ -83,13 +83,19 @@ public class GuiceImplicitUsageProviderTest extends LightJavaCodeInsightFixtureT
     assertFalse(provider.isImplicitRead(aClass));
   }
 
-  public void testInjectedFieldIsClaimed() {
+  /**
+   * An injected field must NOT be reported as implicitly used. The platform treats implicit
+   * usage as an entry point and then skips the "N usages" hint entirely, including "0 usages",
+   * which makes it impossible to tell whether the field is referenced. The unused warning is
+   * suppressed separately by GuiceUnusedDeclarationSuppressor.
+   */
+  public void testInjectedFieldKeepsUsagesHint() {
     PsiJavaFile file = (PsiJavaFile)myFixture.configureByText("Consumer.java", """
       import com.google.inject.Inject;
       class Consumer { @Inject private Object service; }
       """);
     PsiField field = file.getClasses()[0].getFields()[0];
-    assertTrue(provider.isImplicitUsage(field));
+    assertFalse(provider.isImplicitUsage(field));
     assertTrue(provider.isImplicitRead(field));
     assertTrue(provider.isImplicitWrite(field));
   }

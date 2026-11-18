@@ -57,6 +57,7 @@ intellijPlatform {
         <li>Select Firebase Admin and Commercetools independently in the project wizard, with matching Maven/Gradle dependencies and JPMS module names.</li>
         <li>Opt-in native-image starter beside jlink: SPI discovery, reflection registration and a modular GraalVM build guide.</li>
         <li>Fix implicit-usage detection so unused private fields and the "usages" hint are no longer suppressed by class-level injection annotations (issue #1).</li>
+        <li>Restore the "N usages" code-vision hint on injected fields (including "0 usages") while keeping their unused warnings suppressed (issue #1).</li>
       </ul>
       <h3>2.5.0</h3>
       <ul>

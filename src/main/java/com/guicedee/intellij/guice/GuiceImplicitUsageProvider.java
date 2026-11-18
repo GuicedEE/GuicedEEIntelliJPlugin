@@ -16,13 +16,26 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Marks genuine Guice / GuicedEE injection points as implicitly used.
+ * Marks genuine Guice / GuicedEE framework entry points as implicitly used.
  *
  * <p>The platform consults every {@link ImplicitUsageProvider} for every declaration while
  * running the "Unused declaration" inspection and the "usages" code-vision provider. Returning
  * {@code true} for an ordinary declaration silently removes both the unused warning and the
- * usages hint. Therefore the element types accepted here must stay narrow: only fields, methods,
- * constructor/method parameters and explicit framework entry points may be claimed.</p>
+ * usages hint, so the element types accepted here must stay narrow.</p>
+ *
+ * <p>Injection points (fields, methods and parameters carrying {@code @Inject} and friends) are
+ * deliberately <em>not</em> claimed by {@link #isImplicitUsage}. The platform's
+ * {@code UnusedDeclarationInspectionBase.isEntryPoint(PsiElement)} is defined as
+ * {@code isStrictEntryPoint(element) || RefUtil.isImplicitUsage(element)}, and
+ * {@code JavaReferencesCodeVisionProvider.getVisionInfo()} returns {@code null} for entry points.
+ * Claiming an injected field therefore makes its "N usages" hint disappear entirely, including
+ * the {@code 0 usages} case, leaving no way to tell whether the field is actually referenced.
+ * The unused warning for those injection points is suppressed separately by
+ * {@link GuiceUnusedDeclarationSuppressor}, which does not go through the entry-point check.</p>
+ *
+ * <p>{@link #isImplicitRead} and {@link #isImplicitWrite} still cover injection points so that
+ * the platform does not report the secondary "never read" / "never assigned" warnings for a
+ * field whose value is supplied by Guice at runtime.</p>
  *
  * <p>Annotations are checked through {@link PsiAnnotationOwner#findAnnotation(String)} on the
  * element's own modifier list. This avoids the additional hierarchy, external and inferred
@@ -36,9 +49,14 @@ public final class GuiceImplicitUsageProvider implements ImplicitUsageProvider {
   private static final Collection<String> ENTRY_POINTS = GuiceAnnotations.ENTRY_POINTS;
   private static final Collection<String> PROVIDES = List.of(GuiceAnnotations.PROVIDES);
 
+  /**
+   * Only real framework entry points are claimed here. Injection points are intentionally
+   * excluded so that the usages code-vision provider keeps rendering their reference counts;
+   * their unused warning is handled by {@link GuiceUnusedDeclarationSuppressor} instead.
+   */
   @Override
   public boolean isImplicitUsage(@NotNull PsiElement element) {
-    return isInjectionPoint(element) || isEntryPoint(element) || isProvidesMethod(element);
+    return isEntryPoint(element) || isProvidesMethod(element);
   }
 
   @Override
@@ -52,7 +70,7 @@ public final class GuiceImplicitUsageProvider implements ImplicitUsageProvider {
   }
 
   /** Only real injection sites: fields, methods/constructors and their parameters. */
-  private static boolean isInjectionPoint(@NotNull PsiElement element) {
+  static boolean isInjectionPoint(@NotNull PsiElement element) {
     if (!(element instanceof PsiField || element instanceof PsiMethod || element instanceof PsiParameter)) {
       return false;
     }
